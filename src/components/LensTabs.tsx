@@ -81,7 +81,7 @@ const LENSES: Lens[] = [
     label: "Vendor",
     eyebrow: "For model providers and platforms",
     heading: "Make trust a feature you ship",
-    lede: "You already build the pieces. Prompt Syntax gives them shared meaning, so they interoperate instead of fragmenting.",
+    lede: "You already build the pieces. PromptSyntax gives them shared meaning, so they interoperate instead of fragmenting.",
     points: [
       "Adopt one layer at a time. A receipt lowers onto the OpenTelemetry spans you already emit, so the cost is low.",
       "Turn substitution notices, fallback, and tool traces into a standard that buyers can require and compare.",
@@ -94,12 +94,7 @@ const LENSES: Lens[] = [
 const LensTabs: Component = () => (
   <section class="border-base-300 border-b">
     <div class="py-16 content-container">
-      <h2 class="mb-2 font-bold text-[clamp(23px,3vw,30px)] tracking-tight">
-        Prompt Syntax Edge: Control + Proof
-      </h2>
-      <p class="mb-7 text-base-content/60 text-sm">
-        One language and one receipt, read differently by each audience. Pick your lens.
-      </p>
+      <h2 class="mb-7 font-bold text-[clamp(23px,3vw,30px)] tracking-tight">PromptSyntax Impact</h2>
       <Tabs defaultSelectedKey="user" variant="primary">
         <Tabs.List aria-label="Choose your lens">
           <For each={LENSES}>{(lens) => <Tabs.Tab id={lens.id}>{lens.label}</Tabs.Tab>}</For>

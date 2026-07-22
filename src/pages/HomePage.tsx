@@ -12,12 +12,12 @@ const HomePage: Component = () => (
           DRAFT SPECIFICATION · v0.2.1
         </span>
         <h1 class="mb-4 font-bold text-[clamp(30px,5vw,50px)] leading-[1.1] tracking-tight">
-          Every prompt deserves a receipt.
+          PromptSyntax Edge: Control + Proof
         </h1>
         <p class="mb-8 max-w-[680px] text-[clamp(18px,2.4vw,21px)] text-base-content/70">
           When you ask an AI to do something, you can't see what your request became, can't
           guarantee which model or tools ran, and aren't told when something was silently changed.
-          Prompt Syntax is a vendor-neutral proposal to fix that, at the layer where you type.
+          PromptSyntax is a vendor-neutral proposal to fix that, at the layer where you type.
         </p>
         <div class="flex flex-wrap gap-3">
           <A href={ROUTES.SPEC}>
@@ -33,6 +33,8 @@ const HomePage: Component = () => (
         </div>
       </div>
     </div>
+
+    <LensTabs />
 
     <section class="border-base-300 border-b">
       <div class="py-16 content-container">
@@ -114,7 +116,7 @@ const HomePage: Component = () => (
             </p>
           </div>
           <div class="rounded-xl border border-success/30 bg-base-200 p-5">
-            <h4 class="mb-2 font-semibold text-[15px] text-success">With Prompt Syntax</h4>
+            <h4 class="mb-2 font-semibold text-[15px] text-success">With PromptSyntax</h4>
             <p class="text-[14.5px] text-base-content/70">
               One grammar means the same thing everywhere. What you ask for is either honored or
               you're told exactly what changed and why, in a standard, readable receipt. You can
@@ -124,7 +126,7 @@ const HomePage: Component = () => (
           </div>
         </div>
         <p class="mt-6 max-w-[760px] text-base-content/50 text-xs">
-          Prompt Syntax makes a narrow, honest promise:{" "}
+          PromptSyntax makes a narrow, honest promise:{" "}
           <b class="text-base-content/80">
             portable expression of intent and transparent resolution
           </b>
@@ -134,8 +136,6 @@ const HomePage: Component = () => (
         </p>
       </div>
     </section>
-
-    <LensTabs />
 
     <section class="border-base-300 border-b">
       <div class="py-16 content-container">
@@ -190,7 +190,7 @@ const HomePage: Component = () => (
         </h2>
         <p class="mb-7 text-base-content/60 text-sm">Honest about what this is.</p>
         <p class="max-w-[720px] text-base-content/70">
-          Prompt Syntax is a{" "}
+          PromptSyntax is a{" "}
           <b class="text-base-content">draft specification (v0.2.1), pre-implementation.</b> A
           reference implementation and a formative multi-stakeholder study are in progress, and an
           academic paper is in preparation. This is a proposal seeking scrutiny, especially from
