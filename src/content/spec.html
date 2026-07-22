@@ -1,0 +1,932 @@
+<div class="doc-banner">Draft v0.2.1 — pre-implementation, not yet stable. This is a proposal seeking scrutiny. The normative source is the Markdown/PDF in the repository.</div><h1 id="prompt-syntax-ps-specification-draft-v0.2">Prompt Syntax (PS) —
+Specification Draft v0.2</h1>
+<p><strong>Status:</strong> Working draft — design decisions marked ✅
+(settled), 🔶 (proposed, awaiting confirmation), ❓ (open question)
+<strong>Editors:</strong> [author], with drafting assistance
+<strong>Last updated:</strong> 2026-07-19</p>
+<blockquote>
+<p><strong>Changelog v0.1 → v0.2:</strong> major revision incorporating
+external platform-operator review (2026-07-19). Added:
+authority/specificity precedence split with non-escalation rule (§10);
+four-layer architecture (§4); trace visibility tiers (§12); pinned
+canonical identifiers (§6.2); capability negotiation (§7); parameter
+normalization records (§7.2); standardized failure codes (§8.2); budget
+construct replacing generic <code>limit()</code> (§9.1); fallback
+authorization rule (§9.2); determinism taxonomy (§14); mandatory island
+highlighting for interactive implementations (§13). Deferred:
+multi-model span execution (→ orchestration extension). Reframed:
+portability as <em>portable intent + transparent resolution, not
+portable execution</em>.</p>
+</blockquote>
+<hr />
+<h2 id="abstract">1. Abstract</h2>
+<p>Prompt Syntax (PS) is a vendor-neutral language for expressing
+<strong>authorized prompt-execution intent</strong>, together with a
+conformance protocol describing how that intent was resolved and
+fulfilled. Prompts remain natural language with embedded <em>syntax
+islands</em> — directives that give users <strong>routing
+control</strong> (deterministic, <em>authority-bounded</em> selection of
+models, tools, skills, and context) and <strong>routing
+transparency</strong> (an inspectable record of assembly, resolution,
+and fulfillment: the <strong>Prompt Trace</strong>). PS defines a
+grammar, resolution semantics, an authority model, and a conformance
+contract; it does not define presentation UX, and it promises portable
+<em>expression of intent</em> — never portable execution.</p>
+<h2 id="terminology">2. Terminology</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Directive</strong></td>
+<td>A PS construct embedded in a prompt that requests assembly, routing,
+or execution behavior.</td>
+</tr>
+<tr class="even">
+<td><strong>Syntax island</strong></td>
+<td>A directive occurrence inside otherwise-plain natural language.</td>
+</tr>
+<tr class="odd">
+<td><strong>Entity</strong></td>
+<td>A referenceable resource: model, agent, plugin/connector, tool,
+skill, file, context source.</td>
+</tr>
+<tr class="even">
+<td><strong>Canonical identifier</strong></td>
+<td>The immutable, versioned, vendor-qualified form of an entity
+reference (§6.2).</td>
+</tr>
+<tr class="odd">
+<td><strong>Resolver</strong></td>
+<td>The defined procedure mapping an entity reference to a canonical
+identifier.</td>
+</tr>
+<tr class="even">
+<td><strong>Authority level</strong></td>
+<td>The governance tier a configuration value originates from
+(§10.1).</td>
+</tr>
+<tr class="odd">
+<td><strong>Capability envelope</strong></td>
+<td>The set of permissions and resources granted by all higher authority
+levels; directives operate only within it.</td>
+</tr>
+<tr class="even">
+<td><strong>Fulfillment policy</strong></td>
+<td>The directive’s contract for unsatisfiable requirements:
+<code>strict</code> / <code>partial</code> / <code>best-effort</code>
+(§8).</td>
+</tr>
+<tr class="odd">
+<td><strong>Fill report</strong></td>
+<td>The per-requirement requested → normalized → applied record, with
+reason codes (§8.2).</td>
+</tr>
+<tr class="even">
+<td><strong>Budget</strong></td>
+<td>A venue-enforced execution bound with defined measurement points
+(§9.1).</td>
+</tr>
+<tr class="odd">
+<td><strong>Fallback chain</strong></td>
+<td>An ordered list of routing steps tried on fill failure; the only
+contingency construct in PS (§9.2).</td>
+</tr>
+<tr class="even">
+<td><strong>Canonical form</strong></td>
+<td>The fully explicit representation every PS prompt compiles to
+(§11).</td>
+</tr>
+<tr class="odd">
+<td><strong>Prompt Trace</strong></td>
+<td>The tiered, machine-readable artifact recording assembly,
+resolution, and fulfillment (§12).</td>
+</tr>
+<tr class="even">
+<td><strong>Trace tier</strong></td>
+<td>A defined visibility level of the trace: user / developer / operator
+/ oversight (§12.2).</td>
+</tr>
+<tr class="odd">
+<td><strong>Routing control</strong></td>
+<td>The property that directives <em>guarantee</em> what runs — within
+the capability envelope — rather than the model inferring intent.</td>
+</tr>
+<tr class="even">
+<td><strong>Routing transparency</strong></td>
+<td>The property that the user can inspect, at their tier, what will run
+(pre-execution) and what ran (post-execution).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="design-principles">3. Design principles ✅</h2>
+<ol type="1">
+<li><strong>Graceful degradation.</strong> A prompt with zero directives
+is valid PS; every directive is optional prose-compatible.</li>
+<li><strong>Familiarity borrowing.</strong> Every sigil reuses a
+convention with an existing large user base (@-mentions, /commands, XML
+tags, frontmatter).</li>
+<li><strong>Progressive disclosure.</strong> Casual form → parameterized
+form → strict form, all compiling to one canonical representation; the
+equivalence is a property of the grammar.</li>
+<li><strong>Content safety.</strong> Pasted code/HTML/XML must never
+accidentally become directives; only reserved namespaces are live.</li>
+<li><strong>Contract, not presentation.</strong> The spec mandates
+information availability (the Prompt Trace); presentation is
+implementation-defined — with one exception (§13, island
+highlighting).</li>
+<li><strong>Minimal reserved surface.</strong> One live tag namespace
+(<code>ps</code>), two sigils (<code>@</code>, <code>/</code>), one
+fence (<code>---ps</code>). The reserved set never grows across
+versions.</li>
+<li><strong>One reference grammar.</strong> The <code>@</code>
+entity-reference syntax is the sole routing syntax, reused verbatim at
+every scope.</li>
+<li><strong>Non-escalation.</strong> ✅ <em>(v0.2)</em> Prompt content
+can <em>narrow</em> the capability envelope; it can never expand it. No
+directive grants access, permission, or budget that higher authority has
+not already granted.</li>
+<li><strong>Intent portability, not execution portability.</strong> ✅
+<em>(v0.2)</em> PS guarantees that intent is expressed portably and
+resolution is reported transparently; it never guarantees that execution
+is identical across venues.</li>
+</ol>
+<h2 id="layered-architecture-v0.2">4. Layered architecture ✅
+<em>(v0.2)</em></h2>
+<p>PS is specified as four layers with independent conformance. A venue
+may claim conformance per layer; layers evolve at different rates (the
+grammar is stable for years; parameters and runtimes are not).</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Layer</th>
+<th>Contents</th>
+<th>Stability</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>PS/Core</strong></td>
+<td>Grammar, escaping, scopes, canonical references, round-trip
+property</td>
+<td>High</td>
+</tr>
+<tr class="even">
+<td><strong>PS/Capabilities</strong></td>
+<td>Entity discovery, capability documents, parameter registries,
+authorization surface</td>
+<td>Medium</td>
+</tr>
+<tr class="odd">
+<td><strong>PS/Execution</strong></td>
+<td>Fulfillment policies, budgets, fallback chains</td>
+<td>Medium</td>
+</tr>
+<tr class="even">
+<td><strong>PS/Trace</strong></td>
+<td>Trace schema, tiers, fill reports, failure codes</td>
+<td>Medium-high</td>
+</tr>
+</tbody>
+</table>
+<p>A conformance claim names layers and version: e.g.,
+<code>PS/Core 0.2 + PS/Trace 0.2 (user tier)</code>.</p>
+<h2 id="directive-scopes">5. Directive scopes ✅</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Scope</th>
+<th>Syntax</th>
+<th>Applies to</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Point</strong></td>
+<td><code>@</code> entity reference; <code>/</code> action</td>
+<td>The whole message (routing) or the reference site (context)</td>
+<td><code>@opus(temperature: 0.2) Summarize this. /concise</code></td>
+</tr>
+<tr class="even">
+<td><strong>Span</strong></td>
+<td>Reserved tag <code>&lt;ps …&gt;…&lt;/ps&gt;</code></td>
+<td>The enclosed text region</td>
+<td><code>&lt;ps @file:glossary.md&gt;use these terms&lt;/ps&gt;</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Document</strong></td>
+<td>Frontmatter fence <code>---ps … ---</code></td>
+<td>The entire prompt; the strict form</td>
+<td>see §11</td>
+</tr>
+</tbody>
+</table>
+<h3 id="span-tag-forms">5.1 Span tag forms ✅</h3>
+<p>The <code>ps</code> tag accepts the same reference grammar as point
+scope (principle 7): <code>&lt;ps @ref …&gt;</code> casual;
+<code>&lt;ps key="value"&gt;</code> canonical/XML-friendly
+(compiler-emitted).</p>
+<h3
+id="v0.1v0.2-span-restriction-v0.2-was-open-settled-per-external-review">5.2
+v0.1/v0.2 span restriction ✅ <em>(v0.2 — was open; settled per external
+review)</em></h3>
+<p>Spans are restricted to: <strong>context inclusion, local instruction
+scope, tool availability, visibility/provenance marking</strong>.
+Multi-model span execution (<code>&lt;ps @haiku&gt;…&lt;/ps&gt;</code>
+routing a region to a different model) is <strong>deferred to a separate
+orchestration extension</strong>: it requires execution-order,
+data-flow, context-isolation, token-accounting, failure- and
+injection-boundary semantics that do not belong in the core language.
+The syntax remains forward-compatible; venues MUST reject (not ignore)
+model references in spans with
+<code>SPAN_EXECUTION_UNSUPPORTED</code>.</p>
+<h2 id="entity-references-and-resolution">6. Entity references and
+resolution</h2>
+<h3 id="reference-syntax">6.1 Reference syntax ✅</h3>
+<pre class="ebnf"><code>reference   ::= &quot;@&quot; [ namespace &quot;:&quot; ] name [ &quot;!&quot; ] [ arglist ]
+namespace   ::= &quot;model&quot; | &quot;agent&quot; | &quot;plugin&quot; | &quot;tool&quot; | &quot;skill&quot; | &quot;file&quot; | &quot;ctx&quot; | vendor-ext
+name        ::= identifier ( (&quot;.&quot; | &quot;/&quot;) identifier )* [ &quot;@&quot; version ]
+arglist     ::= &quot;(&quot; arg ( &quot;,&quot; arg )* &quot;)&quot;
+arg         ::= key &quot;:&quot; value                          (* JSON5-style scalars *)
+action      ::= &quot;/&quot; name [ arglist ]</code></pre>
+<h3 id="canonical-identifiers-v0.2">6.2 Canonical identifiers ✅
+<em>(v0.2)</em></h3>
+<p>Casual aliases (<code>@opus</code>, <code>@fast</code>) are legal
+input. Resolution MUST bind every reference to a <strong>globally
+canonical, immutable, versioned identifier</strong>, recorded in the
+canonical form and the trace:</p>
+<pre class="text"><code>@opus                    →  @model:anthropic/claude-opus-4-5@2026-05-01
+@tool:search-contracts   →  @tool:workspace/acme/search-contracts@3
+@file:q3-report.md       →  @file:workspace/acme/9fc2…</code></pre>
+<p>Model aliases drift; dated snapshots do not. The trace never contains
+an unpinned binding.</p>
+<h3 id="ambiguity-and-namespace-resolution">6.3 Ambiguity and namespace
+resolution ✅</h3>
+<ol type="1">
+<li>A bare name matching exactly one entity in the capability envelope
+binds to it.</li>
+<li>Multiple matches are an <strong>ambiguity condition</strong>:
+implementations MUST surface it and MUST NOT silently guess
+(<code>ENTITY_AMBIGUOUS</code>).</li>
+<li>Every binding, including the deciding rule, is recorded in the
+trace’s resolution report.</li>
+</ol>
+<p>❓ <em>Open: default namespace search order (proposal: session
+bindings → project config → <code>model</code> → <code>agent</code> →
+<code>plugin</code> → <code>tool</code> → <code>skill</code> →
+<code>file</code>).</em></p>
+<h3 id="environment-relative-parsing-documented-limitation-v0.2">6.4
+Environment-relative parsing — documented limitation ✅
+<em>(v0.2)</em></h3>
+<p>Because bare-name recognition depends on installed entities,
+identical text may parse differently across venues. PS guarantees a
+<strong>visible</strong> parse, not an identical parse. Normative
+mitigations: island highlighting is MUST for interactive implementations
+(§13); <strong>consequential actions</strong> (tool execution, connector
+access, data egress) MUST be either fully qualified or explicitly
+confirmed by the user; venues SHOULD offer a strict mode in which only
+<code>&lt;ps&gt;</code> / <code>---ps</code> content is executable.</p>
+<h2 id="capabilities-and-parameters-pscapabilities">7. Capabilities and
+parameters <em>(PS/Capabilities)</em></h2>
+<h3 id="capability-document-v0.2">7.1 Capability document ✅
+<em>(v0.2)</em></h3>
+<p>A conformant venue publishes a machine-readable capability document;
+implementations negotiate against it before fill:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ps_version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;0.2&quot;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">supports</span><span class="kw">:</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">scopes</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">point</span><span class="kw">,</span><span class="at"> span</span><span class="kw">,</span><span class="at"> document</span><span class="kw">]</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">fulfillment</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">strict</span><span class="kw">,</span><span class="at"> partial</span><span class="kw">,</span><span class="at"> best-effort</span><span class="kw">]</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">budgets</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">estimated_cost</span><span class="kw">,</span><span class="at"> observed_cost</span><span class="kw">,</span><span class="at"> wall_time</span><span class="kw">,</span><span class="at"> first_token</span><span class="kw">]</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cancellation</span><span class="kw">:</span><span class="at"> preferred</span><span class="co">          # required | preferred | unsupported</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">trace_tiers</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">user</span><span class="kw">,</span><span class="at"> developer</span><span class="kw">]</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">namespaces</span><span class="kw">:</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">model</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> </span><span class="fu">discovery</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;…&quot;</span><span class="kw">,</span><span class="at"> </span><span class="fu">pinning</span><span class="kw">:</span><span class="at"> date-snapshot </span><span class="kw">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">tool</span><span class="kw">:</span><span class="at">  </span><span class="kw">{</span><span class="at"> </span><span class="fu">discovery</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;…&quot;</span><span class="at"> </span><span class="kw">}</span></span></code></pre></div>
+<p>A prompt MAY declare the PS version it targets
+(<code>ps: "0.2"</code> in frontmatter); venues MUST reject versions
+they cannot honor rather than degrade silently.</p>
+<h3
+id="parameters-normalization-not-passthrough-v0.2-replaces-v0.1-passthrough">7.2
+Parameters: normalization, not passthrough ✅ <em>(v0.2 — replaces v0.1
+passthrough)</em></h3>
+<p>There is no stable universal parameter registry. PS defines a small
+<strong>normalized core</strong> (<code>temperature</code>,
+<code>top_p</code>, <code>max_tokens</code>, <code>stop</code>,
+<code>seed</code>, <code>effort</code>) plus vendor-native names. Every
+parameter’s journey is recorded as a <strong>normalization
+record</strong> in the fill report:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;requested&quot;</span><span class="fu">:</span>  <span class="fu">{</span> <span class="dt">&quot;effort&quot;</span><span class="fu">:</span> <span class="st">&quot;max&quot;</span> <span class="fu">},</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;normalized&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;reasoning.effort&quot;</span><span class="fu">:</span> <span class="st">&quot;xhigh&quot;</span> <span class="fu">},</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;applied&quot;</span><span class="fu">:</span>    <span class="fu">{</span> <span class="dt">&quot;reasoning.effort&quot;</span><span class="fu">:</span> <span class="st">&quot;xhigh&quot;</span> <span class="fu">},</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;status&quot;</span><span class="fu">:</span>     <span class="st">&quot;translated&quot;</span><span class="fu">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;mapping_rule&quot;</span><span class="fu">:</span> <span class="st">&quot;vendor-profile/openai-2026-07&quot;</span> <span class="fu">}</span></span></code></pre></div>
+<p>Status is one of
+<code>applied | translated | clamped | unsupported | ignored</code> —
+each with a defined fill consequence under the directive’s policy.
+Undocumented passthrough is non-conformant: it creates the appearance of
+control without semantics.</p>
+<h2 id="fulfillment-psexecution">8. Fulfillment
+<em>(PS/Execution)</em></h2>
+<h3 id="policies-settled-external-review-concurs">8.1 Policies ✅
+<em>(settled; external review concurs)</em></h3>
+<p><em>Inspired by exchange order types: a routing directive is an
+order; the venue fills it or reports why not.</em></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Policy</th>
+<th>Trading analog</th>
+<th>Semantics</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>strict</code></td>
+<td>Fill-or-Kill</td>
+<td>Every requirement satisfied exactly, or the directive fails
+pre-execution. No silent substitution.</td>
+</tr>
+<tr class="even">
+<td><code>partial</code></td>
+<td>Immediate-or-Cancel</td>
+<td>Fill what can be filled; every drop recorded.</td>
+</tr>
+<tr class="odd">
+<td><code>best-effort</code></td>
+<td>Market order</td>
+<td>Venue discretion; all degradations still recorded.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Default (✅): split</strong> — <code>strict</code> on entity
+binding (<code>@opus</code> means opus, never a silent substitute),
+<code>partial</code> on parameters (unsupported values drop with a
+fill-report entry). <strong><code>!</code> semantics (✅ v0.2.1 —
+clarified per external review):</strong> since entity binding is already
+strict by default, <code>!</code> escalates the <strong>entire
+directive</strong> to strict: every parameter becomes a hard requirement
+(no drop, no clamp; translation only where the vendor profile declares
+it semantics-preserving), and any degradation is a fill failure instead
+of a reported drop. <code>@opus</code> = strict entity, partial params;
+<code>@opus!</code> = strict everything. Named forms:
+<code>fill="strict"</code> (span/document), <code>fill: strict</code>
+(frontmatter; document level = all-or-none). ❓ <em>Open
+(severity/consent): degradation-severity classes and an optional
+<code>confirm-on-degrade</code> preflight mode for consequential
+settings — a post-hoc report is not consent.</em></p>
+<h3 id="failure-codes-v0.2">8.2 Failure codes ✅ <em>(v0.2)</em></h3>
+<p>Fill failures and degradations carry standardized codes (extensible
+registry, <code>PS_</code>-free core set):</p>
+<pre class="text"><code>ENTITY_NOT_FOUND        ENTITY_AMBIGUOUS         ENTITY_UNAUTHORIZED
+PARAM_UNSUPPORTED       PARAM_CLAMPED            PARAM_IGNORED
+BUDGET_PREFLIGHT_REJECTED  BUDGET_EXCEEDED       TIMEOUT_NOT_CANCELLED
+DATA_POLICY_BLOCKED     SPAN_EXECUTION_UNSUPPORTED  VERSION_UNSUPPORTED
+FALLBACK_EXHAUSTED</code></pre>
+<h2 id="budgets-and-fallback-chains-psexecution">9. Budgets and fallback
+chains <em>(PS/Execution)</em></h2>
+<h3 id="budgets-v0.2-replaces-generic-limit">9.1 Budgets ✅ <em>(v0.2 —
+replaces generic <code>limit()</code>)</em></h3>
+<p><code>limit(…)</code> remains as syntax sugar, expanding to a
+<strong>budget</strong> with defined measurement points:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">budget</span><span class="kw">:</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">estimated_cost_max</span><span class="kw">:</span><span class="at"> $0.10</span><span class="co">     # pre-flight: reject if floor estimate exceeds</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">observed_cost_max</span><span class="kw">:</span><span class="at">  $0.15</span><span class="co">     # runtime: abort (if cancellable) when exceeded</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">wall_time_max</span><span class="kw">:</span><span class="at">      5s</span><span class="co">        # submission → completion, tool calls included</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">first_token_max</span><span class="kw">:</span><span class="at">    1s</span><span class="co">        # streaming responsiveness bound</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cancellation</span><span class="kw">:</span><span class="at">       preferred</span><span class="co"> # what the directive requires: required | preferred</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">scope</span><span class="kw">:</span><span class="at">              attempt</span><span class="co">   # attempt | chain</span></span></code></pre></div>
+<p>Semantics: a violated budget is a fill failure. Venues declare their
+enforcement capability in the capability document (§7.1); a directive
+requiring <code>cancellation: required</code> fails pre-flight
+(<code>BUDGET_PREFLIGHT_REJECTED</code>) against a venue declaring
+<code>unsupported</code>. A timeout the venue could not cancel is
+reported as <code>TIMEOUT_NOT_CANCELLED</code> with observed cost —
+enforcement is honest-by-declaration, never pretended. Implementations
+MUST NOT silently degrade output (e.g., truncate) to satisfy a budget.
+<code>scope: chain</code> bounds the <strong>total</strong> across
+fallback attempts <em>(resolves v0.1 open question)</em>.</p>
+<h3
+id="fallback-chains-structure-settled-authorization-rule-added-in-v0.2">9.2
+Fallback chains ✅ <em>(structure settled; authorization rule added in
+v0.2)</em></h3>
+<p>PS has <strong>no general conditionals</strong> — no predicates over
+content, no branching on output (delegated to orchestration frameworks).
+The only re-routing trigger is a <strong>fill failure</strong>.
+Precedent: CSS font stacks; trading’s contingent orders.</p>
+<pre class="ebnf"><code>route    ::= step ( &quot;else&quot; step )* [ &quot;else&quot; terminal ]
+step     ::= reference [ limitclause ]
+terminal ::= &quot;fail&quot; | &quot;ask&quot;</code></pre>
+<pre class="text"><code>@opus!(temperature: 0.2) limit(wall_time: 5s, estimated_cost: $0.10)
+  else @model:openai/gpt-5.6@2026-07-01 limit(wall_time: 3s)
+  else ask</code></pre>
+<p>First successful fill wins; the fill report records every attempt
+with outcome, codes, and measured cost/latency. <strong>Authorization
+rule (✅ v0.2):</strong> every step is checked against the same
+capability envelope — data classification, consent, allowlists,
+residency, retention, connector authorization. A failed primary route
+never makes a prohibited secondary route permissible; a cross-provider
+fallback is a data-governance decision, not merely an availability
+decision, and blocked steps report <code>DATA_POLICY_BLOCKED</code>.</p>
+<h2
+id="authority-and-precedence-v0.2-replaces-v0.1-single-chain-critical-fix">10.
+Authority and precedence ✅ <em>(v0.2 — replaces v0.1 single chain;
+critical fix)</em></h2>
+<p>Precedence has <strong>two independent dimensions</strong>. The v0.1
+single chain (<code>system &lt; … &lt; span</code>) was unsafe: read
+literally, user content could override platform policy.</p>
+<h3 id="authority-precedence-who-may-decide">10.1 Authority precedence
+(who may decide)</h3>
+<pre class="text"><code>platform policy  &gt;  organization/workspace policy  &gt;  application/developer policy
+                 &gt;  user policy  &gt;  prompt content</code></pre>
+<p>Lower authority may <strong>narrow</strong> permissions, budgets, and
+entity sets; it may never expand them (principle 8).</p>
+<h3
+id="specificity-precedence-which-value-wins-within-one-authority-level">10.2
+Specificity precedence (which value wins, within one authority
+level)</h3>
+<pre class="text"><code>document  &lt;  point  &lt;  span        (inner/more-specific wins)</code></pre>
+<h3 id="normative-rule">10.3 Normative rule</h3>
+<blockquote>
+<p>A more specific directive overrides configuration <strong>only within
+the capability envelope granted by higher-authority policy.</strong> An
+out-of-envelope directive is a fill failure
+(<code>ENTITY_UNAUTHORIZED</code> / <code>DATA_POLICY_BLOCKED</code>),
+never a silent ignore — the user always learns that authority, not
+availability, was the reason.</p>
+</blockquote>
+<p>Every envelope constraint that suppressed a directive is recorded in
+the trace at the requesting user’s tier (as a typed refusal, not
+necessarily with the policy’s content).</p>
+<h3 id="refusal-reasons-and-verified-attributes-v0.2.1">10.5 Refusal
+reasons and verified attributes 🔶 <em>(v0.2.1)</em></h3>
+<p>A directive can be blocked for categorically different reasons that
+current interfaces collapse into one undifferentiated outcome (e.g., a
+single “switched model” banner covering safety blocks, capacity
+substitution, and org-policy denials alike). PS requires the reason be
+<strong>typed</strong> in the trace, distinguishing at minimum:
+availability (entity unavailable/capacity), <strong>safety</strong>
+(<code>SAFETY_BLOCKED</code>, with a category and the provenance of the
+<em>triggering segment</em> — which may be a retrieved document or tool
+result, not the user’s message), org/data policy
+(<code>DATA_POLICY_BLOCKED</code>), and authorization
+(<code>ENTITY_UNAUTHORIZED</code>). The receipt names the reason, the
+deciding authority, and — normatively — an available <strong>recourse
+path</strong> where one exists (appeal, verification program, feedback
+channel).</p>
+<p><strong>Verified principal attributes (the credential-informed
+envelope).</strong> A safety or policy envelope MAY be widened for a
+principal presenting a <em>verified attribute</em> (an identity proof, a
+credential such as a cyber-verification-program membership, an
+institutional affiliation). This is expressed entirely within the
+authority model and is <strong>not</strong> non-escalation-violating:
+the wider envelope is granted by a <em>higher</em> authority (the
+verifier/provider reading the attribute), never claimed by prompt
+content. The signed attribute is an <strong>input to</strong> the
+authority-holder’s decision, never a self-granted capability; the
+decision and the attributes it relied on (by reference, not by
+disclosing the credential) are recorded. Verified-attribute policies
+MUST NOT be mandated by PS — identity-gating carries chilling, privacy,
+and gatekeeping costs, and whether to use the mechanism is contestable
+policy left to the authority. <em>(Existing practice: providers already
+run verification programs that widen safeguards for verified
+defensive-security researchers — PS standardizes the seam, not the
+program.)</em></p>
+<p>❓ <em>Open (companion-paper territory): appeal-loop semantics;
+credential formats and privacy-preserving attribute proofs; interaction
+of verified envelopes with the oversight tier.</em></p>
+<h3 id="policy-system-integration-peppdp-v0.2.1">10.4 Policy system
+integration (PEP/PDP) 🔶 <em>(v0.2.1)</em></h3>
+<p>PS does not define a policy language, and it adds <strong>no new
+policy decisions</strong> — the organization keeps its existing engine.
+What PS adds is what the existing control stack cannot produce: (1)
+<strong>prompt-level decision semantics</strong> — network- and
+key-layer controls are blind inside the request; PS’s decision requests
+carry the entities, classifications, and fallback routes a meaningful
+policy needs to see; and (2) <strong>per-request enforcement
+evidence</strong> — today an admin setting is a request to the vendor
+with no proof it fired; typed refusals and fill reports make every
+policy outcome verifiable. PS defines the <strong>enforcement
+seam</strong>: the PS runtime is a <em>policy enforcement point</em>
+(PEP); the organization’s policy engine is the <em>policy decision
+point</em> (PDP), attached at the org/workspace authority level. At
+resolution time, for each directive, the PEP submits a decision request
+— <strong>principal</strong> (identity/groups from the IdP),
+<strong>entity reference</strong> (canonical identifier),
+<strong>context labels</strong> (data classification of referenced
+files/sources), <strong>jurisdiction/residency</strong> — and the PDP
+answers: in-envelope or refused (with code), applicable budget,
+permitted egress set for fallback steps. Decisions and refusals are
+recorded in the trace (policy hits, not policy content).
+<strong>Bindings</strong> to concrete engines (OPA/Rego, Cedar,
+XACML-style) are external versioned documents, declared in the
+capability document.</p>
+<p><strong>Worked example (🔶 v0.2.1 — illustrative; decision-interface
+schema remains OQ#10).</strong> User input:
+<code>@opus! Summarize @file:q3-acquisition-memo.pdf else @gemini-flash</code>.
+At resolution time — before assembly, before any call — the PEP submits
+per-binding decision requests to the org’s existing engine:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;principal&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;user:meas@acme&quot;</span><span class="fu">,</span> <span class="dt">&quot;groups&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;finance&quot;</span><span class="ot">]</span> <span class="fu">},</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;action&quot;</span><span class="fu">:</span> <span class="st">&quot;route&quot;</span><span class="fu">,</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;route&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span> <span class="dt">&quot;step&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span> <span class="dt">&quot;entity&quot;</span><span class="fu">:</span> <span class="st">&quot;model:anthropic/claude-opus-4-5@2026-05-01&quot;</span><span class="fu">,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;provider_jurisdiction&quot;</span><span class="fu">:</span> <span class="st">&quot;EU&quot;</span> <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span> <span class="dt">&quot;step&quot;</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span> <span class="dt">&quot;entity&quot;</span><span class="fu">:</span> <span class="st">&quot;model:google/gemini-flash@2026-06-01&quot;</span><span class="fu">,</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;provider_jurisdiction&quot;</span><span class="fu">:</span> <span class="st">&quot;US&quot;</span><span class="fu">,</span> <span class="dt">&quot;role&quot;</span><span class="fu">:</span> <span class="st">&quot;fallback&quot;</span> <span class="fu">}</span> <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;context&quot;</span><span class="fu">:</span> <span class="ot">[</span> <span class="fu">{</span> <span class="dt">&quot;entity&quot;</span><span class="fu">:</span> <span class="st">&quot;file:acme/9fc2…&quot;</span><span class="fu">,</span> <span class="dt">&quot;classification&quot;</span><span class="fu">:</span> <span class="st">&quot;confidential&quot;</span> <span class="fu">}</span> <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;budget_scope&quot;</span><span class="fu">:</span> <span class="st">&quot;attempt&quot;</span> <span class="fu">}</span></span></code></pre></div>
+<p>Against an unchanged org policy (e.g., Rego/Cedar: <em>confidential
+sources route only to EU-approved models</em>), the PDP returns per-step
+decisions: step 1 <code>permit</code>, step 2 <code>deny(egress)</code>.
+The PEP fills step 1 and marks step 2 <code>DATA_POLICY_BLOCKED</code>
+<strong>before any failure could trigger it</strong> — the chain is
+judged as one decision, not discovered call-by-call — and the trace
+records the <code>policy_decision_id</code>s.</p>
+<p><strong>Why a call-level gateway PDP is not equivalent.</strong>
+Gateways with policy sidecars can and do filter API calls today. But a
+call-level decision point sees flattened text and a model name; it
+cannot see (1) <strong>typed references before flattening</strong> — by
+the time the gateway inspects the call, the confidential file is
+extracted text and its classification label died in assembly, whereas PS
+decides on the reference while the label exists; (2) <strong>the
+chain</strong> — the fallback call does not exist yet at gateway time,
+and when it fires it is a fresh call that may individually pass; (3)
+<strong>injected expansion</strong> — which skill added what, or
+prompt-content attempts at tool-access escalation (inert-content rule,
+§13); (4) <strong>its own effectiveness</strong> — a gateway drop is
+silent; a PS refusal is typed, user-visible, and receipted. The layers
+compose: gateways remain useful as defense in depth below the PS
+seam.</p>
+<p><em>Note — the externalization pattern:</em> vendor profiles (§7.2),
+oversight profiles (§12.3), and policy bindings (§10.4) are the same
+architectural move: the core spec defines interface + semantics;
+stakeholder-specific mappings live outside and version independently.
+Enterprise-relevant consequences already in core: typed refusals as
+policy audit events; org-authority budgets; the
+fallback-authorization/egress rule (§9.2); pinned identifiers as model
+change management (§6.2); capability documents as procurement artifacts
+(§7.1).</p>
+<h2 id="canonical-form-and-the-strict-document">11. Canonical form and
+the strict document ✅</h2>
+<p>Canonical form: frontmatter (all routing/config, canonical pinned
+identifiers, defaults materialized, PS version declared) + body (prose
+with islands replaced by resolved references).</p>
+<pre class="text"><code>---ps
+version: &quot;0.2&quot;
+route:
+  - { model: &quot;model:anthropic/claude-opus-4-5@2026-05-01&quot;,
+      params: { temperature: 0.2 }, fill: strict,
+      budget: { wall_time_max: 5s, estimated_cost_max: $0.10 } }
+  - { model: &quot;model:openai/gpt-5.6@2026-07-01&quot; }
+skills: [ &quot;skill:workspace/acme/concise@1&quot; ]
+context: [ &quot;file:workspace/acme/9fc2…&quot; ]
+---
+Summarize the report.</code></pre>
+<p><strong>Round-trip property (normative):</strong>
+<code>compile(casual) ≡ compile(strict(compile(casual)))</code>. The
+intent-reification layer MUST output this strict form, editable and
+re-submittable.</p>
+<h2 id="the-prompt-trace-pstrace">12. The Prompt Trace
+<em>(PS/Trace)</em></h2>
+<h3
+id="structure-settled-normative-schema-prompt-trace.schema.json">12.1
+Structure ✅ <em>(settled; normative schema:
+<code>prompt-trace.schema.json</code>)</em></h3>
+<p>The trace is a <strong>turn-level object</strong> with an ordered
+<code>events</code> array interleaving <em>inference records</em> and
+<em>boundary events</em>. Three settled decisions:</p>
+<ul>
+<li><strong>Shape (D1): flat segments + provenance steps.</strong>
+Ordered segment list whose concatenation reproduces the compiled prompt
+byte-exactly within tier scope (rule R1); each injected segment carries
+a pointer into a step table whose parent chains reconstruct the
+expansion tree (R2, R3). Source-map / W3C-PROV pattern.</li>
+<li><strong>Turn scope (D2): tiered, with the boundary rule.</strong>
+Routing record + fill report MUST for every venue invocation; full
+segments MUST for user-initiated inferences, SHOULD for internal
+continuations (absence <em>declared</em> via <code>coverage</code>,
+never silent — R6). Everything crossing the venue boundary (tool I/O)
+MUST be recorded; tool internals are explicitly outside the
+perimeter.</li>
+<li><strong>Content (D3): hybrid three-state union.</strong>
+<code>inline</code> (≤ threshold; floor 4 KB for the user tier, R4) |
+<code>external</code> (sha256 + length + handle; dedups across loop
+steps) | <code>withheld</code> (salted digest + length band +
+minimum-visible tier). Oversight-tier exports MUST support
+<strong>materialized mode</strong> — external content resolved and
+embedded at export time, with blob retention governed at oversight scope
+(R5).</li>
+</ul>
+<p><strong>MUST:</strong> compiled prompt (tier-scoped); resolution
+report (every binding + deciding rule, ambiguities, envelope refusals);
+routing record incl. <strong>fill report</strong> (§8.2 codes,
+normalization records, per-attempt outcomes with measured cost/latency).
+<strong>SHOULD:</strong> dry-run (pre-execution) trace; stable segment
+IDs for diffing. <strong>MAY:</strong> any presentation.</p>
+<h3 id="visibility-tiers-v0.2-replaces-flat-redaction">12.2 Visibility
+tiers ✅ <em>(v0.2 — replaces flat redaction)</em></h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Tier</th>
+<th>Audience</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>User</strong></td>
+<td>End user</td>
+<td>User-visible sources, selected tools, applied parameters, typed
+envelope refusals, fill report</td>
+</tr>
+<tr class="even">
+<td><strong>Developer</strong></td>
+<td>Application owner</td>
+<td>+ application instructions, tool definitions, runtime events</td>
+</tr>
+<tr class="odd">
+<td><strong>Operator</strong></td>
+<td>Platform personnel</td>
+<td>+ infrastructure and policy diagnostics</td>
+</tr>
+<tr class="even">
+<td><strong>Oversight</strong></td>
+<td>Auditors &amp; regulators (via profiles, §12.3)</td>
+<td>Evidence-grade export per the applicable oversight profile</td>
+</tr>
+</tbody>
+</table>
+<p>Completeness is <strong>tier-relative</strong>: a tier’s trace is
+complete with respect to content at or below that tier’s authority;
+higher-tier content appears as a <strong>typed, sized
+placeholder</strong>
+(<code>{type: system_policy, tier: operator}</code>). ❓ <em>Open (“the
+transparency floor”): what placeholder detail is safe — exact lengths
+and content hashes can leak (dictionary attacks against candidate
+texts); banding and salted digests are candidate mitigations. This is a
+negotiation between auditability and confidentiality, flagged as a
+research question.</em> Trace availability interacts with venue
+data-retention configuration; the capability document declares supported
+tiers.</p>
+<h3 id="oversight-evidence-substrate-and-profiles-v0.2.1">12.3
+Oversight: evidence substrate and profiles ✅ <em>(v0.2.1)</em></h3>
+<p>Enterprise audit and government/regulatory oversight are
+<strong>distinct lenses</strong>. An auditor’s access is granted by
+contract <em>inside</em> the authority ladder; a regulator’s access is
+compelled by law from <strong>above platform policy</strong> (§10 note
+below). Regulatory requirements are jurisdictional, sectoral, and
+mutually conflicting (e.g., EU AI Act Art. 12 automatic record-keeping
+vs. GDPR minimization vs. WORM-retention financial rules), and they
+demand an evidentiary standard — tamper-evidence, authenticity, chain of
+custody (contributing to, not constituting, legal non-repudiation) —
+that internal audit does not.</p>
+<p>PS therefore specifies no jurisdiction’s rules. Instead:</p>
+<ul>
+<li><strong>Evidence substrate (PS/Trace core).</strong> Properties any
+oversight regime composes from: integrity chaining or signing of trace
+records (SHOULD in core; oversight profiles are expected to make these
+MUST, with canonical serialization, key custody, and verification
+procedures profile-specified); completeness attestations (what coverage
+the venue claims, signed); <strong>signed sequence numbers with explicit
+gap records</strong> (an omitted event leaves a visible hole, not
+silence); trusted timestamps (SHOULD); retention and residency metadata
+fields (MUST when the oversight tier is supported); <strong>provable
+redaction</strong> — a withheld segment’s existence, kind, and timing
+are demonstrable without revealing content; the fully
+<strong>materialized export</strong> (§ Decision 3) with blob retention
+governed at oversight scope. Because a venue-produced trace is
+self-asserted, profiles MAY additionally require independent trust
+mechanisms: append-only transparency logs, cross-reconciliation against
+gateway or billing records, independently operated collectors, or remote
+attestation.</li>
+<li><strong>Oversight profiles (external documents).</strong>
+Jurisdiction- or framework-specific mappings (e.g., an EU-AI-Act
+profile, a SOC 2 profile) declaring which substrate properties are MUST
+and with what parameters (retention period, residency, signature
+regime). Profiles are versioned and maintained outside the core spec —
+the PDF/A / FHIR national-profile / OTel semantic-convention pattern.
+The capability document declares supported profiles.</li>
+</ul>
+<p><strong>Authority note (amends §10.1):</strong> the authority ladder
+is crowned by an acknowledged but externally governed level — <em>law
+and regulation</em> — above platform policy. Non-escalation continues to
+bind prompt content; disclosure obligations, however, may be compelled
+from this level, making the transparency floor (§12.2)
+<strong>authority-relative</strong>: content a venue may withhold at the
+user tier can be compellable at the oversight tier under an applicable
+profile.</p>
+<h2 id="content-safety-and-input-marking">13. Content safety and input
+marking ✅</h2>
+<ul>
+<li><strong>Provenance-typed parsing (inert content) ✅ <em>(v0.2.1 —
+security-critical, from external review)</em>:</strong> Only explicitly
+designated <strong>authoring segments</strong> — text the principal
+typed or an authority-checked surface produced as PS — are parsed for
+directives. Retrieved documents, file contents, tool results, quoted
+messages, and model-generated text are typed <strong>inert</strong>:
+PS-shaped text inside them (e.g., a document containing
+<code>@tool:send_email!(…)</code>) is content, never a directive, and
+cannot introduce directives except through an explicit,
+authority-checked <em>promotion</em> operation recorded in the trace.
+This rule is prior to and stronger than fence exemption; without it, PS
+would be a prompt-injection and capability-escalation surface.</li>
+<li><strong>The parameterization principle ✅
+<em>(v0.2.1)</em>:</strong> security rests on provenance, never on
+escaping. PS is parsed only at the interface layer, only over authored
+segments — models never execute PS, so inert content is never “escaped
+for safety”; it is never parsed at all. Content inclusion is <strong>by
+reference</strong> (canonical id + digest), the discipline that ended
+SQL injection: data is never concatenated into the command channel.
+Escapes (<code>\@</code>, <code>\/</code>, fences) exist solely as
+authoring ergonomics for deliberate literals; no security property may
+depend on them.</li>
+<li><strong>Inner content and nesting ✅ <em>(v0.2.1)</em>:</strong> a
+span’s inner prose is authored text — islands within it parse normally;
+content <em>resolved into</em> a span via its references remains inert.
+Canonical-form serialization MUST carry content segments by reference or
+in typed data fields, never spliced into directive text, so
+serialize-then-recompile cannot promote inert content (round-trip
+safety). Nested-span conflict semantics: pending conflict table (OQ).
+<strong>Model-generated PS</strong> (including the reification layer’s
+proposed strict form) is inert until explicitly accepted by the user —
+reification acceptance is the archetypal authority-checked promotion,
+and the promotion event is recorded in the trace.</li>
+<li>Only the <code>ps</code> tag namespace is live; all other
+<code>&lt;…&gt;</code> is content.</li>
+<li><code>@</code>/<code>/</code> islands require a word boundary and a
+resolvable or qualified name; emails and paths do not parse.</li>
+<li>Escapes <code>\@</code>, <code>\/</code> and fenced code blocks are
+always content.</li>
+<li><strong>Island highlighting is MUST for interactive
+implementations</strong> <em>(v0.2 — upgraded from SHOULD per
+review)</em>: every recognized directive is visually marked before
+submission. Non-interactive (API) callers use dry-run traces for the
+same guarantee.</li>
+</ul>
+<h3 id="internationalization-v0.2.1">13.1 Internationalization 🔶
+<em>(v0.2.1)</em></h3>
+<p>PS prompts are natural language in any script; the grammar must not
+assume Latin text.</p>
+<ul>
+<li><strong>Sigils are script-neutral, with width equivalence.</strong>
+<code>@</code> and <code>/</code> are language-independent and present
+on keyboards worldwide; parsers MUST treat full-width forms (U+FF20
+<code>＠</code>, U+FF0F <code>／</code>), commonly produced by CJK input
+methods, as equivalent to their ASCII forms.</li>
+<li><strong>Unicode identifiers.</strong> Entity names follow Unicode
+identifier rules (UAX #31) with NFC normalization —
+<code>@file:របាយការណ៍.md</code> is valid. Namespace keywords, policy
+names, and <code>else</code> remain English in the <strong>canonical
+form</strong> (the portability lesson of Excel’s localized function
+names: localized <em>canonical</em> syntax destroys portability).
+Implementations MAY accept localized input aliases for keywords and
+units; these compile to canonical form — internationalization rides the
+same casual→strict machinery as everything else, and the round-trip
+property applies.</li>
+<li><strong>Script-aware boundaries.</strong> The “word boundary before
+a sigil” rule is defined by Unicode segmentation (UAX #29), not ASCII
+<code>\b</code> — scripts without inter-word spaces (Khmer, Thai,
+Japanese, Chinese) MUST still get correct island detection. Conformance
+test corpora MUST include non-spacing-script cases.</li>
+<li><strong>Bidirectional text safety.</strong> In RTL contexts (Arabic,
+Hebrew), editors SHOULD wrap islands in bidi isolates (FSI…PDI) for
+stable rendering. Security-normative: parsers MUST reject or neutralize
+bidi control characters <em>inside</em> directive islands — Trojan
+Source-style reordering (CVE-2021-42574) could otherwise visually
+disguise what a directive does, defeating mandatory highlighting.</li>
+<li><strong>Confusables.</strong> Homoglyph references
+(<code>@оpus</code> with Cyrillic <code>о</code>) are a spoofing vector
+against entity binding. Resolvers SHOULD apply confusable detection (UTS
+#39) and surface skeleton-matches as ambiguity conditions rather than
+silently binding.</li>
+<li><strong>Localized scalars.</strong> Budget/parameter input MAY use
+locale conventions (decimal comma, local currency); canonical form and
+traces always use canonical units (USD, <code>ms</code>/<code>s</code>,
+dot-decimal).</li>
+</ul>
+<p>❓ <em>Open: governance of localized keyword-alias tables
+(per-language registries? vendor-defined?); which locales the
+conformance suite must cover.</em></p>
+<h2 id="determinism-taxonomy-v0.2">14. Determinism taxonomy ✅
+<em>(v0.2)</em></h2>
+<p>Documentation and conformance language MUST distinguish, and never
+conflate:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Kind</th>
+<th>PS guarantees it?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Routing-contract determinism</strong> — parsing,
+canonicalization, resolution, and policy evaluation under a pinned
+environment; execution choices recorded</td>
+<td><strong>Yes</strong> (within envelope; this is PS’s claim — renamed
+from “execution determinism” per external review: tool calls, races, and
+provider behavior are not deterministic and are <em>recorded</em>, not
+guaranteed)</td>
+</tr>
+<tr class="even">
+<td><strong>Generation determinism</strong> — identical output text</td>
+<td><strong>No</strong> (even with <code>seed</code>; vendor
+implementation varies)</td>
+</tr>
+<tr class="odd">
+<td><strong>Semantic reproducibility</strong> — same meaning across
+runs/venues</td>
+<td><strong>No</strong> (retrieval, web content, tools, policies
+drift)</td>
+</tr>
+</tbody>
+</table>
+<p><code>@model:x(seed: 42)!</code> guarantees the seed was applied —
+not that the output is identical.</p>
+<h2 id="out-of-scope-delegated">15. Out of scope (delegated) ✅</h2>
+<p>Output/decoding constraints (LMQL, Guidance) — params/normalization
+is the integration point. Agent orchestration graphs (DSPy, LangGraph)
+and multi-model span execution — orchestration extension.
+Content-conditional branching — orchestration frameworks.</p>
+<h2 id="open-questions-queue">16. Open questions queue</h2>
+<ol type="1">
+<li>Default namespace search order (§6.3).</li>
+<li><del>Trace JSON schema decisions</del> <strong>Resolved</strong> —
+flat+provenance / tiered turn scope / hybrid content confirmed;
+normative schema published (§12.1).</li>
+<li>The transparency floor: placeholder detail vs. leakage (§12.2).</li>
+<li><code>else ask</code> terminal: interaction contract with intent
+reification.</li>
+<li>Capability-document schema detail (§7.1) and vendor-profile registry
+governance.</li>
+<li>Failure-code registry governance (who mints codes; vendor
+extensions).</li>
+<li>Vendor mapping table (Claude, ChatGPT, Cursor, Copilot, Gemini) —
+separate document.</li>
+<li>Orchestration extension scoping (multi-model spans, §5.2).</li>
+<li>Oversight-profile governance: who authors and maintains jurisdiction
+profiles (standards body? consortium?); how profile conformance is
+asserted and verified (§12.3).</li>
+<li>PDP decision-interface schema (§10.4): request/response shape,
+latency budget for per-directive policy evaluation, caching semantics,
+and binding governance.</li>
+<li><em>(from external auditor-lens review, 2026-07-19)</em> Identifier
+governance: who controls canonical-identifier uniqueness, vendor
+prefixes, deprecation, alias ownership, disputes (§6.2).</li>
+<li>Budget measurement profiles: tariff/price-sheet version identifiers,
+cached-token treatment, queueing inclusion, cancellation-attempt
+evidence (§9.1).</li>
+<li>Trace-privacy deployment profiles: field-level encryption, access
+logging, deletion, legal hold, retention conflicts, purpose limitation
+(§12.2).</li>
+<li>Version-baseline consolidation: merge v0.2.1 markers into a clean
+v0.3 baseline before public spec release; conformance tests reference
+exactly one baseline.</li>
+<li>Conformance vs. certification: negative/adversarial test
+requirements, signed capability documents, and a path to independent
+verification (currently: two author-controlled implementations
+demonstrate spec precision, not third-party assurance).</li>
+</ol>
+<hr />
+<p><em>Naming: properties are routing <strong>control</strong> and
+routing <strong>transparency</strong>; the artifact is the
+<strong>Prompt Trace</strong>; fulfillment vocabulary is
+<code>strict</code>/<code>partial</code>/<code>best-effort</code>.</em></p>

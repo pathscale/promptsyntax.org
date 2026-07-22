@@ -1,0 +1,280 @@
+<div class="doc-banner">The full syntax on one page. Normative source: the specification.</div><h1 id="prompt-syntax-syntax-reference">Prompt Syntax — Syntax
+Reference</h1>
+<p><strong>v0.2.1 working draft · 2026-07-19 · companion to the
+specification (normative source: SPEC v0.2)</strong></p>
+<h2 id="at-a-glance">1. At a glance</h2>
+<pre class="text"><code>@opus!(temperature: 0.2) limit(wall_time: 5s, estimated_cost: $0.10)
+  else @model:openai/gpt-5.6@2026-07-01 limit(wall_time: 3s)
+  else ask
+Summarize @file:q3-report.md /concise
+&lt;ps @file:glossary.md&gt;use these terms for translations&lt;/ps&gt;</code></pre>
+<p>One prompt: a strict model binding with a parameter, two budgets, a
+two-step fallback chain ending in ask-the-user, a deterministic file
+inclusion, a skill invocation, and a span scoping a glossary to one
+instruction. Every element is optional — a prompt with zero directives
+is valid PS.</p>
+<h2 id="reserved-surface-never-grows">2. Reserved surface (never
+grows)</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Element</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>@</code></td>
+<td>Entity reference (models, agents, plugins, tools, skills, files,
+context)</td>
+</tr>
+<tr class="even">
+<td><code>/</code></td>
+<td>Action invocation (skills/commands)</td>
+</tr>
+<tr class="odd">
+<td><code>&lt;ps …&gt;…&lt;/ps&gt;</code></td>
+<td>Span directive — the only live tag namespace</td>
+</tr>
+<tr class="even">
+<td><code>---ps … ---</code></td>
+<td>Document frontmatter fence (strict form)</td>
+</tr>
+<tr class="odd">
+<td><code>\@</code> <code>\/</code></td>
+<td>Escapes — always content</td>
+</tr>
+<tr class="even">
+<td><code>``` … ```</code></td>
+<td>Fenced code — always content</td>
+</tr>
+</tbody>
+</table>
+<p>Full-width forms <code>＠</code> (U+FF20) and <code>／</code>
+(U+FF0F) are equivalent to ASCII (CJK input methods).</p>
+<h2 id="entity-references-point-scope">3. Entity references (point
+scope)</h2>
+<pre class="ebnf"><code>reference ::= &quot;@&quot; [ namespace &quot;:&quot; ] name [ &quot;!&quot; ] [ arglist ]
+namespace ::= &quot;model&quot; | &quot;agent&quot; | &quot;plugin&quot; | &quot;tool&quot; | &quot;skill&quot; | &quot;file&quot; | &quot;ctx&quot; | vendor-ext
+name      ::= identifier ( (&quot;.&quot; | &quot;/&quot;) identifier )* [ &quot;@&quot; version ]   (* Unicode, UAX #31, NFC *)
+arglist   ::= &quot;(&quot; key &quot;:&quot; value ( &quot;,&quot; key &quot;:&quot; value )* &quot;)&quot;             (* JSON5-style scalars *)
+action    ::= &quot;/&quot; name [ arglist ]</code></pre>
+<ul>
+<li><strong>Bare</strong> <code>@opus</code> resolves via namespace
+search; <strong>qualified</strong> <code>@model:opus</code> bypasses
+it.</li>
+<li>Ambiguity (<code>@research</code> = plugin? file?) is
+<strong>surfaced, never guessed</strong>
+(<code>ENTITY_AMBIGUOUS</code>).</li>
+<li>Every binding pins to an immutable canonical identifier:
+<code>@opus</code> →
+<code>model:anthropic/claude-opus-4-5@2026-05-01</code>. Traces never
+contain unpinned bindings.</li>
+<li>Islands require a Unicode word boundary (UAX #29 — works in no-space
+scripts) and a resolvable or qualified name. Emails and paths do not
+parse.</li>
+</ul>
+<p>Examples:</p>
+<pre class="text"><code>@opus            @model:opus            @haiku!(temperature: 0)
+@plugin:linear   @file:របាយការណ៍.md     @tool:workspace/acme/search-contracts@3
+/translate(to: &quot;km&quot;)                    /concise</code></pre>
+<h2 id="parameters">4. Parameters</h2>
+<p>Normalized core keys: <code>temperature</code>, <code>top_p</code>,
+<code>max_tokens</code>, <code>stop</code>, <code>seed</code>,
+<code>effort</code>. Vendor-native keys allowed; every parameter’s
+journey is recorded as requested → normalized → applied with status
+<code>applied | translated | clamped | unsupported | ignored | refused</code>
+(mapping rule from the venue’s vendor profile). Undocumented passthrough
+is non-conformant.</p>
+<h2 id="strictness-fulfillment-policies">5. Strictness (fulfillment
+policies)</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Policy</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>strict</code></td>
+<td>Every requirement exactly, or fail before execution. No silent
+substitution.</td>
+</tr>
+<tr class="even">
+<td><code>partial</code></td>
+<td>Fill what can be filled; every drop reported in the fill
+report.</td>
+</tr>
+<tr class="odd">
+<td><code>best-effort</code></td>
+<td>Venue discretion; degradations still reported.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Default (split):</strong> entity binding is
+<code>strict</code> (<code>@opus</code> means opus, never a substitute);
+parameters are <code>partial</code> (unsupported values drop, with a
+report).</p>
+<p><strong><code>!</code> escalates the whole directive to
+strict:</strong> all parameters become hard requirements (no drop, no
+clamp; translation only if the vendor profile declares it
+semantics-preserving); any degradation is a failure. <code>@opus</code>
+= strict entity, partial params · <code>@opus!</code> = strict
+everything.</p>
+<p>Named forms: <code>fill="strict"</code> on a span;
+<code>fill: strict</code> in frontmatter (document level =
+all-or-none).</p>
+<h2 id="budgets">6. Budgets</h2>
+<p><code>limit(…)</code> is sugar for a budget object with defined
+measurement points:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>estimated_cost_max</code></td>
+<td>Pre-flight: reject if floor estimate exceeds (<code>$</code> USD or
+<code>tok</code>)</td>
+</tr>
+<tr class="even">
+<td><code>observed_cost_max</code></td>
+<td>Runtime: abort (if cancellable) when exceeded</td>
+</tr>
+<tr class="odd">
+<td><code>wall_time_max</code></td>
+<td>Submission → completion, tool calls included
+(<code>ms</code>/<code>s</code>)</td>
+</tr>
+<tr class="even">
+<td><code>first_token_max</code></td>
+<td>Streaming responsiveness bound</td>
+</tr>
+<tr class="odd">
+<td><code>cancellation</code></td>
+<td>What the directive requires: <code>required</code> /
+<code>preferred</code></td>
+</tr>
+<tr class="even">
+<td><code>scope</code></td>
+<td><code>attempt</code> (default) or <code>chain</code> (bounds the
+total across fallback attempts)</td>
+</tr>
+</tbody>
+</table>
+<p>A violated budget is a fill failure. Venues declare enforcement
+capability in their capability document;
+<code>cancellation: required</code> against a venue declaring
+<code>unsupported</code> fails pre-flight
+(<code>BUDGET_PREFLIGHT_REJECTED</code>). Output is never silently
+degraded (e.g., truncated) to satisfy a budget.</p>
+<h2 id="fallback-chains">7. Fallback chains</h2>
+<pre class="ebnf"><code>route    ::= step ( &quot;else&quot; step )* [ &quot;else&quot; terminal ]
+step     ::= reference [ &quot;limit&quot; &quot;(&quot; … &quot;)&quot; ]
+terminal ::= &quot;fail&quot; | &quot;ask&quot;</code></pre>
+<ul>
+<li>The <strong>only</strong> trigger is a fill failure (unfillable
+entity, violated budget, timeout, vendor error, policy refusal). No
+content conditionals — ever.</li>
+<li>First successful fill wins; every attempt is recorded with outcome,
+codes, measured cost and latency.</li>
+<li><code>else fail</code> is the implicit default;
+<code>else ask</code> (optional capability) surfaces the exhausted chain
+to the user.</li>
+<li>Every step is checked against the same capability envelope — a
+failed primary never legitimizes a prohibited secondary
+(<code>DATA_POLICY_BLOCKED</code>).</li>
+</ul>
+<h2 id="spans">8. Spans</h2>
+<pre class="text"><code>&lt;ps @file:glossary.md&gt;use these terms&lt;/ps&gt;        casual: same @ grammar inside the tag
+&lt;ps context=&quot;file:workspace/acme/9fc2…&quot;&gt;…&lt;/ps&gt;    canonical XML-friendly form (compiler-emitted)</code></pre>
+<p>v0.2 spans carry: context inclusion, local instruction scope, tool
+availability, provenance marking. <strong>Multi-model span execution is
+deferred</strong> — a model reference in a span is rejected with
+<code>SPAN_EXECUTION_UNSUPPORTED</code>, never ignored.</p>
+<h2 id="document-scope-frontmatter-the-strict-form">9. Document scope
+(frontmatter — the strict form)</h2>
+<pre class="text"><code>---ps
+version: &quot;0.2&quot;
+route:
+  - { model: &quot;model:anthropic/claude-opus-4-5@2026-05-01&quot;,
+      params: { temperature: 0.2 }, fill: strict,
+      budget: { wall_time_max: 5s, estimated_cost_max: $0.10 } }
+  - { model: &quot;model:openai/gpt-5.6@2026-07-01&quot; }
+skills:  [ &quot;skill:workspace/concise@1&quot; ]
+context: [ &quot;file:workspace/acme/9fc2…&quot; ]
+fill: strict
+---
+Summarize the report.</code></pre>
+<p>The strict document <strong>is</strong> the canonical form made
+writable. Round-trip property (under a pinned environment E — registry,
+capability/default profiles, alias map, policy version):
+<code>C_E(S(C_E(P))) = C_E(P)</code>. Casual, parameterized, and strict
+forms of the same prompt mean the same thing under the same environment
+— machine-checked, not asserted.</p>
+<h2 id="content-safety">10. Content safety</h2>
+<ul>
+<li><strong>Inert content (security-critical):</strong> only designated
+<em>authoring segments</em> parse as PS. Retrieved documents, file
+contents, tool results, quoted messages, and model-generated text are
+provenance-typed <strong>inert</strong> — PS-shaped text inside them
+(e.g., a document containing <code>@tool:send_email!(…)</code>) is
+content, never a directive, absent an explicit authority-checked
+promotion recorded in the trace.</li>
+<li>Interactive implementations <strong>must</strong> visually mark
+every recognized island before submission; API callers get the same
+guarantee via dry-run traces.</li>
+<li>Bidirectional control characters inside islands are rejected
+(Trojan-Source mitigation); homoglyph lookalikes (<code>@оpus</code>,
+Cyrillic о) surface as ambiguity, never bind silently.</li>
+</ul>
+<h2 id="internationalization">11. Internationalization</h2>
+<ul>
+<li>Entity names: any script (UAX #31 identifiers, NFC-normalized).</li>
+<li>Canonical keywords (<code>model:</code>, <code>fill:</code>,
+<code>else</code>, policy names, units) are English in canonical form;
+implementations may accept localized input aliases that compile to
+canonical — localization rides the same casual→strict machinery.</li>
+<li>Island boundaries use Unicode segmentation, so detection works in
+no-space scripts (Khmer, Thai, CJK).</li>
+<li>Budgets accept locale conventions at input; canonical form and
+traces use canonical units (USD, <code>ms</code>/<code>s</code>,
+dot-decimal).</li>
+</ul>
+<h2 id="precedence-in-two-rules">12. Precedence in two rules</h2>
+<ol type="1">
+<li><strong>Authority</strong> (who may decide): platform &gt;
+organization &gt; application &gt; user &gt; prompt content. Lower
+authority may <strong>narrow</strong> the capability envelope, never
+expand it. Out-of-envelope directives fail visibly
+(<code>ENTITY_UNAUTHORIZED</code> / <code>DATA_POLICY_BLOCKED</code>) —
+the user learns authority, not availability, was the reason.</li>
+<li><strong>Specificity</strong> (which value wins, within one authority
+level): more specific wins — <strong>span &gt; point &gt;
+document</strong>.</li>
+</ol>
+<h2 id="failure-codes-core-set">13. Failure codes (core set)</h2>
+<pre class="text"><code>ENTITY_NOT_FOUND   ENTITY_AMBIGUOUS   ENTITY_UNAUTHORIZED
+PARAM_UNSUPPORTED  PARAM_CLAMPED      PARAM_IGNORED
+BUDGET_PREFLIGHT_REJECTED  BUDGET_EXCEEDED  TIMEOUT_NOT_CANCELLED
+DATA_POLICY_BLOCKED  SPAN_EXECUTION_UNSUPPORTED  VERSION_UNSUPPORTED
+FALLBACK_EXHAUSTED</code></pre>
+<p>Every requested thing ends in exactly one of: filled/applied ·
+translated · clamped · dropped-with-report · refused-with-code. That is
+the receipt’s promise: <strong>no silent anything.</strong></p>

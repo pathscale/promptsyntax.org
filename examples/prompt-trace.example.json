@@ -1,0 +1,181 @@
+{
+  "ps_trace": "0.2",
+  "turn": "t-7841",
+  "tier": "user",
+  "mode": "executed",
+  "venue": {
+    "id": "venue:example",
+    "capability_document": "https://venue.example/ps-capabilities.json",
+    "vendor_profile": "vendor-profile/anthropic-2026-07"
+  },
+  "coverage": {
+    "routing": "complete",
+    "assembly": "user-initiated-only",
+    "inline_threshold_bytes": 4096
+  },
+  "events": [
+    {
+      "id": "inf-1",
+      "event": "inference",
+      "kind": "user-initiated",
+      "routing": {
+        "requested": "@opus!(temperature: 0.2) limit(wall_time: 5s) else @haiku",
+        "bound": "model:anthropic/claude-opus-4-5@2026-05-01",
+        "policy": "strict",
+        "attempts": [
+          {
+            "ref": "@opus!",
+            "bound": "model:anthropic/claude-opus-4-5@2026-05-01",
+            "outcome": "filled",
+            "measured": {
+              "cost_usd": 0.041,
+              "wall_time_ms": 3210
+            }
+          }
+        ],
+        "fill": [
+          {
+            "req": "entity",
+            "status": "filled"
+          },
+          {
+            "req": "temperature",
+            "requested": 0.2,
+            "applied": 0.2,
+            "status": "applied"
+          }
+        ],
+        "budget": {
+          "wall_time_max_ms": 5000,
+          "cancellation": "preferred",
+          "scope": "attempt",
+          "set_by_authority": "prompt"
+        }
+      },
+      "segments": [
+        {
+          "i": 0,
+          "content": {
+            "state": "inline",
+            "text": "Summarize "
+          },
+          "step": "s1"
+        },
+        {
+          "i": 1,
+          "content": {
+            "state": "external",
+            "sha256": "9fc2aa",
+            "length": 183042,
+            "media": "text/markdown",
+            "handle": "blob://store/9fc2aa"
+          },
+          "step": "s3"
+        },
+        {
+          "i": 2,
+          "content": {
+            "state": "inline",
+            "text": "Prefer concise answers."
+          },
+          "step": "s5"
+        },
+        {
+          "i": 3,
+          "content": {
+            "state": "withheld",
+            "digest": "salted:ae41",
+            "length_band": "1-4KB",
+            "tier": "operator"
+          },
+          "step": "s6"
+        }
+      ],
+      "steps": [
+        {
+          "id": "s1",
+          "kind": "user-content"
+        },
+        {
+          "id": "s2",
+          "kind": "context-inclusion",
+          "via": "@file:q3-report.md",
+          "parent": "s1"
+        },
+        {
+          "id": "s3",
+          "kind": "retrieval",
+          "of": "file:workspace/acme/9fc2aa",
+          "parent": "s2"
+        },
+        {
+          "id": "s4",
+          "kind": "skill-invocation",
+          "via": "/concise",
+          "parent": "s1"
+        },
+        {
+          "id": "s5",
+          "kind": "template-expansion",
+          "of": "skill:workspace/concise@1",
+          "parent": "s4"
+        },
+        {
+          "id": "s6",
+          "kind": "policy-injection",
+          "tier": "operator"
+        }
+      ],
+      "resolution": {
+        "bindings": [
+          {
+            "ref": "@opus",
+            "bound": "model:anthropic/claude-opus-4-5@2026-05-01",
+            "rule": "namespace-search/model",
+            "ambiguity_surfaced": false
+          }
+        ],
+        "refusals": []
+      }
+    },
+    {
+      "id": "b-1",
+      "event": "boundary",
+      "tool": "tool:venue/web-search@2",
+      "sent": {
+        "state": "inline",
+        "text": "Q3 revenue drivers acme corp"
+      },
+      "received": {
+        "state": "external",
+        "sha256": "77aabb",
+        "length": 2150,
+        "handle": "blob://store/77aabb"
+      },
+      "internal": "outside-trace-perimeter",
+      "measured": {
+        "wall_time_ms": 640
+      }
+    },
+    {
+      "id": "inf-2",
+      "event": "inference",
+      "kind": "internal-continuation",
+      "routing": {
+        "bound": "model:anthropic/claude-opus-4-5@2026-05-01",
+        "policy": "strict",
+        "fill": [
+          {
+            "req": "entity",
+            "status": "filled"
+          }
+        ]
+      },
+      "segments": {
+        "coverage": "not-provided",
+        "reason": "should-level-not-implemented",
+        "declared_in": "capability-document"
+      }
+    }
+  ]
+}
