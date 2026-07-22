@@ -1,6 +1,7 @@
 import { Button } from "@pathscale/ui";
 import { A } from "@solidjs/router";
 import type { Component } from "solid-js";
+import LensTabs from "~/components/LensTabs";
 import { GITHUB_URL, ROUTES } from "~/config/routes";
 
 const HomePage: Component = () => (
@@ -134,52 +135,7 @@ const HomePage: Component = () => (
       </div>
     </section>
 
-    <section class="border-base-300 border-b">
-      <div class="py-16 content-container">
-        <h2 class="mb-2 font-bold text-[clamp(23px,3vw,30px)] tracking-tight">Who it's for</h2>
-        <p class="mb-7 text-base-content/60 text-sm">
-          One language, one receipt, read differently by each audience.
-        </p>
-        <div class="grid gap-4 md:grid-cols-3">
-          <div class="rounded-xl border border-base-300 bg-base-200 p-5">
-            <div class="mb-2 font-medium text-primary text-xs uppercase tracking-wider">
-              Everyday users
-            </div>
-            <h3 class="mb-2 font-semibold text-lg">Know what happened</h3>
-            <p class="text-[15px] text-base-content/70">
-              Did it actually search the web? Which file did it use? Was the model you picked the
-              one that answered? The receipt tells you, in plain terms, only when something's worth
-              knowing. Type nothing special and it still works; the syntax is there when you want
-              control, not a tax when you don't.
-            </p>
-          </div>
-          <div class="rounded-xl border border-base-300 bg-base-200 p-5">
-            <div class="mb-2 font-medium text-primary text-xs uppercase tracking-wider">
-              Enterprises &amp; IT
-            </div>
-            <h3 class="mb-2 font-semibold text-lg">Govern and prove it</h3>
-            <p class="text-[15px] text-base-content/70">
-              Bind requests to approved models by immutable version. Keep confidential data from
-              falling back to an unapproved provider. Let your existing policy engine decide on the
-              real request (references, data labels, the whole fallback chain) and get per-request{" "}
-              <em>evidence</em> that the decision was honored, not just a setting that hopes it was.
-            </p>
-          </div>
-          <div class="rounded-xl border border-base-300 bg-base-200 p-5">
-            <div class="mb-2 font-medium text-primary text-xs uppercase tracking-wider">
-              Vendors &amp; platforms
-            </div>
-            <h3 class="mb-2 font-semibold text-lg">Compete on trust</h3>
-            <p class="text-[15px] text-base-content/70">
-              You already ship the pieces: substitution notices, tool traces, fallback. PS gives
-              them shared semantics so they interoperate instead of fragmenting. Adopt per layer; a
-              receipt lowers onto the OpenTelemetry spans you already emit. Transparency becomes
-              something you can advertise, and conformance something a customer can require.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
+    <LensTabs />
 
     <section class="border-base-300 border-b">
       <div class="py-16 content-container">
