@@ -38,7 +38,7 @@ export default defineConfig({
       description:
         "Prompt Syntax (PS) is a vendor-neutral specification for controlling and verifying what an AI system does with your prompt: which model runs, what context is sent, what was silently changed.",
     },
-    title: "PromptSyntax — every prompt deserves a receipt",
+    title: "PromptSyntax: every prompt deserves a receipt",
     mountId: "root",
   },
   dev: {
