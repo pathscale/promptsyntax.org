@@ -1,0 +1,118 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy:
+    runs-on: ubicloud-standard-2
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Set Version
+        run: |
+          echo "Version: 1.0.${GITHUB_RUN_NUMBER}"
+          sed -i "s/\"version\": \".*\"/\"version\": \"1.0.${GITHUB_RUN_NUMBER}\"/" package.json
+          echo "{\"version\":\"1.0.${GITHUB_RUN_NUMBER}\"}" > public/version.json
+          echo "GITHUB_RELEASE_VERSION=1.0.${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+          echo "GITHUB_BUILD_TIMESTAMP=$(date +%s%3N)" >> $GITHUB_ENV
+
+      - name: Build project
+        run: bun run build
+
+      - name: Mirror index.html to 404
+        run: |
+          cd dist
+          mkdir -p bunnycdn_errors
+          cp index.html bunnycdn_errors/404.html
+
+      - name: Remove stale assets from BunnyCDN
+        env:
+          STORAGE_API_KEY: ${{ secrets.BUNNYCDN_STORAGE_API_KEY }}
+          STORAGE_NAME: ${{ secrets.BUNNYCDN_STORAGE_NAME }}
+        run: |
+          curl -sf -X DELETE -H "AccessKey: $STORAGE_API_KEY" \
+            "https://storage.bunnycdn.com/$STORAGE_NAME/index.html" || true
+          curl -sf -X DELETE -H "AccessKey: $STORAGE_API_KEY" \
+            "https://storage.bunnycdn.com/$STORAGE_NAME/404.html" || true
+          curl -sf -X DELETE -H "AccessKey: $STORAGE_API_KEY" \
+            "https://storage.bunnycdn.com/$STORAGE_NAME/static/js/app.mjs" || true
+          curl -sf -X DELETE -H "AccessKey: $STORAGE_API_KEY" \
+            "https://storage.bunnycdn.com/$STORAGE_NAME/static/js/app.js" || true
+          curl -sf -X DELETE -H "AccessKey: $STORAGE_API_KEY" \
+            "https://storage.bunnycdn.com/$STORAGE_NAME/static/js/app.js.br" || true
+          curl -sf -X DELETE -H "AccessKey: $STORAGE_API_KEY" \
+            "https://storage.bunnycdn.com/$STORAGE_NAME/static/css/app.mcss" || true
+          curl -sf -X DELETE -H "AccessKey: $STORAGE_API_KEY" \
+            "https://storage.bunnycdn.com/$STORAGE_NAME/static/css/app.css" || true
+          curl -sf -X DELETE -H "AccessKey: $STORAGE_API_KEY" \
+            "https://storage.bunnycdn.com/$STORAGE_NAME/static/css/app.css.br" || true
+
+      - name: Deploy assets to BunnyCDN
+        env:
+          STORAGE_API_KEY: ${{ secrets.BUNNYCDN_STORAGE_API_KEY }}
+          STORAGE_NAME: ${{ secrets.BUNNYCDN_STORAGE_NAME }}
+        run: |
+          cd dist
+          upload_file() {
+            local file="$1"
+            local url="https://storage.bunnycdn.com/$STORAGE_NAME/${file#./}"
+            local max_attempts=4
+            local attempt=1
+            local http_code body
+            while [ "$attempt" -le "$max_attempts" ]; do
+              body=$(curl -sS -X PUT \
+                -H "AccessKey: $STORAGE_API_KEY" \
+                -T "$file" \
+                -w $'\n%{http_code}' \
+                "$url")
+              http_code=$(printf '%s' "$body" | tail -n1)
+              body=$(printf '%s' "$body" | sed '$d')
+              if [ "$http_code" = "200" ] || [ "$http_code" = "201" ]; then
+                return 0
+              fi
+              echo "::warning::Upload attempt $attempt/$max_attempts failed for $file: HTTP $http_code - $body"
+              attempt=$((attempt + 1))
+              sleep $((attempt * 3))
+            done
+            echo "::error::Upload failed for $file after $max_attempts attempts: HTTP $http_code - $body"
+            return 1
+          }
+
+          failures=0
+          while IFS= read -r file; do
+            if ! upload_file "$file"; then
+              failures=$((failures + 1))
+            fi
+          done < <(find . -type f ! -path "./static/js/async/*" ! -path "./js/async/*")
+
+          if [ "$failures" -gt 0 ]; then
+            echo "::error::Deploy aborted: $failures file(s) failed to upload to BunnyCDN"
+            exit 1
+          fi
+
+      - name: Purge BunnyCDN edge cache
+        env:
+          ZONE_API_KEY: ${{ secrets.BUNNYCDN_ZONE_API_KEY }}
+          ZONE_ID: ${{ secrets.BUNNYCDN_ZONE_ID }}
+        run: |
+          if [ -n "$ZONE_API_KEY" ] || [ -n "$ZONE_ID" ]; then
+            curl -sf -X POST -H "AccessKey: $ZONE_API_KEY" \
+              "https://bunnycdn.com/api/pullzone/$ZONE_ID/purgeCache" || true
+            echo "Edge cache purged"
+          else
+            echo "Skipping purge: BUNNYCDN_ZONE_API_KEY or BUNNYCDN_ZONE_ID not set"
+          fi

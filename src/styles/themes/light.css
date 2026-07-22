@@ -1,0 +1,51 @@
+@layer theme {
+  [data-theme="light"] {
+    color-scheme: light;
+
+    --color-base-100: oklch(99% 0.002 250);
+    --color-base-200: oklch(96.5% 0.004 250);
+    --color-base-300: oklch(92% 0.008 250);
+    --color-base-content: oklch(25% 0.02 255);
+
+    --color-primary: oklch(52% 0.18 262);
+    --color-primary-content: oklch(98% 0.005 250);
+    --color-secondary: oklch(55% 0.12 160);
+    --color-secondary-content: oklch(98% 0.005 250);
+    --color-accent: oklch(52% 0.18 262);
+    --color-accent-content: oklch(98% 0.005 250);
+    --color-neutral: oklch(94% 0.005 250);
+    --color-neutral-content: oklch(25% 0.02 255);
+
+    --color-info: oklch(52% 0.18 262);
+    --color-info-content: oklch(98% 0.005 250);
+    --color-success: oklch(52% 0.12 160);
+    --color-success-content: oklch(98% 0.005 250);
+    --color-warning: oklch(62% 0.13 80);
+    --color-warning-content: oklch(98% 0.005 250);
+    --color-error: oklch(55% 0.18 25);
+    --color-error-content: oklch(98% 0.005 250);
+
+    --radius-selector: 0.375rem;
+    --radius-field: 0.5rem;
+    --radius-box: 0.75rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 0;
+    --noise: 0;
+
+    /* Syntax-island highlight colors (landing demo + doc code) */
+    --isl-model: #2563c9;
+    --isl-file: #1a7f4b;
+    --isl-skill: #8b3fc0;
+    --isl-pol: #9a6a10;
+    --isl-com: #7a8494;
+    --doc-code-ink: oklch(30% 0.02 255);
+  }
+}
+
+@layer base {
+  [data-theme="light"] {
+    color-scheme: only light;
+  }
+}
