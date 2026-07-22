@@ -27,7 +27,9 @@ export default defineConfig({
   },
   html: {
     meta: {
-      charset: "utf-8",
+      // Object form emits a real `<meta charset>` declaration; the string form
+      // would emit a useless `<meta name="charset">` and mojibake the page.
+      charset: { charset: "utf-8" },
       viewport: "width=device-width, initial-scale=1",
       "theme-color": "#0d1117",
       "Cache-Control": "no-cache, no-store, must-revalidate",
