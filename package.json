@@ -1,6 +1,6 @@
 {
   "name": "promptsyntax.org",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "PromptSyntax - a vendor-neutral specification for prompt-execution intent and execution receipts",
   "type": "module",
   "repository": {
