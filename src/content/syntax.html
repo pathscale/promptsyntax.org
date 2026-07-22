@@ -1,4 +1,4 @@
-<div class="doc-banner">The full syntax on one page. Normative source: the specification.</div><h1 id="prompt-syntax-syntax-reference">Prompt Syntax — Syntax
+<div class="doc-banner">The full syntax on one page. Normative source: the specification.</div><h1 id="prompt-syntax-syntax-reference">Prompt Syntax, Syntax
 Reference</h1>
 <p><strong>v0.2.1 working draft · 2026-07-19 · companion to the
 specification (normative source: SPEC v0.2)</strong></p>
@@ -11,8 +11,8 @@ Summarize @file:q3-report.md /concise
 <p>One prompt: a strict model binding with a parameter, two budgets, a
 two-step fallback chain ending in ask-the-user, a deterministic file
 inclusion, a skill invocation, and a span scoping a glossary to one
-instruction. Every element is optional — a prompt with zero directives
-is valid PS.</p>
+instruction. Every element is optional, a prompt with zero directives is
+valid PS.</p>
 <h2 id="reserved-surface-never-grows">2. Reserved surface (never
 grows)</h2>
 <table>
@@ -21,36 +21,36 @@ grows)</h2>
 <col style="width: 50%" />
 </colgroup>
 <thead>
-<tr class="header">
+<tr>
 <th>Element</th>
 <th>Meaning</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>@</code></td>
 <td>Entity reference (models, agents, plugins, tools, skills, files,
 context)</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>/</code></td>
 <td>Action invocation (skills/commands)</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>&lt;ps …&gt;…&lt;/ps&gt;</code></td>
-<td>Span directive — the only live tag namespace</td>
+<td>Span directive, the only live tag namespace</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>---ps … ---</code></td>
 <td>Document frontmatter fence (strict form)</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>\@</code> <code>\/</code></td>
-<td>Escapes — always content</td>
+<td>Escapes, always content</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>``` … ```</code></td>
-<td>Fenced code — always content</td>
+<td>Fenced code, always content</td>
 </tr>
 </tbody>
 </table>
@@ -74,7 +74,7 @@ it.</li>
 <code>@opus</code> →
 <code>model:anthropic/claude-opus-4-5@2026-05-01</code>. Traces never
 contain unpinned bindings.</li>
-<li>Islands require a Unicode word boundary (UAX #29 — works in no-space
+<li>Islands require a Unicode word boundary (UAX #29, works in no-space
 scripts) and a resolvable or qualified name. Emails and paths do not
 parse.</li>
 </ul>
@@ -98,23 +98,23 @@ policies)</h2>
 <col style="width: 50%" />
 </colgroup>
 <thead>
-<tr class="header">
+<tr>
 <th>Policy</th>
 <th>Meaning</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>strict</code></td>
 <td>Every requirement exactly, or fail before execution. No silent
 substitution.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>partial</code></td>
 <td>Fill what can be filled; every drop reported in the fill
 report.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>best-effort</code></td>
 <td>Venue discretion; degradations still reported.</td>
 </tr>
@@ -142,36 +142,36 @@ measurement points:</p>
 <col style="width: 50%" />
 </colgroup>
 <thead>
-<tr class="header">
+<tr>
 <th>Key</th>
 <th>Meaning</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>estimated_cost_max</code></td>
 <td>Pre-flight: reject if floor estimate exceeds (<code>$</code> USD or
 <code>tok</code>)</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>observed_cost_max</code></td>
 <td>Runtime: abort (if cancellable) when exceeded</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>wall_time_max</code></td>
 <td>Submission → completion, tool calls included
 (<code>ms</code>/<code>s</code>)</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>first_token_max</code></td>
 <td>Streaming responsiveness bound</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>cancellation</code></td>
 <td>What the directive requires: <code>required</code> /
 <code>preferred</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>scope</code></td>
 <td><code>attempt</code> (default) or <code>chain</code> (bounds the
 total across fallback attempts)</td>
@@ -191,14 +191,14 @@ terminal ::= &quot;fail&quot; | &quot;ask&quot;</code></pre>
 <ul>
 <li>The <strong>only</strong> trigger is a fill failure (unfillable
 entity, violated budget, timeout, vendor error, policy refusal). No
-content conditionals — ever.</li>
+content conditionals, ever.</li>
 <li>First successful fill wins; every attempt is recorded with outcome,
 codes, measured cost and latency.</li>
 <li><code>else fail</code> is the implicit default;
 <code>else ask</code> (optional capability) surfaces the exhausted chain
 to the user.</li>
-<li>Every step is checked against the same capability envelope — a
-failed primary never legitimizes a prohibited secondary
+<li>Every step is checked against the same capability envelope, a failed
+primary never legitimizes a prohibited secondary
 (<code>DATA_POLICY_BLOCKED</code>).</li>
 </ul>
 <h2 id="spans">8. Spans</h2>
@@ -206,10 +206,10 @@ failed primary never legitimizes a prohibited secondary
 &lt;ps context=&quot;file:workspace/acme/9fc2…&quot;&gt;…&lt;/ps&gt;    canonical XML-friendly form (compiler-emitted)</code></pre>
 <p>v0.2 spans carry: context inclusion, local instruction scope, tool
 availability, provenance marking. <strong>Multi-model span execution is
-deferred</strong> — a model reference in a span is rejected with
+deferred</strong>, a model reference in a span is rejected with
 <code>SPAN_EXECUTION_UNSUPPORTED</code>, never ignored.</p>
 <h2 id="document-scope-frontmatter-the-strict-form">9. Document scope
-(frontmatter — the strict form)</h2>
+(frontmatter, the strict form)</h2>
 <pre class="text"><code>---ps
 version: &quot;0.2&quot;
 route:
@@ -223,17 +223,17 @@ fill: strict
 ---
 Summarize the report.</code></pre>
 <p>The strict document <strong>is</strong> the canonical form made
-writable. Round-trip property (under a pinned environment E — registry,
+writable. Round-trip property (under a pinned environment E, registry,
 capability/default profiles, alias map, policy version):
 <code>C_E(S(C_E(P))) = C_E(P)</code>. Casual, parameterized, and strict
-forms of the same prompt mean the same thing under the same environment
-— machine-checked, not asserted.</p>
+forms of the same prompt mean the same thing under the same environment,
+machine-checked, not asserted.</p>
 <h2 id="content-safety">10. Content safety</h2>
 <ul>
 <li><strong>Inert content (security-critical):</strong> only designated
 <em>authoring segments</em> parse as PS. Retrieved documents, file
 contents, tool results, quoted messages, and model-generated text are
-provenance-typed <strong>inert</strong> — PS-shaped text inside them
+provenance-typed <strong>inert</strong>, PS-shaped text inside them
 (e.g., a document containing <code>@tool:send_email!(…)</code>) is
 content, never a directive, absent an explicit authority-checked
 promotion recorded in the trace.</li>
@@ -250,7 +250,7 @@ Cyrillic о) surface as ambiguity, never bind silently.</li>
 <li>Canonical keywords (<code>model:</code>, <code>fill:</code>,
 <code>else</code>, policy names, units) are English in canonical form;
 implementations may accept localized input aliases that compile to
-canonical — localization rides the same casual→strict machinery.</li>
+canonical, localization rides the same casual→strict machinery.</li>
 <li>Island boundaries use Unicode segmentation, so detection works in
 no-space scripts (Khmer, Thai, CJK).</li>
 <li>Budgets accept locale conventions at input; canonical form and
@@ -263,10 +263,10 @@ dot-decimal).</li>
 organization &gt; application &gt; user &gt; prompt content. Lower
 authority may <strong>narrow</strong> the capability envelope, never
 expand it. Out-of-envelope directives fail visibly
-(<code>ENTITY_UNAUTHORIZED</code> / <code>DATA_POLICY_BLOCKED</code>) —
+(<code>ENTITY_UNAUTHORIZED</code> / <code>DATA_POLICY_BLOCKED</code>),
 the user learns authority, not availability, was the reason.</li>
 <li><strong>Specificity</strong> (which value wins, within one authority
-level): more specific wins — <strong>span &gt; point &gt;
+level): more specific wins, <strong>span &gt; point &gt;
 document</strong>.</li>
 </ol>
 <h2 id="failure-codes-core-set">13. Failure codes (core set)</h2>

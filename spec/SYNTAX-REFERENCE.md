@@ -1,4 +1,4 @@
-# Prompt Syntax — Syntax Reference
+# Prompt Syntax, Syntax Reference
 
 **v0.2.1 working draft · 2026-07-19 · companion to the specification (normative source: SPEC v0.2)**
 
@@ -14,7 +14,7 @@ Summarize @file:q3-report.md /concise
 
 One prompt: a strict model binding with a parameter, two budgets, a two-step fallback
 chain ending in ask-the-user, a deterministic file inclusion, a skill invocation, and a
-span scoping a glossary to one instruction. Every element is optional — a prompt with
+span scoping a glossary to one instruction. Every element is optional, a prompt with
 zero directives is valid PS.
 
 ## 2. Reserved surface (never grows)
@@ -23,10 +23,10 @@ zero directives is valid PS.
 |---|---|
 | `@` | Entity reference (models, agents, plugins, tools, skills, files, context) |
 | `/` | Action invocation (skills/commands) |
-| `<ps …>…</ps>` | Span directive — the only live tag namespace |
+| `<ps …>…</ps>` | Span directive, the only live tag namespace |
 | `---ps … ---` | Document frontmatter fence (strict form) |
-| `\@` `\/` | Escapes — always content |
-| ` ``` … ``` ` | Fenced code — always content |
+| `\@` `\/` | Escapes, always content |
+| ` ``` … ``` ` | Fenced code, always content |
 
 Full-width forms `＠` (U+FF20) and `／` (U+FF0F) are equivalent to ASCII (CJK input methods).
 
@@ -44,7 +44,7 @@ action    ::= "/" name [ arglist ]
 - Ambiguity (`@research` = plugin? file?) is **surfaced, never guessed** (`ENTITY_AMBIGUOUS`).
 - Every binding pins to an immutable canonical identifier: `@opus` →
   `model:anthropic/claude-opus-4-5@2026-05-01`. Traces never contain unpinned bindings.
-- Islands require a Unicode word boundary (UAX #29 — works in no-space scripts) and a
+- Islands require a Unicode word boundary (UAX #29, works in no-space scripts) and a
   resolvable or qualified name. Emails and paths do not parse.
 
 Examples:
@@ -109,12 +109,12 @@ terminal ::= "fail" | "ask"
 ```
 
 - The **only** trigger is a fill failure (unfillable entity, violated budget, timeout,
-  vendor error, policy refusal). No content conditionals — ever.
+  vendor error, policy refusal). No content conditionals, ever.
 - First successful fill wins; every attempt is recorded with outcome, codes, measured
   cost and latency.
 - `else fail` is the implicit default; `else ask` (optional capability) surfaces the
   exhausted chain to the user.
-- Every step is checked against the same capability envelope — a failed primary never
+- Every step is checked against the same capability envelope, a failed primary never
   legitimizes a prohibited secondary (`DATA_POLICY_BLOCKED`).
 
 ## 8. Spans
@@ -125,10 +125,10 @@ terminal ::= "fail" | "ask"
 ```
 
 v0.2 spans carry: context inclusion, local instruction scope, tool availability,
-provenance marking. **Multi-model span execution is deferred** — a model reference in a
+provenance marking. **Multi-model span execution is deferred**, a model reference in a
 span is rejected with `SPAN_EXECUTION_UNSUPPORTED`, never ignored.
 
-## 9. Document scope (frontmatter — the strict form)
+## 9. Document scope (frontmatter, the strict form)
 
 ```text
 ---ps
@@ -146,16 +146,16 @@ Summarize the report.
 ```
 
 The strict document **is** the canonical form made writable. Round-trip property (under
-a pinned environment E — registry, capability/default profiles, alias map, policy
+a pinned environment E, registry, capability/default profiles, alias map, policy
 version): `C_E(S(C_E(P))) = C_E(P)`. Casual, parameterized, and strict forms of the
-same prompt mean the same thing under the same environment — machine-checked, not
+same prompt mean the same thing under the same environment, machine-checked, not
 asserted.
 
 ## 10. Content safety
 
 - **Inert content (security-critical):** only designated *authoring segments* parse as
   PS. Retrieved documents, file contents, tool results, quoted messages, and
-  model-generated text are provenance-typed **inert** — PS-shaped text inside them
+  model-generated text are provenance-typed **inert**, PS-shaped text inside them
   (e.g., a document containing `@tool:send_email!(…)`) is content, never a directive,
   absent an explicit authority-checked promotion recorded in the trace.
 - Interactive implementations **must** visually mark every recognized island before
@@ -169,7 +169,7 @@ asserted.
 - Entity names: any script (UAX #31 identifiers, NFC-normalized).
 - Canonical keywords (`model:`, `fill:`, `else`, policy names, units) are English in
   canonical form; implementations may accept localized input aliases that compile to
-  canonical — localization rides the same casual→strict machinery.
+  canonical, localization rides the same casual→strict machinery.
 - Island boundaries use Unicode segmentation, so detection works in no-space scripts
   (Khmer, Thai, CJK).
 - Budgets accept locale conventions at input; canonical form and traces use canonical
@@ -180,9 +180,8 @@ asserted.
 1. **Authority** (who may decide): platform > organization > application > user >
    prompt content. Lower authority may **narrow** the capability envelope, never expand
    it. Out-of-envelope directives fail visibly (`ENTITY_UNAUTHORIZED` /
-   `DATA_POLICY_BLOCKED`) — the user learns authority, not availability, was the reason.
-2. **Specificity** (which value wins, within one authority level): more specific wins —
-   **span > point > document**.
+   `DATA_POLICY_BLOCKED`), the user learns authority, not availability, was the reason.
+2. **Specificity** (which value wins, within one authority level): more specific wins, **span > point > document**.
 
 ## 13. Failure codes (core set)
 

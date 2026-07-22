@@ -2,27 +2,23 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://promptsyntax.org/schemas/prompt-trace/0.2",
   "title": "Prompt Trace",
-  "description": "PS/Trace 0.2 — turn-level trace: flat segments + provenance steps (D1-C), tiered turn scope with boundary rule (D2-C), hybrid content states with materialized export (D3-C). Normative rules beyond this schema: (R1) concatenating a segments[] array's content, in order, MUST reproduce the compiled prompt byte-exactly within tier scope; (R2) every segment.step MUST resolve to a step in the same inference, and injected (non user-typed) segments MUST carry step; (R3) step.parent chains MUST be acyclic; (R4) the inline threshold MUST NOT be set below 4096 bytes for the user tier; (R5) audit-tier exports MUST support materialized mode (external content resolved inline); (R6) no unqualified conformance claims — coverage MUST be declared.",
+  "description": "PS/Trace 0.2, turn-level trace: flat segments + provenance steps (D1-C), tiered turn scope with boundary rule (D2-C), hybrid content states with materialized export (D3-C). Normative rules beyond this schema: (R1) concatenating a segments[] array's content, in order, MUST reproduce the compiled prompt byte-exactly within tier scope; (R2) every segment.step MUST resolve to a step in the same inference, and injected (non user-typed) segments MUST carry step; (R3) step.parent chains MUST be acyclic; (R4) the inline threshold MUST NOT be set below 4096 bytes for the user tier; (R5) audit-tier exports MUST support materialized mode (external content resolved inline); (R6) no unqualified conformance claims, coverage MUST be declared.",
   "type": "object",
   "required": ["ps_trace", "turn", "tier", "mode", "venue", "coverage", "events"],
   "properties": {
     "ps_trace": { "const": "0.2" },
     "turn": { "type": "string", "description": "Venue-unique turn identifier" },
     "tier": { "enum": ["user", "developer", "operator", "oversight"] },
-    "mode": {
-      "enum": ["dry-run", "executed"],
-      "description": "dry-run = pre-execution trace (SHOULD capability); powers intent reification and prediction studies"
-    },
+    "mode": { "enum": ["dry-run", "executed"],
+      "description": "dry-run = pre-execution trace (SHOULD capability); powers intent reification and prediction studies" },
     "venue": {
       "type": "object",
       "required": ["id", "capability_document"],
       "properties": {
         "id": { "type": "string" },
         "capability_document": { "type": "string", "format": "uri" },
-        "vendor_profile": {
-          "type": "string",
-          "description": "Parameter-mapping profile in force, e.g. vendor-profile/openai-2026-07"
-        }
+        "vendor_profile": { "type": "string",
+          "description": "Parameter-mapping profile in force, e.g. vendor-profile/openai-2026-07" }
       }
     },
     "coverage": {
@@ -30,14 +26,10 @@
       "description": "R6: the declared conformance perimeter of this trace.",
       "required": ["routing", "assembly"],
       "properties": {
-        "routing": {
-          "const": "complete",
-          "description": "Routing records are MUST for every venue invocation — always complete"
-        },
-        "assembly": {
-          "enum": ["complete", "user-initiated-only"],
-          "description": "Whether full segments are provided for internal continuations (SHOULD) or only user-initiated inferences (MUST floor)"
-        },
+        "routing": { "const": "complete",
+          "description": "Routing records are MUST for every venue invocation, always complete" },
+        "assembly": { "enum": ["complete", "user-initiated-only"],
+          "description": "Whether full segments are provided for internal continuations (SHOULD) or only user-initiated inferences (MUST floor)" },
         "inline_threshold_bytes": { "type": "integer", "minimum": 4096, "default": 4096 }
       }
     },
@@ -46,51 +38,42 @@
       "description": "Evidence-substrate hooks (§12.3). SHOULD in core; oversight profiles may require.",
       "properties": {
         "algorithm": { "enum": ["sha256-chain"] },
-        "event_hashes": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "hash[i] = sha256(canonical(events[i]) + hash[i-1])"
-        },
-        "signature": {
-          "type": "object",
+        "event_hashes": { "type": "array", "items": { "type": "string" },
+          "description": "hash[i] = sha256(canonical(events[i]) + hash[i-1])" },
+        "signature": { "type": "object",
           "properties": {
-            "alg": { "type": "string" },
-            "key_id": { "type": "string" },
+            "alg": { "type": "string" }, "key_id": { "type": "string" },
             "value": { "type": "string" },
             "timestamp": { "type": "string", "format": "date-time" },
-            "timestamp_authority": { "type": "string" }
-          }
-        },
-        "completeness_attestation": {
-          "type": "string",
-          "description": "Signed statement of the coverage object by the venue"
-        }
+            "timestamp_authority": { "type": "string" } } },
+        "completeness_attestation": { "type": "string",
+          "description": "Signed statement of the coverage object by the venue" }
       }
     },
     "events": {
       "type": "array",
       "description": "Ordered record of the turn: inferences and boundary crossings interleaved in occurrence order.",
-      "items": { "oneOf": [{ "$ref": "#/$defs/inference" }, { "$ref": "#/$defs/boundary_event" }] }
+      "items": { "oneOf": [
+        { "$ref": "#/$defs/inference" },
+        { "$ref": "#/$defs/boundary_event" }
+      ] }
     }
   },
   "$defs": {
+
     "inference": {
       "type": "object",
       "required": ["id", "event", "kind", "routing"],
       "properties": {
         "id": { "type": "string" },
         "event": { "const": "inference" },
-        "kind": {
-          "enum": ["user-initiated", "internal-continuation"],
-          "description": "user-initiated = input includes new end-user content; full segments MUST. internal-continuation = loop step; segments SHOULD."
-        },
+        "kind": { "enum": ["user-initiated", "internal-continuation"],
+          "description": "user-initiated = input includes new end-user content; full segments MUST. internal-continuation = loop step; segments SHOULD." },
         "routing": { "$ref": "#/$defs/routing_record" },
-        "segments": {
-          "oneOf": [
-            { "type": "array", "items": { "$ref": "#/$defs/segment" } },
-            { "$ref": "#/$defs/segments_omitted" }
-          ]
-        },
+        "segments": { "oneOf": [
+          { "type": "array", "items": { "$ref": "#/$defs/segment" } },
+          { "$ref": "#/$defs/segments_omitted" }
+        ] },
         "steps": { "type": "array", "items": { "$ref": "#/$defs/step" } },
         "resolution": { "$ref": "#/$defs/resolution_report" }
       }
@@ -98,23 +81,17 @@
 
     "routing_record": {
       "type": "object",
-      "description": "MUST for every invocation the venue makes — the fill report lives here.",
+      "description": "MUST for every invocation the venue makes, the fill report lives here.",
       "required": ["bound", "fill"],
       "properties": {
-        "requested": {
-          "type": "string",
-          "description": "The directive text (or synthesized canonical route) that governed this invocation"
-        },
-        "bound": {
-          "type": "string",
-          "description": "Canonical pinned identifier actually invoked, e.g. model:anthropic/claude-opus-4-5@2026-05-01. Never unpinned (§6.2)."
-        },
+        "requested": { "type": "string",
+          "description": "The directive text (or synthesized canonical route) that governed this invocation" },
+        "bound": { "type": "string",
+          "description": "Canonical pinned identifier actually invoked, e.g. model:anthropic/claude-opus-4-5@2026-05-01. Never unpinned (§6.2)." },
         "policy": { "enum": ["strict", "partial", "best-effort"] },
-        "attempts": {
-          "type": "array",
+        "attempts": { "type": "array",
           "description": "Fallback-chain history, one entry per step tried, in order.",
-          "items": { "$ref": "#/$defs/attempt" }
-        },
+          "items": { "$ref": "#/$defs/attempt" } },
         "fill": { "type": "array", "items": { "$ref": "#/$defs/fill_entry" } },
         "budget": { "$ref": "#/$defs/budget_echo" }
       }
@@ -128,15 +105,12 @@
         "bound": { "type": "string", "description": "Canonical id if binding succeeded" },
         "outcome": { "enum": ["filled", "failed", "blocked"] },
         "codes": { "type": "array", "items": { "$ref": "#/$defs/failure_code" } },
-        "measured": {
-          "type": "object",
+        "measured": { "type": "object",
           "properties": {
             "cost_usd": { "type": "number" },
             "wall_time_ms": { "type": "integer" },
             "first_token_ms": { "type": "integer" },
-            "cancelled": { "type": "boolean" }
-          }
-        }
+            "cancelled": { "type": "boolean" } } }
       }
     },
 
@@ -144,48 +118,22 @@
       "type": "object",
       "required": ["req", "status"],
       "properties": {
-        "req": {
-          "type": "string",
-          "description": "entity | a parameter key | a budget key | an action"
-        },
+        "req": { "type": "string", "description": "entity | a parameter key | a budget key | an action" },
         "requested": {},
         "normalized": {},
         "applied": {},
-        "status": {
-          "enum": [
-            "filled",
-            "applied",
-            "translated",
-            "clamped",
-            "unsupported",
-            "ignored",
-            "refused"
-          ]
-        },
+        "status": { "enum": ["filled", "applied", "translated", "clamped", "unsupported", "ignored", "refused"] },
         "code": { "$ref": "#/$defs/failure_code" },
-        "mapping_rule": {
-          "type": "string",
-          "description": "e.g. vendor-profile/openai-2026-07 (§7.2)"
-        }
+        "mapping_rule": { "type": "string", "description": "e.g. vendor-profile/openai-2026-07 (§7.2)" }
       }
     },
 
     "failure_code": {
-      "enum": [
-        "ENTITY_NOT_FOUND",
-        "ENTITY_AMBIGUOUS",
-        "ENTITY_UNAUTHORIZED",
-        "PARAM_UNSUPPORTED",
-        "PARAM_CLAMPED",
-        "PARAM_IGNORED",
-        "BUDGET_PREFLIGHT_REJECTED",
-        "BUDGET_EXCEEDED",
-        "TIMEOUT_NOT_CANCELLED",
-        "DATA_POLICY_BLOCKED",
-        "SPAN_EXECUTION_UNSUPPORTED",
-        "VERSION_UNSUPPORTED",
-        "FALLBACK_EXHAUSTED"
-      ]
+      "enum": ["ENTITY_NOT_FOUND", "ENTITY_AMBIGUOUS", "ENTITY_UNAUTHORIZED",
+        "PARAM_UNSUPPORTED", "PARAM_CLAMPED", "PARAM_IGNORED",
+        "BUDGET_PREFLIGHT_REJECTED", "BUDGET_EXCEEDED", "TIMEOUT_NOT_CANCELLED",
+        "DATA_POLICY_BLOCKED", "SPAN_EXECUTION_UNSUPPORTED", "VERSION_UNSUPPORTED",
+        "FALLBACK_EXHAUSTED"]
     },
 
     "budget_echo": {
@@ -198,13 +146,9 @@
         "first_token_max_ms": { "type": "integer" },
         "cancellation": { "enum": ["required", "preferred", "unsupported"] },
         "scope": { "enum": ["attempt", "chain"] },
-        "set_by_authority": {
-          "enum": ["platform", "organization", "application", "user", "prompt"]
-        },
-        "measurement_profile": {
-          "type": "string",
-          "description": "Tariff/measurement profile id@version used for cost and latency accounting (OQ#12)"
-        }
+        "set_by_authority": { "enum": ["platform", "organization", "application", "user", "prompt"] },
+        "measurement_profile": { "type": "string",
+          "description": "Tariff/measurement profile id@version used for cost and latency accounting (OQ#12)" }
       }
     },
 
@@ -215,56 +159,34 @@
       "properties": {
         "i": { "type": "integer", "minimum": 0 },
         "content": { "$ref": "#/$defs/content" },
-        "step": {
-          "type": "string",
-          "description": "Provenance pointer (R2: MUST for injected segments)"
-        }
+        "step": { "type": "string",
+          "description": "Provenance pointer (R2: MUST for injected segments)" }
       }
     },
 
     "content": {
       "description": "D3-C: three-state union.",
       "oneOf": [
-        {
-          "type": "object",
-          "required": ["state", "text"],
-          "properties": { "state": { "const": "inline" }, "text": { "type": "string" } }
-        },
-        {
-          "type": "object",
-          "required": ["state", "sha256", "length", "handle"],
+        { "type": "object", "required": ["state", "text"],
+          "properties": { "state": { "const": "inline" }, "text": { "type": "string" } } },
+        { "type": "object", "required": ["state", "sha256", "length", "handle"],
           "properties": {
             "state": { "const": "external" },
             "sha256": { "type": "string" },
             "length": { "type": "integer" },
             "media": { "type": "string" },
             "handle": { "type": "string", "format": "uri" },
-            "materialized": {
-              "type": "object",
+            "materialized": { "type": "object",
               "description": "Present in materialized exports (R5): resolved content embedded at export time.",
-              "properties": {
-                "text": { "type": "string" },
-                "materialized_at": { "type": "string", "format": "date-time" }
-              }
-            }
-          }
-        },
-        {
-          "type": "object",
-          "required": ["state", "digest", "length_band", "tier"],
+              "properties": { "text": { "type": "string" },
+                "materialized_at": { "type": "string", "format": "date-time" } } } } },
+        { "type": "object", "required": ["state", "digest", "length_band", "tier"],
           "properties": {
             "state": { "const": "withheld" },
-            "digest": {
-              "type": "string",
-              "description": "Salted digest (transparency-floor mitigation, §12.2)"
-            },
+            "digest": { "type": "string", "description": "Salted digest (transparency-floor mitigation, §12.2)" },
             "length_band": { "enum": ["<1KB", "1-4KB", "4-16KB", "16-64KB", ">64KB"] },
-            "tier": {
-              "enum": ["developer", "operator", "oversight"],
-              "description": "Minimum tier at which content becomes visible"
-            }
-          }
-        }
+            "tier": { "enum": ["developer", "operator", "oversight"],
+              "description": "Minimum tier at which content becomes visible" } } }
       ]
     },
 
@@ -284,25 +206,11 @@
       "required": ["id", "kind"],
       "properties": {
         "id": { "type": "string" },
-        "kind": {
-          "enum": [
-            "user-content",
-            "context-inclusion",
-            "retrieval",
-            "skill-invocation",
-            "template-expansion",
-            "policy-injection",
-            "system-injection",
-            "tool-result-inclusion",
-            "loop-instruction",
-            "truncation",
-            "transformation"
-          ]
-        },
-        "via": {
-          "type": "string",
-          "description": "The directive or mechanism that caused this step"
-        },
+        "kind": { "enum": ["user-content", "context-inclusion", "retrieval",
+          "skill-invocation", "template-expansion", "policy-injection",
+          "system-injection", "tool-result-inclusion", "loop-instruction",
+          "truncation", "transformation"] },
+        "via": { "type": "string", "description": "The directive or mechanism that caused this step" },
         "of": { "type": "string", "description": "Canonical id of the entity expanded/retrieved" },
         "parent": { "type": "string" },
         "tier": { "enum": ["user", "developer", "operator", "oversight"] }
@@ -312,49 +220,27 @@
     "resolution_report": {
       "type": "object",
       "properties": {
-        "bindings": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["ref", "bound", "rule"],
-            "properties": {
-              "ref": { "type": "string" },
-              "bound": { "type": "string" },
-              "rule": {
-                "type": "string",
-                "description": "Which resolution/precedence rule decided this binding"
-              },
-              "ambiguity_surfaced": { "type": "boolean" }
-            }
-          }
-        },
-        "refusals": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["ref", "code"],
-            "properties": {
-              "ref": { "type": "string" },
-              "code": { "$ref": "#/$defs/failure_code" },
-              "authority": {
-                "enum": ["platform", "organization", "application", "user"],
-                "description": "Which authority level's envelope refused it — the user learns authority, not availability, was the reason (§10.3)"
-              },
-              "policy_decision_id": {
-                "type": "string",
-                "description": "Opaque PDP decision reference (§10.4)"
-              },
-              "policy_bundle": {
-                "type": "string",
-                "description": "Policy bundle identifier@version in force (independently reconcilable without revealing policy text)"
-              },
-              "policy_engine": {
-                "type": "string",
-                "description": "Deciding engine identifier, e.g. opa@0.68 / cedar@4"
-              }
-            }
-          }
-        }
+        "bindings": { "type": "array", "items": { "type": "object",
+          "required": ["ref", "bound", "rule"],
+          "properties": {
+            "ref": { "type": "string" },
+            "bound": { "type": "string" },
+            "rule": { "type": "string",
+              "description": "Which resolution/precedence rule decided this binding" },
+            "ambiguity_surfaced": { "type": "boolean" } } } },
+        "refusals": { "type": "array", "items": { "type": "object",
+          "required": ["ref", "code"],
+          "properties": {
+            "ref": { "type": "string" },
+            "code": { "$ref": "#/$defs/failure_code" },
+            "authority": { "enum": ["platform", "organization", "application", "user"],
+              "description": "Which authority level's envelope refused it, the user learns authority, not availability, was the reason (§10.3)" },
+            "policy_decision_id": { "type": "string",
+              "description": "Opaque PDP decision reference (§10.4)" },
+            "policy_bundle": { "type": "string",
+              "description": "Policy bundle identifier@version in force (independently reconcilable without revealing policy text)" },
+            "policy_engine": { "type": "string",
+              "description": "Deciding engine identifier, e.g. opa@0.68 / cedar@4" } } } }
       }
     },
 
@@ -368,16 +254,12 @@
         "tool": { "type": "string", "description": "Canonical pinned tool id" },
         "sent": { "$ref": "#/$defs/content" },
         "received": { "$ref": "#/$defs/content" },
-        "fill": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/fill_entry" },
-          "description": "Fill report for the tool invocation itself"
-        },
+        "fill": { "type": "array", "items": { "$ref": "#/$defs/fill_entry" },
+          "description": "Fill report for the tool invocation itself" },
         "internal": { "const": "outside-trace-perimeter" },
-        "measured": {
-          "type": "object",
-          "properties": { "wall_time_ms": { "type": "integer" }, "cost_usd": { "type": "number" } }
-        }
+        "measured": { "type": "object",
+          "properties": { "wall_time_ms": { "type": "integer" },
+            "cost_usd": { "type": "number" } } }
       }
     }
   }

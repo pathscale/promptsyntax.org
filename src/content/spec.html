@@ -1,6 +1,6 @@
-<div class="doc-banner">Draft v0.2.1 — pre-implementation, not yet stable. This is a proposal seeking scrutiny. The normative source is the Markdown/PDF in the repository.</div><h1 id="prompt-syntax-ps-specification-draft-v0.2">Prompt Syntax (PS) —
+<div class="doc-banner">Draft v0.2.1: pre-implementation, not yet stable. This is a proposal seeking scrutiny. The normative source is the Markdown/PDF in the repository.</div><h1 id="prompt-syntax-ps-specification-draft-v0.2">Prompt Syntax (PS),
 Specification Draft v0.2</h1>
-<p><strong>Status:</strong> Working draft — design decisions marked ✅
+<p><strong>Status:</strong> Working draft, design decisions marked ✅
 (settled), 🔶 (proposed, awaiting confirmation), ❓ (open question)
 <strong>Editors:</strong> [author], with drafting assistance
 <strong>Last updated:</strong> 2026-07-19</p>
@@ -24,14 +24,14 @@ portable execution</em>.</p>
 <strong>authorized prompt-execution intent</strong>, together with a
 conformance protocol describing how that intent was resolved and
 fulfilled. Prompts remain natural language with embedded <em>syntax
-islands</em> — directives that give users <strong>routing
+islands</em>, directives that give users <strong>routing
 control</strong> (deterministic, <em>authority-bounded</em> selection of
 models, tools, skills, and context) and <strong>routing
 transparency</strong> (an inspectable record of assembly, resolution,
 and fulfillment: the <strong>Prompt Trace</strong>). PS defines a
 grammar, resolution semantics, an authority model, and a conformance
 contract; it does not define presentation UX, and it promises portable
-<em>expression of intent</em> — never portable execution.</p>
+<em>expression of intent</em>, never portable execution.</p>
 <h2 id="terminology">2. Terminology</h2>
 <table>
 <colgroup>
@@ -39,88 +39,88 @@ contract; it does not define presentation UX, and it promises portable
 <col style="width: 50%" />
 </colgroup>
 <thead>
-<tr class="header">
+<tr>
 <th>Term</th>
 <th>Definition</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><strong>Directive</strong></td>
 <td>A PS construct embedded in a prompt that requests assembly, routing,
 or execution behavior.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>Syntax island</strong></td>
 <td>A directive occurrence inside otherwise-plain natural language.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>Entity</strong></td>
 <td>A referenceable resource: model, agent, plugin/connector, tool,
 skill, file, context source.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>Canonical identifier</strong></td>
 <td>The immutable, versioned, vendor-qualified form of an entity
 reference (§6.2).</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>Resolver</strong></td>
 <td>The defined procedure mapping an entity reference to a canonical
 identifier.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>Authority level</strong></td>
 <td>The governance tier a configuration value originates from
 (§10.1).</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>Capability envelope</strong></td>
 <td>The set of permissions and resources granted by all higher authority
 levels; directives operate only within it.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>Fulfillment policy</strong></td>
 <td>The directive’s contract for unsatisfiable requirements:
 <code>strict</code> / <code>partial</code> / <code>best-effort</code>
 (§8).</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>Fill report</strong></td>
 <td>The per-requirement requested → normalized → applied record, with
 reason codes (§8.2).</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>Budget</strong></td>
 <td>A venue-enforced execution bound with defined measurement points
 (§9.1).</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>Fallback chain</strong></td>
 <td>An ordered list of routing steps tried on fill failure; the only
 contingency construct in PS (§9.2).</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>Canonical form</strong></td>
 <td>The fully explicit representation every PS prompt compiles to
 (§11).</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>Prompt Trace</strong></td>
 <td>The tiered, machine-readable artifact recording assembly,
 resolution, and fulfillment (§12).</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>Trace tier</strong></td>
 <td>A defined visibility level of the trace: user / developer / operator
 / oversight (§12.2).</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>Routing control</strong></td>
-<td>The property that directives <em>guarantee</em> what runs — within
-the capability envelope — rather than the model inferring intent.</td>
+<td>The property that directives <em>guarantee</em> what runs, within
+the capability envelope, rather than the model inferring intent.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>Routing transparency</strong></td>
 <td>The property that the user can inspect, at their tier, what will run
 (pre-execution) and what ran (post-execution).</td>
@@ -141,7 +141,7 @@ equivalence is a property of the grammar.</li>
 accidentally become directives; only reserved namespaces are live.</li>
 <li><strong>Contract, not presentation.</strong> The spec mandates
 information availability (the Prompt Trace); presentation is
-implementation-defined — with one exception (§13, island
+implementation-defined, with one exception (§13, island
 highlighting).</li>
 <li><strong>Minimal reserved surface.</strong> One live tag namespace
 (<code>ps</code>), two sigils (<code>@</code>, <code>/</code>), one
@@ -171,31 +171,31 @@ grammar is stable for years; parameters and runtimes are not).</p>
 <col style="width: 33%" />
 </colgroup>
 <thead>
-<tr class="header">
+<tr>
 <th>Layer</th>
 <th>Contents</th>
 <th>Stability</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><strong>PS/Core</strong></td>
 <td>Grammar, escaping, scopes, canonical references, round-trip
 property</td>
 <td>High</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>PS/Capabilities</strong></td>
 <td>Entity discovery, capability documents, parameter registries,
 authorization surface</td>
 <td>Medium</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>PS/Execution</strong></td>
 <td>Fulfillment policies, budgets, fallback chains</td>
 <td>Medium</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>PS/Trace</strong></td>
 <td>Trace schema, tiers, fill reports, failure codes</td>
 <td>Medium-high</td>
@@ -213,7 +213,7 @@ authorization surface</td>
 <col style="width: 25%" />
 </colgroup>
 <thead>
-<tr class="header">
+<tr>
 <th>Scope</th>
 <th>Syntax</th>
 <th>Applies to</th>
@@ -221,19 +221,19 @@ authorization surface</td>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><strong>Point</strong></td>
 <td><code>@</code> entity reference; <code>/</code> action</td>
 <td>The whole message (routing) or the reference site (context)</td>
 <td><code>@opus(temperature: 0.2) Summarize this. /concise</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>Span</strong></td>
 <td>Reserved tag <code>&lt;ps …&gt;…&lt;/ps&gt;</code></td>
 <td>The enclosed text region</td>
 <td><code>&lt;ps @file:glossary.md&gt;use these terms&lt;/ps&gt;</code></td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>Document</strong></td>
 <td>Frontmatter fence <code>---ps … ---</code></td>
 <td>The entire prompt; the strict form</td>
@@ -248,7 +248,7 @@ scope (principle 7): <code>&lt;ps @ref …&gt;</code> casual;
 (compiler-emitted).</p>
 <h3
 id="v0.1v0.2-span-restriction-v0.2-was-open-settled-per-external-review">5.2
-v0.1/v0.2 span restriction ✅ <em>(v0.2 — was open; settled per external
+v0.1/v0.2 span restriction ✅ <em>(v0.2, was open; settled per external
 review)</em></h3>
 <p>Spans are restricted to: <strong>context inclusion, local instruction
 scope, tool availability, visibility/provenance marking</strong>.
@@ -296,7 +296,7 @@ bindings → project config → <code>model</code> → <code>agent</code> →
 <code>plugin</code> → <code>tool</code> → <code>skill</code> →
 <code>file</code>).</em></p>
 <h3 id="environment-relative-parsing-documented-limitation-v0.2">6.4
-Environment-relative parsing — documented limitation ✅
+Environment-relative parsing, documented limitation ✅
 <em>(v0.2)</em></h3>
 <p>Because bare-name recognition depends on installed entities,
 identical text may parse differently across venues. PS guarantees a
@@ -328,7 +328,7 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="
 they cannot honor rather than degrade silently.</p>
 <h3
 id="parameters-normalization-not-passthrough-v0.2-replaces-v0.1-passthrough">7.2
-Parameters: normalization, not passthrough ✅ <em>(v0.2 — replaces v0.1
+Parameters: normalization, not passthrough ✅ <em>(v0.2, replaces v0.1
 passthrough)</em></h3>
 <p>There is no stable universal parameter registry. PS defines a small
 <strong>normalized core</strong> (<code>temperature</code>,
@@ -343,7 +343,7 @@ class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;status&quot;</span><span class="fu">:</span>     <span class="st">&quot;translated&quot;</span><span class="fu">,</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;mapping_rule&quot;</span><span class="fu">:</span> <span class="st">&quot;vendor-profile/openai-2026-07&quot;</span> <span class="fu">}</span></span></code></pre></div>
 <p>Status is one of
-<code>applied | translated | clamped | unsupported | ignored</code> —
+<code>applied | translated | clamped | unsupported | ignored</code>,
 each with a defined fill consequence under the directive’s policy.
 Undocumented passthrough is non-conformant: it creates the appearance of
 control without semantics.</p>
@@ -360,35 +360,35 @@ order; the venue fills it or reports why not.</em></p>
 <col style="width: 33%" />
 </colgroup>
 <thead>
-<tr class="header">
+<tr>
 <th>Policy</th>
 <th>Trading analog</th>
 <th>Semantics</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>strict</code></td>
 <td>Fill-or-Kill</td>
 <td>Every requirement satisfied exactly, or the directive fails
 pre-execution. No silent substitution.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>partial</code></td>
 <td>Immediate-or-Cancel</td>
 <td>Fill what can be filled; every drop recorded.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>best-effort</code></td>
 <td>Market order</td>
 <td>Venue discretion; all degradations still recorded.</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Default (✅): split</strong> — <code>strict</code> on entity
+<p><strong>Default (✅): split</strong>, <code>strict</code> on entity
 binding (<code>@opus</code> means opus, never a silent substitute),
 <code>partial</code> on parameters (unsupported values drop with a
-fill-report entry). <strong><code>!</code> semantics (✅ v0.2.1 —
+fill-report entry). <strong><code>!</code> semantics (✅ v0.2.1,
 clarified per external review):</strong> since entity binding is already
 strict by default, <code>!</code> escalates the <strong>entire
 directive</strong> to strict: every parameter becomes a hard requirement
@@ -400,7 +400,7 @@ of a reported drop. <code>@opus</code> = strict entity, partial params;
 (frontmatter; document level = all-or-none). ❓ <em>Open
 (severity/consent): degradation-severity classes and an optional
 <code>confirm-on-degrade</code> preflight mode for consequential
-settings — a post-hoc report is not consent.</em></p>
+settings, a post-hoc report is not consent.</em></p>
 <h3 id="failure-codes-v0.2">8.2 Failure codes ✅ <em>(v0.2)</em></h3>
 <p>Fill failures and degradations carry standardized codes (extensible
 registry, <code>PS_</code>-free core set):</p>
@@ -411,7 +411,7 @@ DATA_POLICY_BLOCKED     SPAN_EXECUTION_UNSUPPORTED  VERSION_UNSUPPORTED
 FALLBACK_EXHAUSTED</code></pre>
 <h2 id="budgets-and-fallback-chains-psexecution">9. Budgets and fallback
 chains <em>(PS/Execution)</em></h2>
-<h3 id="budgets-v0.2-replaces-generic-limit">9.1 Budgets ✅ <em>(v0.2 —
+<h3 id="budgets-v0.2-replaces-generic-limit">9.1 Budgets ✅ <em>(v0.2,
 replaces generic <code>limit()</code>)</em></h3>
 <p><code>limit(…)</code> remains as syntax sugar, expanding to a
 <strong>budget</strong> with defined measurement points:</p>
@@ -428,7 +428,7 @@ enforcement capability in the capability document (§7.1); a directive
 requiring <code>cancellation: required</code> fails pre-flight
 (<code>BUDGET_PREFLIGHT_REJECTED</code>) against a venue declaring
 <code>unsupported</code>. A timeout the venue could not cancel is
-reported as <code>TIMEOUT_NOT_CANCELLED</code> with observed cost —
+reported as <code>TIMEOUT_NOT_CANCELLED</code> with observed cost,
 enforcement is honest-by-declaration, never pretended. Implementations
 MUST NOT silently degrade output (e.g., truncate) to satisfy a budget.
 <code>scope: chain</code> bounds the <strong>total</strong> across
@@ -437,7 +437,7 @@ fallback attempts <em>(resolves v0.1 open question)</em>.</p>
 id="fallback-chains-structure-settled-authorization-rule-added-in-v0.2">9.2
 Fallback chains ✅ <em>(structure settled; authorization rule added in
 v0.2)</em></h3>
-<p>PS has <strong>no general conditionals</strong> — no predicates over
+<p>PS has <strong>no general conditionals</strong>, no predicates over
 content, no branching on output (delegated to orchestration frameworks).
 The only re-routing trigger is a <strong>fill failure</strong>.
 Precedent: CSS font stacks; trading’s contingent orders.</p>
@@ -450,14 +450,14 @@ terminal ::= &quot;fail&quot; | &quot;ask&quot;</code></pre>
 <p>First successful fill wins; the fill report records every attempt
 with outcome, codes, and measured cost/latency. <strong>Authorization
 rule (✅ v0.2):</strong> every step is checked against the same
-capability envelope — data classification, consent, allowlists,
+capability envelope, data classification, consent, allowlists,
 residency, retention, connector authorization. A failed primary route
 never makes a prohibited secondary route permissible; a cross-provider
 fallback is a data-governance decision, not merely an availability
 decision, and blocked steps report <code>DATA_POLICY_BLOCKED</code>.</p>
 <h2
 id="authority-and-precedence-v0.2-replaces-v0.1-single-chain-critical-fix">10.
-Authority and precedence ✅ <em>(v0.2 — replaces v0.1 single chain;
+Authority and precedence ✅ <em>(v0.2, replaces v0.1 single chain;
 critical fix)</em></h2>
 <p>Precedence has <strong>two independent dimensions</strong>. The v0.1
 single chain (<code>system &lt; … &lt; span</code>) was unsafe: read
@@ -479,7 +479,7 @@ level)</h3>
 the capability envelope granted by higher-authority policy.</strong> An
 out-of-envelope directive is a fill failure
 (<code>ENTITY_UNAUTHORIZED</code> / <code>DATA_POLICY_BLOCKED</code>),
-never a silent ignore — the user always learns that authority, not
+never a silent ignore, the user always learns that authority, not
 availability, was the reason.</p>
 </blockquote>
 <p>Every envelope constraint that suppressed a directive is recorded in
@@ -494,11 +494,11 @@ substitution, and org-policy denials alike). PS requires the reason be
 <strong>typed</strong> in the trace, distinguishing at minimum:
 availability (entity unavailable/capacity), <strong>safety</strong>
 (<code>SAFETY_BLOCKED</code>, with a category and the provenance of the
-<em>triggering segment</em> — which may be a retrieved document or tool
+<em>triggering segment</em>, which may be a retrieved document or tool
 result, not the user’s message), org/data policy
 (<code>DATA_POLICY_BLOCKED</code>), and authorization
 (<code>ENTITY_UNAUTHORIZED</code>). The receipt names the reason, the
-deciding authority, and — normatively — an available <strong>recourse
+deciding authority, and, normatively, an available <strong>recourse
 path</strong> where one exists (appeal, verification program, feedback
 channel).</p>
 <p><strong>Verified principal attributes (the credential-informed
@@ -513,11 +513,11 @@ content. The signed attribute is an <strong>input to</strong> the
 authority-holder’s decision, never a self-granted capability; the
 decision and the attributes it relied on (by reference, not by
 disclosing the credential) are recorded. Verified-attribute policies
-MUST NOT be mandated by PS — identity-gating carries chilling, privacy,
+MUST NOT be mandated by PS, identity-gating carries chilling, privacy,
 and gatekeeping costs, and whether to use the mechanism is contestable
 policy left to the authority. <em>(Existing practice: providers already
 run verification programs that widen safeguards for verified
-defensive-security researchers — PS standardizes the seam, not the
+defensive-security researchers, PS standardizes the seam, not the
 program.)</em></p>
 <p>❓ <em>Open (companion-paper territory): appeal-loop semantics;
 credential formats and privacy-preserving attribute proofs; interaction
@@ -525,33 +525,32 @@ of verified envelopes with the oversight tier.</em></p>
 <h3 id="policy-system-integration-peppdp-v0.2.1">10.4 Policy system
 integration (PEP/PDP) 🔶 <em>(v0.2.1)</em></h3>
 <p>PS does not define a policy language, and it adds <strong>no new
-policy decisions</strong> — the organization keeps its existing engine.
+policy decisions</strong>, the organization keeps its existing engine.
 What PS adds is what the existing control stack cannot produce: (1)
-<strong>prompt-level decision semantics</strong> — network- and
-key-layer controls are blind inside the request; PS’s decision requests
-carry the entities, classifications, and fallback routes a meaningful
-policy needs to see; and (2) <strong>per-request enforcement
-evidence</strong> — today an admin setting is a request to the vendor
-with no proof it fired; typed refusals and fill reports make every
-policy outcome verifiable. PS defines the <strong>enforcement
-seam</strong>: the PS runtime is a <em>policy enforcement point</em>
-(PEP); the organization’s policy engine is the <em>policy decision
-point</em> (PDP), attached at the org/workspace authority level. At
-resolution time, for each directive, the PEP submits a decision request
-— <strong>principal</strong> (identity/groups from the IdP),
-<strong>entity reference</strong> (canonical identifier),
-<strong>context labels</strong> (data classification of referenced
-files/sources), <strong>jurisdiction/residency</strong> — and the PDP
-answers: in-envelope or refused (with code), applicable budget,
-permitted egress set for fallback steps. Decisions and refusals are
-recorded in the trace (policy hits, not policy content).
-<strong>Bindings</strong> to concrete engines (OPA/Rego, Cedar,
-XACML-style) are external versioned documents, declared in the
-capability document.</p>
-<p><strong>Worked example (🔶 v0.2.1 — illustrative; decision-interface
+<strong>prompt-level decision semantics</strong>, network- and key-layer
+controls are blind inside the request; PS’s decision requests carry the
+entities, classifications, and fallback routes a meaningful policy needs
+to see; and (2) <strong>per-request enforcement evidence</strong>, today
+an admin setting is a request to the vendor with no proof it fired;
+typed refusals and fill reports make every policy outcome verifiable. PS
+defines the <strong>enforcement seam</strong>: the PS runtime is a
+<em>policy enforcement point</em> (PEP); the organization’s policy
+engine is the <em>policy decision point</em> (PDP), attached at the
+org/workspace authority level. At resolution time, for each directive,
+the PEP submits a decision request, <strong>principal</strong>
+(identity/groups from the IdP), <strong>entity reference</strong>
+(canonical identifier), <strong>context labels</strong> (data
+classification of referenced files/sources),
+<strong>jurisdiction/residency</strong>, and the PDP answers:
+in-envelope or refused (with code), applicable budget, permitted egress
+set for fallback steps. Decisions and refusals are recorded in the trace
+(policy hits, not policy content). <strong>Bindings</strong> to concrete
+engines (OPA/Rego, Cedar, XACML-style) are external versioned documents,
+declared in the capability document.</p>
+<p><strong>Worked example (🔶 v0.2.1, illustrative; decision-interface
 schema remains OQ#10).</strong> User input:
 <code>@opus! Summarize @file:q3-acquisition-memo.pdf else @gemini-flash</code>.
-At resolution time — before assembly, before any call — the PEP submits
+At resolution time, before assembly, before any call, the PEP submits
 per-binding decision requests to the org’s existing engine:</p>
 <div class="sourceCode" id="cb11"><pre
 class="sourceCode json"><code class="sourceCode json"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;principal&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;user:meas@acme&quot;</span><span class="fu">,</span> <span class="dt">&quot;groups&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;finance&quot;</span><span class="ot">]</span> <span class="fu">},</span></span>
@@ -567,25 +566,25 @@ class="sourceCode json"><code class="sourceCode json"><span id="cb11-1"><a href=
 sources route only to EU-approved models</em>), the PDP returns per-step
 decisions: step 1 <code>permit</code>, step 2 <code>deny(egress)</code>.
 The PEP fills step 1 and marks step 2 <code>DATA_POLICY_BLOCKED</code>
-<strong>before any failure could trigger it</strong> — the chain is
-judged as one decision, not discovered call-by-call — and the trace
+<strong>before any failure could trigger it</strong>, the chain is
+judged as one decision, not discovered call-by-call, and the trace
 records the <code>policy_decision_id</code>s.</p>
 <p><strong>Why a call-level gateway PDP is not equivalent.</strong>
 Gateways with policy sidecars can and do filter API calls today. But a
 call-level decision point sees flattened text and a model name; it
-cannot see (1) <strong>typed references before flattening</strong> — by
+cannot see (1) <strong>typed references before flattening</strong>, by
 the time the gateway inspects the call, the confidential file is
 extracted text and its classification label died in assembly, whereas PS
 decides on the reference while the label exists; (2) <strong>the
-chain</strong> — the fallback call does not exist yet at gateway time,
+chain</strong>, the fallback call does not exist yet at gateway time,
 and when it fires it is a fresh call that may individually pass; (3)
-<strong>injected expansion</strong> — which skill added what, or
+<strong>injected expansion</strong>, which skill added what, or
 prompt-content attempts at tool-access escalation (inert-content rule,
-§13); (4) <strong>its own effectiveness</strong> — a gateway drop is
+§13); (4) <strong>its own effectiveness</strong>, a gateway drop is
 silent; a PS refusal is typed, user-visible, and receipted. The layers
 compose: gateways remain useful as defense in depth below the PS
 seam.</p>
-<p><em>Note — the externalization pattern:</em> vendor profiles (§7.2),
+<p><em>Note, the externalization pattern:</em> vendor profiles (§7.2),
 oversight profiles (§12.3), and policy bindings (§10.4) are the same
 architectural move: the core spec defines interface + semantics;
 stakeholder-specific mappings live outside and version independently.
@@ -633,7 +632,7 @@ expansion tree (R2, R3). Source-map / W3C-PROV pattern.</li>
 Routing record + fill report MUST for every venue invocation; full
 segments MUST for user-initiated inferences, SHOULD for internal
 continuations (absence <em>declared</em> via <code>coverage</code>,
-never silent — R6). Everything crossing the venue boundary (tool I/O)
+never silent, R6). Everything crossing the venue boundary (tool I/O)
 MUST be recorded; tool internals are explicitly outside the
 perimeter.</li>
 <li><strong>Content (D3): hybrid three-state union.</strong>
@@ -641,7 +640,7 @@ perimeter.</li>
 <code>external</code> (sha256 + length + handle; dedups across loop
 steps) | <code>withheld</code> (salted digest + length band +
 minimum-visible tier). Oversight-tier exports MUST support
-<strong>materialized mode</strong> — external content resolved and
+<strong>materialized mode</strong>, external content resolved and
 embedded at export time, with blob retention governed at oversight scope
 (R5).</li>
 </ul>
@@ -652,7 +651,7 @@ normalization records, per-attempt outcomes with measured cost/latency).
 <strong>SHOULD:</strong> dry-run (pre-execution) trace; stable segment
 IDs for diffing. <strong>MAY:</strong> any presentation.</p>
 <h3 id="visibility-tiers-v0.2-replaces-flat-redaction">12.2 Visibility
-tiers ✅ <em>(v0.2 — replaces flat redaction)</em></h3>
+tiers ✅ <em>(v0.2, replaces flat redaction)</em></h3>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -660,30 +659,30 @@ tiers ✅ <em>(v0.2 — replaces flat redaction)</em></h3>
 <col style="width: 33%" />
 </colgroup>
 <thead>
-<tr class="header">
+<tr>
 <th>Tier</th>
 <th>Audience</th>
 <th>Contents</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><strong>User</strong></td>
 <td>End user</td>
 <td>User-visible sources, selected tools, applied parameters, typed
 envelope refusals, fill report</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>Developer</strong></td>
 <td>Application owner</td>
 <td>+ application instructions, tool definitions, runtime events</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>Operator</strong></td>
 <td>Platform personnel</td>
 <td>+ infrastructure and policy diagnostics</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>Oversight</strong></td>
 <td>Auditors &amp; regulators (via profiles, §12.3)</td>
 <td>Evidence-grade export per the applicable oversight profile</td>
@@ -695,9 +694,9 @@ complete with respect to content at or below that tier’s authority;
 higher-tier content appears as a <strong>typed, sized
 placeholder</strong>
 (<code>{type: system_policy, tier: operator}</code>). ❓ <em>Open (“the
-transparency floor”): what placeholder detail is safe — exact lengths
-and content hashes can leak (dictionary attacks against candidate
-texts); banding and salted digests are candidate mitigations. This is a
+transparency floor”): what placeholder detail is safe, exact lengths and
+content hashes can leak (dictionary attacks against candidate texts);
+banding and salted digests are candidate mitigations. This is a
 negotiation between auditability and confidentiality, flagged as a
 research question.</em> Trace availability interacts with venue
 data-retention configuration; the capability document declares supported
@@ -711,9 +710,9 @@ compelled by law from <strong>above platform policy</strong> (§10 note
 below). Regulatory requirements are jurisdictional, sectoral, and
 mutually conflicting (e.g., EU AI Act Art. 12 automatic record-keeping
 vs. GDPR minimization vs. WORM-retention financial rules), and they
-demand an evidentiary standard — tamper-evidence, authenticity, chain of
-custody (contributing to, not constituting, legal non-repudiation) —
-that internal audit does not.</p>
+demand an evidentiary standard, tamper-evidence, authenticity, chain of
+custody (contributing to, not constituting, legal non-repudiation), that
+internal audit does not.</p>
 <p>PS therefore specifies no jurisdiction’s rules. Instead:</p>
 <ul>
 <li><strong>Evidence substrate (PS/Trace core).</strong> Properties any
@@ -725,37 +724,36 @@ the venue claims, signed); <strong>signed sequence numbers with explicit
 gap records</strong> (an omitted event leaves a visible hole, not
 silence); trusted timestamps (SHOULD); retention and residency metadata
 fields (MUST when the oversight tier is supported); <strong>provable
-redaction</strong> — a withheld segment’s existence, kind, and timing
-are demonstrable without revealing content; the fully
-<strong>materialized export</strong> (§ Decision 3) with blob retention
-governed at oversight scope. Because a venue-produced trace is
-self-asserted, profiles MAY additionally require independent trust
-mechanisms: append-only transparency logs, cross-reconciliation against
-gateway or billing records, independently operated collectors, or remote
-attestation.</li>
+redaction</strong>, a withheld segment’s existence, kind, and timing are
+demonstrable without revealing content; the fully <strong>materialized
+export</strong> (§ Decision 3) with blob retention governed at oversight
+scope. Because a venue-produced trace is self-asserted, profiles MAY
+additionally require independent trust mechanisms: append-only
+transparency logs, cross-reconciliation against gateway or billing
+records, independently operated collectors, or remote attestation.</li>
 <li><strong>Oversight profiles (external documents).</strong>
 Jurisdiction- or framework-specific mappings (e.g., an EU-AI-Act
 profile, a SOC 2 profile) declaring which substrate properties are MUST
 and with what parameters (retention period, residency, signature
-regime). Profiles are versioned and maintained outside the core spec —
+regime). Profiles are versioned and maintained outside the core spec,
 the PDF/A / FHIR national-profile / OTel semantic-convention pattern.
 The capability document declares supported profiles.</li>
 </ul>
 <p><strong>Authority note (amends §10.1):</strong> the authority ladder
-is crowned by an acknowledged but externally governed level — <em>law
-and regulation</em> — above platform policy. Non-escalation continues to
-bind prompt content; disclosure obligations, however, may be compelled
-from this level, making the transparency floor (§12.2)
+is crowned by an acknowledged but externally governed level, <em>law and
+regulation</em>, above platform policy. Non-escalation continues to bind
+prompt content; disclosure obligations, however, may be compelled from
+this level, making the transparency floor (§12.2)
 <strong>authority-relative</strong>: content a venue may withhold at the
 user tier can be compellable at the oversight tier under an applicable
 profile.</p>
 <h2 id="content-safety-and-input-marking">13. Content safety and input
 marking ✅</h2>
 <ul>
-<li><strong>Provenance-typed parsing (inert content) ✅ <em>(v0.2.1 —
+<li><strong>Provenance-typed parsing (inert content) ✅ <em>(v0.2.1,
 security-critical, from external review)</em>:</strong> Only explicitly
-designated <strong>authoring segments</strong> — text the principal
-typed or an authority-checked surface produced as PS — are parsed for
+designated <strong>authoring segments</strong>, text the principal typed
+or an authority-checked surface produced as PS, are parsed for
 directives. Retrieved documents, file contents, tool results, quoted
 messages, and model-generated text are typed <strong>inert</strong>:
 PS-shaped text inside them (e.g., a document containing
@@ -767,7 +765,7 @@ would be a prompt-injection and capability-escalation surface.</li>
 <li><strong>The parameterization principle ✅
 <em>(v0.2.1)</em>:</strong> security rests on provenance, never on
 escaping. PS is parsed only at the interface layer, only over authored
-segments — models never execute PS, so inert content is never “escaped
+segments, models never execute PS, so inert content is never “escaped
 for safety”; it is never parsed at all. Content inclusion is <strong>by
 reference</strong> (canonical id + digest), the discipline that ended
 SQL injection: data is never concatenated into the command channel.
@@ -775,14 +773,14 @@ Escapes (<code>\@</code>, <code>\/</code>, fences) exist solely as
 authoring ergonomics for deliberate literals; no security property may
 depend on them.</li>
 <li><strong>Inner content and nesting ✅ <em>(v0.2.1)</em>:</strong> a
-span’s inner prose is authored text — islands within it parse normally;
+span’s inner prose is authored text, islands within it parse normally;
 content <em>resolved into</em> a span via its references remains inert.
 Canonical-form serialization MUST carry content segments by reference or
 in typed data fields, never spliced into directive text, so
 serialize-then-recompile cannot promote inert content (round-trip
 safety). Nested-span conflict semantics: pending conflict table (OQ).
 <strong>Model-generated PS</strong> (including the reification layer’s
-proposed strict form) is inert until explicitly accepted by the user —
+proposed strict form) is inert until explicitly accepted by the user,
 reification acceptance is the archetypal authority-checked promotion,
 and the promotion event is recorded in the trace.</li>
 <li>Only the <code>ps</code> tag namespace is live; all other
@@ -792,7 +790,7 @@ resolvable or qualified name; emails and paths do not parse.</li>
 <li>Escapes <code>\@</code>, <code>\/</code> and fenced code blocks are
 always content.</li>
 <li><strong>Island highlighting is MUST for interactive
-implementations</strong> <em>(v0.2 — upgraded from SHOULD per
+implementations</strong> <em>(v0.2, upgraded from SHOULD per
 review)</em>: every recognized directive is visually marked before
 submission. Non-interactive (API) callers use dry-run traces for the
 same guarantee.</li>
@@ -808,24 +806,24 @@ on keyboards worldwide; parsers MUST treat full-width forms (U+FF20
 <code>＠</code>, U+FF0F <code>／</code>), commonly produced by CJK input
 methods, as equivalent to their ASCII forms.</li>
 <li><strong>Unicode identifiers.</strong> Entity names follow Unicode
-identifier rules (UAX #31) with NFC normalization —
+identifier rules (UAX #31) with NFC normalization,
 <code>@file:របាយការណ៍.md</code> is valid. Namespace keywords, policy
 names, and <code>else</code> remain English in the <strong>canonical
 form</strong> (the portability lesson of Excel’s localized function
 names: localized <em>canonical</em> syntax destroys portability).
 Implementations MAY accept localized input aliases for keywords and
-units; these compile to canonical form — internationalization rides the
+units; these compile to canonical form, internationalization rides the
 same casual→strict machinery as everything else, and the round-trip
 property applies.</li>
 <li><strong>Script-aware boundaries.</strong> The “word boundary before
 a sigil” rule is defined by Unicode segmentation (UAX #29), not ASCII
-<code>\b</code> — scripts without inter-word spaces (Khmer, Thai,
+<code>\b</code>, scripts without inter-word spaces (Khmer, Thai,
 Japanese, Chinese) MUST still get correct island detection. Conformance
 test corpora MUST include non-spacing-script cases.</li>
 <li><strong>Bidirectional text safety.</strong> In RTL contexts (Arabic,
 Hebrew), editors SHOULD wrap islands in bidi isolates (FSI…PDI) for
 stable rendering. Security-normative: parsers MUST reject or neutralize
-bidi control characters <em>inside</em> directive islands — Trojan
+bidi control characters <em>inside</em> directive islands, Trojan
 Source-style reordering (CVE-2021-42574) could otherwise visually
 disguise what a directive does, defeating mandatory highlighting.</li>
 <li><strong>Confusables.</strong> Homoglyph references
@@ -851,45 +849,45 @@ conflate:</p>
 <col style="width: 50%" />
 </colgroup>
 <thead>
-<tr class="header">
+<tr>
 <th>Kind</th>
 <th>PS guarantees it?</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td><strong>Routing-contract determinism</strong> — parsing,
+<tr>
+<td><strong>Routing-contract determinism</strong>, parsing,
 canonicalization, resolution, and policy evaluation under a pinned
 environment; execution choices recorded</td>
-<td><strong>Yes</strong> (within envelope; this is PS’s claim — renamed
+<td><strong>Yes</strong> (within envelope; this is PS’s claim, renamed
 from “execution determinism” per external review: tool calls, races, and
 provider behavior are not deterministic and are <em>recorded</em>, not
 guaranteed)</td>
 </tr>
-<tr class="even">
-<td><strong>Generation determinism</strong> — identical output text</td>
+<tr>
+<td><strong>Generation determinism</strong>, identical output text</td>
 <td><strong>No</strong> (even with <code>seed</code>; vendor
 implementation varies)</td>
 </tr>
-<tr class="odd">
-<td><strong>Semantic reproducibility</strong> — same meaning across
+<tr>
+<td><strong>Semantic reproducibility</strong>, same meaning across
 runs/venues</td>
 <td><strong>No</strong> (retrieval, web content, tools, policies
 drift)</td>
 </tr>
 </tbody>
 </table>
-<p><code>@model:x(seed: 42)!</code> guarantees the seed was applied —
-not that the output is identical.</p>
+<p><code>@model:x(seed: 42)!</code> guarantees the seed was applied, not
+that the output is identical.</p>
 <h2 id="out-of-scope-delegated">15. Out of scope (delegated) ✅</h2>
-<p>Output/decoding constraints (LMQL, Guidance) — params/normalization
-is the integration point. Agent orchestration graphs (DSPy, LangGraph)
-and multi-model span execution — orchestration extension.
-Content-conditional branching — orchestration frameworks.</p>
+<p>Output/decoding constraints (LMQL, Guidance), params/normalization is
+the integration point. Agent orchestration graphs (DSPy, LangGraph) and
+multi-model span execution, orchestration extension. Content-conditional
+branching, orchestration frameworks.</p>
 <h2 id="open-questions-queue">16. Open questions queue</h2>
 <ol type="1">
 <li>Default namespace search order (§6.3).</li>
-<li><del>Trace JSON schema decisions</del> <strong>Resolved</strong> —
+<li><del>Trace JSON schema decisions</del> <strong>Resolved</strong>,
 flat+provenance / tiered turn scope / hybrid content confirmed;
 normative schema published (§12.1).</li>
 <li>The transparency floor: placeholder detail vs. leakage (§12.2).</li>
@@ -899,7 +897,7 @@ reification.</li>
 governance.</li>
 <li>Failure-code registry governance (who mints codes; vendor
 extensions).</li>
-<li>Vendor mapping table (Claude, ChatGPT, Cursor, Copilot, Gemini) —
+<li>Vendor mapping table (Claude, ChatGPT, Cursor, Copilot, Gemini),
 separate document.</li>
 <li>Orchestration extension scoping (multi-model spans, §5.2).</li>
 <li>Oversight-profile governance: who authors and maintains jurisdiction

@@ -4,7 +4,7 @@ Prompt Syntax is a draft specification. It gets better by being attacked.
 
 ## How to help
 - **Open an issue** for anything: an unclear rule, a missed attack, a vendor affordance PS can't represent, a use case that breaks the model.
-- **Design proposals** should use the decision-record format: context, options considered, choice, and — importantly — rejected alternatives with reasons. See `decisions/README.md`.
+- **Design proposals** should use the decision-record format: context, options considered, choice, and, importantly, rejected alternatives with reasons. See `decisions/README.md`.
 - **Implementers** are especially wanted. If you build a parser, resolver, or trace emitter, tell us where the spec was ambiguous.
 
 ## What we most need input on
