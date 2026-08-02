@@ -1,0 +1,664 @@
+{
+  "format_version": "0.1-draft",
+  "target": "trace-producer",
+  "implementation": {
+    "id": "promptsyntax-rs",
+    "version": "0.1.0",
+    "commit": "2789fac8acb810279ece887f46c025ef987ce0bf"
+  },
+  "results": [
+    {
+      "case_id": "producer-kept",
+      "conformant": true,
+      "diagnostics": [],
+      "output": {
+        "content_mode": "tiered",
+        "coverage": {
+          "assembly": "user-initiated-only",
+          "inline_threshold_bytes": 4096,
+          "profile": "trace-user-0-3-draft",
+          "routing": "complete"
+        },
+        "events": [
+          {
+            "event": "inference",
+            "id": "inference-kept-001",
+            "kind": "user-initiated",
+            "resolution": {
+              "bindings": [
+                {
+                  "ambiguity_surfaced": false,
+                  "bound": "model:example/atlas-4@2026-08-01",
+                  "ref": "@model:example/atlas-4@2026-08-01!",
+                  "rule": "qualified-canonical-reference"
+                }
+              ],
+              "refusals": []
+            },
+            "routing": {
+              "attempts": [
+                {
+                  "bound": "model:example/atlas-4@2026-08-01",
+                  "measured": {
+                    "cost_usd": 0.041,
+                    "wall_time_ms": 3210
+                  },
+                  "outcome": "filled",
+                  "ref": "@model:example/atlas-4@2026-08-01!"
+                }
+              ],
+              "bound": "model:example/atlas-4@2026-08-01",
+              "fill": [
+                {
+                  "applied": "model:example/atlas-4@2026-08-01",
+                  "kind": "entity",
+                  "policy": "strict",
+                  "requested": "model:example/atlas-4@2026-08-01",
+                  "status": "kept"
+                },
+                {
+                  "applied": 0.2,
+                  "kind": "parameter",
+                  "name": "temperature",
+                  "policy": "strict",
+                  "requested": 0.2,
+                  "status": "applied"
+                }
+              ],
+              "outcome": "invoked",
+              "policy": "strict",
+              "requested": "@model:example/atlas-4@2026-08-01!"
+            },
+            "segments": [
+              {
+                "content": {
+                  "state": "inline",
+                  "text": "Summarize the report."
+                },
+                "i": 0,
+                "id": "inference-kept-001:segment:0",
+                "origin": "user-authored",
+                "step": "inference-kept-001:step:user-content"
+              }
+            ],
+            "steps": [
+              {
+                "id": "inference-kept-001:step:user-content",
+                "kind": "user-content",
+                "tier": "user"
+              }
+            ]
+          }
+        ],
+        "mode": "executed",
+        "ps_trace": "0.3-draft",
+        "tier": "user",
+        "turn": "turn-producer-kept-001",
+        "venue": {
+          "capability_document": "https://venue.example/ps-capabilities/0.3.json",
+          "id": "venue:example",
+          "vendor_profile": "vendor-profile/example-2026-08"
+        }
+      }
+    },
+    {
+      "case_id": "producer-fallback",
+      "conformant": true,
+      "diagnostics": [],
+      "output": {
+        "content_mode": "tiered",
+        "coverage": {
+          "assembly": "user-initiated-only",
+          "inline_threshold_bytes": 4096,
+          "routing": "complete"
+        },
+        "events": [
+          {
+            "event": "inference",
+            "id": "inference-fallback-001",
+            "kind": "user-initiated",
+            "resolution": {
+              "bindings": [
+                {
+                  "ambiguity_surfaced": false,
+                  "bound": "model:example/atlas-4@2026-08-01",
+                  "ref": "@model:example/atlas-4@2026-08-01!",
+                  "rule": "qualified-canonical-reference"
+                },
+                {
+                  "ambiguity_surfaced": false,
+                  "bound": "model:example/atlas-mini@2026-08-01",
+                  "ref": "@model:example/atlas-mini@2026-08-01",
+                  "rule": "qualified-canonical-reference"
+                }
+              ],
+              "refusals": []
+            },
+            "routing": {
+              "attempts": [
+                {
+                  "outcome": "failed",
+                  "reasons": [
+                    "ENTITY_UNAVAILABLE"
+                  ],
+                  "ref": "@model:example/atlas-4@2026-08-01!"
+                },
+                {
+                  "bound": "model:example/atlas-mini@2026-08-01",
+                  "measured": {
+                    "cost_usd": 0.009,
+                    "wall_time_ms": 1410
+                  },
+                  "outcome": "filled",
+                  "ref": "@model:example/atlas-mini@2026-08-01"
+                }
+              ],
+              "bound": "model:example/atlas-mini@2026-08-01",
+              "fill": [
+                {
+                  "applied": "model:example/atlas-mini@2026-08-01",
+                  "kind": "entity",
+                  "policy": "strict",
+                  "requested": "model:example/atlas-4@2026-08-01",
+                  "route_step": 1,
+                  "status": "fallback"
+                }
+              ],
+              "outcome": "invoked",
+              "policy": "strict",
+              "requested": "@model:example/atlas-4@2026-08-01! else @model:example/atlas-mini@2026-08-01"
+            },
+            "segments": [
+              {
+                "content": {
+                  "state": "inline",
+                  "text": "Summarize the customer notes."
+                },
+                "i": 0,
+                "id": "inference-fallback-001:segment:0",
+                "origin": "user-authored",
+                "step": "inference-fallback-001:step:user-content"
+              }
+            ],
+            "steps": [
+              {
+                "id": "inference-fallback-001:step:user-content",
+                "kind": "user-content",
+                "tier": "user"
+              }
+            ]
+          }
+        ],
+        "mode": "executed",
+        "ps_trace": "0.3-draft",
+        "tier": "user",
+        "turn": "turn-producer-fallback-001",
+        "venue": {
+          "capability_document": "https://venue.example/ps-capabilities/0.3.json",
+          "id": "venue:example"
+        }
+      }
+    },
+    {
+      "case_id": "producer-substituted",
+      "conformant": true,
+      "diagnostics": [],
+      "output": {
+        "content_mode": "tiered",
+        "coverage": {
+          "assembly": "user-initiated-only",
+          "inline_threshold_bytes": 4096,
+          "routing": "complete"
+        },
+        "events": [
+          {
+            "event": "inference",
+            "id": "inference-substituted-001",
+            "kind": "user-initiated",
+            "resolution": {
+              "bindings": [
+                {
+                  "ambiguity_surfaced": false,
+                  "bound": "model:example/atlas-4@2026-08-01",
+                  "ref": "@model:example/atlas-4@2026-08-01",
+                  "rule": "qualified-canonical-reference"
+                },
+                {
+                  "ambiguity_surfaced": false,
+                  "bound": "model:example/atlas-mini@2026-08-01",
+                  "ref": "model:example/atlas-mini@2026-08-01",
+                  "rule": "venue-best-effort-substitution"
+                }
+              ],
+              "refusals": []
+            },
+            "routing": {
+              "attempts": [
+                {
+                  "bound": "model:example/atlas-mini@2026-08-01",
+                  "measured": {
+                    "cost_usd": 0.008,
+                    "wall_time_ms": 1330
+                  },
+                  "outcome": "filled",
+                  "ref": "@model:example/atlas-4@2026-08-01"
+                }
+              ],
+              "bound": "model:example/atlas-mini@2026-08-01",
+              "fill": [
+                {
+                  "applied": "model:example/atlas-mini@2026-08-01",
+                  "deciding_authority": "venue-operations",
+                  "kind": "entity",
+                  "policy": "best-effort",
+                  "reason": "ENTITY_SUBSTITUTED",
+                  "requested": "model:example/atlas-4@2026-08-01",
+                  "status": "substituted"
+                }
+              ],
+              "outcome": "invoked",
+              "policy": "best-effort",
+              "requested": "@model:example/atlas-4@2026-08-01"
+            },
+            "segments": [
+              {
+                "content": {
+                  "state": "inline",
+                  "text": "Summarize the risk report."
+                },
+                "i": 0,
+                "id": "inference-substituted-001:segment:0",
+                "origin": "user-authored",
+                "step": "inference-substituted-001:step:user-content"
+              }
+            ],
+            "steps": [
+              {
+                "id": "inference-substituted-001:step:user-content",
+                "kind": "user-content",
+                "tier": "user"
+              }
+            ]
+          }
+        ],
+        "mode": "executed",
+        "ps_trace": "0.3-draft",
+        "tier": "user",
+        "turn": "turn-producer-substituted-001",
+        "venue": {
+          "capability_document": "https://venue.example/ps-capabilities/0.3.json",
+          "id": "venue:example"
+        }
+      }
+    },
+    {
+      "case_id": "producer-refused",
+      "conformant": true,
+      "diagnostics": [],
+      "output": {
+        "content_mode": "tiered",
+        "coverage": {
+          "assembly": "user-initiated-only",
+          "inline_threshold_bytes": 4096,
+          "routing": "complete"
+        },
+        "events": [
+          {
+            "event": "inference",
+            "id": "inference-refused-001",
+            "kind": "user-initiated",
+            "resolution": {
+              "bindings": [
+                {
+                  "ambiguity_surfaced": false,
+                  "bound": "model:example/atlas-4@2026-08-01",
+                  "ref": "@model:example/atlas-4@2026-08-01!",
+                  "rule": "qualified-canonical-reference"
+                }
+              ],
+              "refusals": [
+                {
+                  "authority": "venue-operations",
+                  "reason": "FALLBACK_EXHAUSTED",
+                  "recourse": {
+                    "available": true,
+                    "kind": "retry"
+                  },
+                  "ref": "@model:example/atlas-4@2026-08-01!"
+                }
+              ]
+            },
+            "routing": {
+              "attempts": [
+                {
+                  "outcome": "failed",
+                  "reasons": [
+                    "ENTITY_UNAVAILABLE"
+                  ],
+                  "ref": "@model:example/atlas-4@2026-08-01!"
+                }
+              ],
+              "fill": [
+                {
+                  "deciding_authority": "venue-operations",
+                  "kind": "entity",
+                  "policy": "strict",
+                  "reason": "FALLBACK_EXHAUSTED",
+                  "requested": "model:example/atlas-4@2026-08-01",
+                  "status": "refused"
+                }
+              ],
+              "outcome": "refused",
+              "policy": "strict",
+              "requested": "@model:example/atlas-4@2026-08-01!"
+            },
+            "segments": [
+              {
+                "content": {
+                  "state": "inline",
+                  "text": "Summarize the restricted report."
+                },
+                "i": 0,
+                "id": "inference-refused-001:segment:0",
+                "origin": "user-authored",
+                "step": "inference-refused-001:step:user-content"
+              }
+            ],
+            "steps": [
+              {
+                "id": "inference-refused-001:step:user-content",
+                "kind": "user-content",
+                "tier": "user"
+              }
+            ]
+          }
+        ],
+        "mode": "executed",
+        "ps_trace": "0.3-draft",
+        "tier": "user",
+        "turn": "turn-producer-refused-001",
+        "venue": {
+          "capability_document": "https://venue.example/ps-capabilities/0.3.json",
+          "id": "venue:example"
+        }
+      }
+    },
+    {
+      "case_id": "producer-boundary-failed",
+      "conformant": true,
+      "diagnostics": [],
+      "output": {
+        "content_mode": "tiered",
+        "coverage": {
+          "assembly": "user-initiated-only",
+          "inline_threshold_bytes": 4096,
+          "routing": "complete"
+        },
+        "events": [
+          {
+            "event": "inference",
+            "id": "inference-boundary-failed-001",
+            "kind": "user-initiated",
+            "resolution": {
+              "bindings": [
+                {
+                  "ambiguity_surfaced": false,
+                  "bound": "model:example/atlas-4@2026-08-01",
+                  "ref": "@model:example/atlas-4@2026-08-01!",
+                  "rule": "qualified-canonical-reference"
+                }
+              ],
+              "refusals": []
+            },
+            "routing": {
+              "attempts": [
+                {
+                  "bound": "model:example/atlas-4@2026-08-01",
+                  "measured": {
+                    "cost_usd": 0.017,
+                    "wall_time_ms": 2010
+                  },
+                  "outcome": "filled",
+                  "ref": "@model:example/atlas-4@2026-08-01!"
+                }
+              ],
+              "bound": "model:example/atlas-4@2026-08-01",
+              "fill": [
+                {
+                  "applied": "model:example/atlas-4@2026-08-01",
+                  "kind": "entity",
+                  "policy": "strict",
+                  "requested": "model:example/atlas-4@2026-08-01",
+                  "status": "kept"
+                }
+              ],
+              "outcome": "invoked",
+              "policy": "strict",
+              "requested": "@model:example/atlas-4@2026-08-01!"
+            },
+            "segments": [
+              {
+                "content": {
+                  "state": "inline",
+                  "text": "Find the latest customer note."
+                },
+                "i": 0,
+                "id": "inference-boundary-failed-001:segment:0",
+                "origin": "user-authored",
+                "step": "inference-boundary-failed-001:step:user-content"
+              }
+            ],
+            "steps": [
+              {
+                "id": "inference-boundary-failed-001:step:user-content",
+                "kind": "user-content",
+                "tier": "user"
+              }
+            ]
+          },
+          {
+            "event": "boundary",
+            "fill": [
+              {
+                "deciding_authority": "venue-operations",
+                "kind": "action",
+                "reason": "ENTITY_UNAVAILABLE",
+                "requested": "tool:example/search@1",
+                "status": "refused"
+              }
+            ],
+            "id": "boundary-failed-001",
+            "measured": {
+              "wall_time_ms": 5
+            },
+            "outcome": "failed",
+            "reason": "ENTITY_UNAVAILABLE",
+            "sent": {
+              "state": "inline",
+              "text": "latest customer note"
+            },
+            "tool": "tool:example/search@1"
+          }
+        ],
+        "mode": "executed",
+        "ps_trace": "0.3-draft",
+        "tier": "user",
+        "turn": "turn-producer-boundary-failed-001",
+        "venue": {
+          "capability_document": "https://venue.example/ps-capabilities/0.3.json",
+          "id": "venue:example"
+        }
+      }
+    },
+    {
+      "case_id": "producer-boundary-succeeded",
+      "conformant": true,
+      "diagnostics": [],
+      "output": {
+        "content_mode": "tiered",
+        "coverage": {
+          "assembly": "user-initiated-only",
+          "inline_threshold_bytes": 4096,
+          "routing": "complete"
+        },
+        "events": [
+          {
+            "event": "inference",
+            "id": "inference-boundary-succeeded-001",
+            "kind": "user-initiated",
+            "resolution": {
+              "bindings": [
+                {
+                  "ambiguity_surfaced": false,
+                  "bound": "model:example/atlas-4@2026-08-01",
+                  "ref": "@model:example/atlas-4@2026-08-01!",
+                  "rule": "qualified-canonical-reference"
+                }
+              ],
+              "refusals": []
+            },
+            "routing": {
+              "attempts": [
+                {
+                  "bound": "model:example/atlas-4@2026-08-01",
+                  "measured": {
+                    "cost_usd": 0.017,
+                    "wall_time_ms": 2010
+                  },
+                  "outcome": "filled",
+                  "ref": "@model:example/atlas-4@2026-08-01!"
+                }
+              ],
+              "bound": "model:example/atlas-4@2026-08-01",
+              "fill": [
+                {
+                  "applied": "model:example/atlas-4@2026-08-01",
+                  "kind": "entity",
+                  "policy": "strict",
+                  "requested": "model:example/atlas-4@2026-08-01",
+                  "status": "kept"
+                }
+              ],
+              "outcome": "invoked",
+              "policy": "strict",
+              "requested": "@model:example/atlas-4@2026-08-01!"
+            },
+            "segments": [
+              {
+                "content": {
+                  "state": "inline",
+                  "text": "Find the latest customer note."
+                },
+                "i": 0,
+                "id": "inference-boundary-succeeded-001:segment:0",
+                "origin": "user-authored",
+                "step": "inference-boundary-succeeded-001:step:user-content"
+              }
+            ],
+            "steps": [
+              {
+                "id": "inference-boundary-succeeded-001:step:user-content",
+                "kind": "user-content",
+                "tier": "user"
+              }
+            ]
+          },
+          {
+            "event": "boundary",
+            "fill": [
+              {
+                "applied": "tool:example/search@1",
+                "kind": "action",
+                "requested": "tool:example/search@1",
+                "status": "applied"
+              }
+            ],
+            "id": "boundary-succeeded-001",
+            "internal": "outside-trace-perimeter",
+            "measured": {
+              "wall_time_ms": 18
+            },
+            "outcome": "succeeded",
+            "received": {
+              "state": "inline",
+              "text": "Customer requested export controls."
+            },
+            "sent": {
+              "state": "inline",
+              "text": "latest customer note"
+            },
+            "tool": "tool:example/search@1"
+          }
+        ],
+        "mode": "executed",
+        "ps_trace": "0.3-draft",
+        "tier": "user",
+        "turn": "turn-producer-boundary-succeeded-001",
+        "venue": {
+          "capability_document": "https://venue.example/ps-capabilities/0.3.json",
+          "id": "venue:example"
+        }
+      }
+    },
+    {
+      "case_id": "producer-strict-substitution-rejected",
+      "conformant": true,
+      "diagnostics": [
+        "TRACE_PRODUCER_SUBSTITUTION_NOT_AUTHORIZED"
+      ],
+      "output": {
+        "error": {
+          "code": "TRACE_PRODUCER_SUBSTITUTION_NOT_AUTHORIZED",
+          "message": "an applied entity outside the authored route requires best-effort policy",
+          "pointer": "/inferences/0/routing/attempts/0/bound"
+        },
+        "format_version": "0.1-draft"
+      }
+    },
+    {
+      "case_id": "producer-multiple-filled-rejected",
+      "conformant": true,
+      "diagnostics": [
+        "TRACE_PRODUCER_MULTIPLE_FILLED"
+      ],
+      "output": {
+        "error": {
+          "code": "TRACE_PRODUCER_MULTIPLE_FILLED",
+          "message": "routing facts contain more than one filled attempt",
+          "pointer": "/inferences/0/routing/attempts"
+        },
+        "format_version": "0.1-draft"
+      }
+    },
+    {
+      "case_id": "producer-missing-refusal-rejected",
+      "conformant": true,
+      "diagnostics": [
+        "TRACE_PRODUCER_REFUSAL_REQUIRED"
+      ],
+      "output": {
+        "error": {
+          "code": "TRACE_PRODUCER_REFUSAL_REQUIRED",
+          "message": "routing with no filled attempt requires a refusal fact",
+          "pointer": "/inferences/0/routing/refusal"
+        },
+        "format_version": "0.1-draft"
+      }
+    },
+    {
+      "case_id": "producer-refusal-conflict-rejected",
+      "conformant": true,
+      "diagnostics": [
+        "TRACE_PRODUCER_REFUSAL_CONFLICT"
+      ],
+      "output": {
+        "error": {
+          "code": "TRACE_PRODUCER_REFUSAL_CONFLICT",
+          "message": "routing cannot contain both a filled attempt and a refusal fact",
+          "pointer": "/inferences/0/routing/refusal"
+        },
+        "format_version": "0.1-draft"
+      }
+    }
+  ]
+}

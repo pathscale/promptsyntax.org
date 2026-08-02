@@ -1,0 +1,64 @@
+{
+  "format_version": "0.1-draft",
+  "cases": [
+    {
+      "id": "producer-kept",
+      "input": "conformance/fixtures/producer/input-kept.json",
+      "transcript": "conformance/fixtures/producer/transcript-kept.json",
+      "expected": { "outcome": "trace", "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "producer-fallback",
+      "input": "conformance/fixtures/producer/input-fallback.json",
+      "transcript": "conformance/fixtures/producer/transcript-fallback.json",
+      "expected": { "outcome": "trace", "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "producer-substituted",
+      "input": "conformance/fixtures/producer/input-substituted.json",
+      "transcript": "conformance/fixtures/producer/transcript-substituted.json",
+      "expected": { "outcome": "trace", "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "producer-refused",
+      "input": "conformance/fixtures/producer/input-refused.json",
+      "transcript": "conformance/fixtures/producer/transcript-refused.json",
+      "expected": { "outcome": "trace", "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "producer-boundary-failed",
+      "input": "conformance/fixtures/producer/input-boundary-failed.json",
+      "transcript": "conformance/fixtures/producer/transcript-boundary-failed.json",
+      "expected": { "outcome": "trace", "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "producer-boundary-succeeded",
+      "input": "conformance/fixtures/producer/input-boundary-succeeded.json",
+      "transcript": "conformance/fixtures/producer/transcript-boundary-succeeded.json",
+      "expected": { "outcome": "trace", "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "producer-strict-substitution-rejected",
+      "input": "conformance/fixtures/producer/input-strict-substitution.json",
+      "expected": {
+        "outcome": "error",
+        "code": "TRACE_PRODUCER_SUBSTITUTION_NOT_AUTHORIZED"
+      }
+    },
+    {
+      "id": "producer-multiple-filled-rejected",
+      "input": "conformance/fixtures/producer/input-multiple-filled.json",
+      "expected": { "outcome": "error", "code": "TRACE_PRODUCER_MULTIPLE_FILLED" }
+    },
+    {
+      "id": "producer-missing-refusal-rejected",
+      "input": "conformance/fixtures/producer/input-missing-refusal.json",
+      "expected": { "outcome": "error", "code": "TRACE_PRODUCER_REFUSAL_REQUIRED" }
+    },
+    {
+      "id": "producer-refusal-conflict-rejected",
+      "input": "conformance/fixtures/producer/input-refusal-conflict.json",
+      "expected": { "outcome": "error", "code": "TRACE_PRODUCER_REFUSAL_CONFLICT" }
+    }
+  ]
+}

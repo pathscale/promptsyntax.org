@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptsyntax.org/conformance/core-differential-report/0.1-draft",
+  "title": "PromptSyntax Core parser differential report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format_version",
+    "target",
+    "generator",
+    "compatible",
+    "left",
+    "right",
+    "case_count",
+    "matched_case_count",
+    "diagnostics"
+  ],
+  "properties": {
+    "format_version": { "const": "0.1-draft" },
+    "target": { "const": "core-parser-differential" },
+    "generator": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "version", "seed"],
+          "properties": {
+            "id": { "const": "promptsyntax-core-grammar" },
+            "version": { "const": "0.1-draft" },
+            "seed": { "type": "string", "pattern": "^[0-9]+$" }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+    "compatible": { "type": "boolean" },
+    "left": { "oneOf": [{ "$ref": "#/$defs/implementation" }, { "type": "null" }] },
+    "right": { "oneOf": [{ "$ref": "#/$defs/implementation" }, { "type": "null" }] },
+    "case_count": { "type": "integer", "minimum": 0 },
+    "matched_case_count": { "type": "integer", "minimum": 0 },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "pointer", "message"],
+        "properties": {
+          "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]+$" },
+          "pointer": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "commit"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+      }
+    }
+  }
+}

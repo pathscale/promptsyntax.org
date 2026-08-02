@@ -16,7 +16,9 @@
         "required": ["code", "phase", "severity", "description"],
         "properties": {
           "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]+$" },
-          "phase": { "enum": ["io", "corpus", "schema", "instance", "semantic", "producer"] },
+          "phase": {
+            "enum": ["io", "corpus", "schema", "instance", "semantic", "producer", "adapter"]
+          },
           "severity": { "enum": ["error", "warning"] },
           "description": { "type": "string", "minLength": 1 }
         }

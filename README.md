@@ -82,11 +82,22 @@ cargo test --manifest-path conformance/runner/Cargo.toml
 cargo run --manifest-path conformance/runner/Cargo.toml -- \
   check-requirements conformance/requirements.json
 cargo run --manifest-path conformance/runner/Cargo.toml -- run-suite .
+cargo run --manifest-path conformance/runner/Cargo.toml -- \
+  compare-core-adapters conformance/cases/core-parser.json \
+  /tmp/promptsyntax-rs-core.json /tmp/promptsyntax-ts-core.json
+cargo run --release --manifest-path conformance/runner/Cargo.toml -- \
+  generate-core-differential 100000 20270803 > /tmp/core-generated.json
+cargo run --release --manifest-path conformance/runner/Cargo.toml -- \
+  compare-core-streams 100000 20270803 \
+  /tmp/promptsyntax-rs-generated.jsonl /tmp/promptsyntax-ts-generated.jsonl
 ```
 
 Candidate `0.1.0-rc.1` currently executes 34 Trace document and producer cases with full
-coverage of its explicitly named 22-requirement profile. Candidate status is not a released
-or unqualified implementation-conformance claim.
+coverage of its explicitly named 22-requirement profile. It also carries 101 Core parser
+vectors, compares full normalized Rust and TypeScript outputs, runs a deterministic
+100,000-input grammar differential, and runs ten real Trace producer cases against
+independent transcripts. Candidate status is not a released or unqualified
+implementation-conformance claim.
 
 ## Contributing
 

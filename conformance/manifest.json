@@ -19,15 +19,25 @@
     "trace_schema": "schemas/prompt-trace-0.3-draft.schema.json",
     "family_schema": "conformance/case-family.schema.json",
     "transcript_schema": "conformance/transcript.schema.json",
+    "trace_producer_input_schema": "conformance/trace-producer-input.schema.json",
+    "trace_producer_cases": "conformance/cases/trace-producer.json",
+    "trace_producer_cases_schema": "conformance/trace-producer-cases.schema.json",
     "profile": "conformance/profiles/trace-user-0.3-draft.json",
     "profile_schema": "conformance/profile.schema.json",
     "report_schema": "conformance/report.schema.json",
     "core_cases": "conformance/cases/core-parser.json",
     "core_cases_schema": "conformance/core-cases.schema.json",
+    "core_differential_input_schema": "conformance/core-differential-input.schema.json",
+    "core_adapter_result_schema": "conformance/core-adapter-result.schema.json",
+    "core_differential_report_schema": "conformance/core-differential-report.schema.json",
     "adapter_result_schema": "conformance/adapter-result.schema.json",
     "implementations_lock": "conformance/implementations.lock.json",
     "implementations_schema": "conformance/implementations.schema.json",
-    "candidate_report": "conformance/reports/0.1.0-rc.1.json"
+    "candidate_report": "conformance/reports/0.1.0-rc.1.json",
+    "core_differential_report": "conformance/reports/core-differential-0.1.0-rc.1.json",
+    "core_generated_differential_report": "conformance/reports/core-generated-differential-0.1.0-rc.1.json",
+    "trace_producer_rs_report": "conformance/reports/trace-producer-rs-0.1.0-rc.1.json",
+    "trace_producer_ts_report": "conformance/reports/trace-producer-ts-0.1.0-rc.1.json"
   },
   "families": [
     {

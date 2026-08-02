@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptsyntax.org/conformance/core-adapter-result/0.1-draft",
+  "title": "PromptSyntax normalized Core parser adapter result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format_version", "target", "implementation", "results"],
+  "properties": {
+    "format_version": { "const": "0.1-draft" },
+    "target": { "const": "core-parser" },
+    "implementation": { "$ref": "#/$defs/implementation" },
+    "results": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/case_result" }
+    }
+  },
+  "$defs": {
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "commit"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+      }
+    },
+    "case_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_id", "conformant", "diagnostics", "output"],
+      "properties": {
+        "case_id": { "type": "string", "pattern": "^core-[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "conformant": { "type": "boolean" },
+        "diagnostics": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]+$" }
+        },
+        "output": { "$ref": "#/$defs/output" }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "round_trip",
+        "data_plane",
+        "segments",
+        "directives",
+        "parser_diagnostics"
+      ],
+      "properties": {
+        "round_trip": { "type": "string" },
+        "data_plane": { "type": "string" },
+        "segments": { "type": "array", "items": { "$ref": "#/$defs/segment" } },
+        "directives": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/directive_record" }
+        },
+        "parser_diagnostics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/parser_diagnostic" }
+        }
+      }
+    },
+    "span": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end", "source"],
+      "properties": {
+        "start": { "type": "integer", "minimum": 0 },
+        "end": { "type": "integer", "minimum": 0 },
+        "source": { "type": "string" }
+      }
+    },
+    "segment": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "span", "source"],
+          "properties": {
+            "type": { "const": "text" },
+            "span": { "$ref": "#/$defs/span" },
+            "source": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "span", "source", "directive"],
+          "properties": {
+            "type": { "const": "directive" },
+            "span": { "$ref": "#/$defs/span" },
+            "source": { "type": "string" },
+            "directive": { "$ref": "#/$defs/directive" }
+          }
+        }
+      ]
+    },
+    "directive_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["span", "source", "directive"],
+      "properties": {
+        "span": { "$ref": "#/$defs/span" },
+        "source": { "type": "string" },
+        "directive": { "$ref": "#/$defs/directive" }
+      }
+    },
+    "parser_diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "span"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]+$" },
+        "span": { "$ref": "#/$defs/span" }
+      }
+    },
+    "directive": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "reference"],
+          "properties": {
+            "kind": { "const": "reference" },
+            "reference": { "$ref": "#/$defs/reference" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "action"],
+          "properties": {
+            "kind": { "const": "action" },
+            "action": { "$ref": "#/$defs/action" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "route"],
+          "properties": {
+            "kind": { "const": "route" },
+            "route": { "$ref": "#/$defs/route" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "header", "segments"],
+          "properties": {
+            "kind": { "const": "span" },
+            "header": { "$ref": "#/$defs/span_header" },
+            "segments": { "type": "array", "items": { "$ref": "#/$defs/segment" } }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "reference"],
+          "properties": {
+            "kind": { "const": "authoring_segment" },
+            "reference": { "$ref": "#/$defs/reference" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "header"],
+          "properties": {
+            "kind": { "const": "invalid_authoring_segment" },
+            "header": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "body"],
+          "properties": {
+            "kind": { "const": "frontmatter" },
+            "body": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["namespace", "name", "version", "strict", "arguments"],
+      "properties": {
+        "namespace": { "type": ["string", "null"] },
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": ["string", "null"] },
+        "strict": { "type": "boolean" },
+        "arguments": { "type": "array", "items": { "$ref": "#/$defs/argument" } }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "arguments"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "arguments": { "type": "array", "items": { "$ref": "#/$defs/argument" } }
+      }
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["steps", "terminal"],
+      "properties": {
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["reference", "limits"],
+            "properties": {
+              "reference": { "$ref": "#/$defs/reference" },
+              "limits": { "type": "array", "items": { "$ref": "#/$defs/argument" } }
+            }
+          }
+        },
+        "terminal": { "enum": ["ask", "fail", null] }
+      }
+    },
+    "span_header": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw", "references", "attributes"],
+      "properties": {
+        "raw": { "type": "string" },
+        "references": { "type": "array", "items": { "$ref": "#/$defs/reference" } },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["key", "value"],
+            "properties": {
+              "key": { "type": "string", "minLength": 1 },
+              "value": { "$ref": "#/$defs/scalar" }
+            }
+          }
+        }
+      }
+    },
+    "argument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "value"],
+      "properties": {
+        "key": { "type": "string", "minLength": 1 },
+        "value": { "$ref": "#/$defs/scalar" }
+      }
+    },
+    "scalar": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "value"],
+          "properties": {
+            "kind": { "enum": ["string", "number", "bare"] },
+            "value": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "value"],
+          "properties": {
+            "kind": { "const": "boolean" },
+            "value": { "type": "boolean" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": { "kind": { "const": "null" } }
+        }
+      ]
+    }
+  }
+}
