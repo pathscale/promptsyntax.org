@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptsyntax.org/conformance/manifest/0.1-draft",
+  "title": "PromptSyntax conformance suite manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format_version", "suite", "spec", "files", "families", "claims"],
+  "properties": {
+    "format_version": { "const": "0.1-draft" },
+    "suite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "status"],
+      "properties": {
+        "id": { "const": "promptsyntax-conformance" },
+        "version": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["bootstrap", "candidate", "released"] }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "commit", "declared_version", "baseline_status"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "declared_version": { "type": "string", "minLength": 1 },
+        "baseline_status": { "enum": ["working-draft", "frozen"] }
+      }
+    },
+    "files": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirements", "requirements_schema", "diagnostics", "diagnostics_schema"],
+      "properties": {
+        "requirements": { "type": "string", "minLength": 1 },
+        "requirements_schema": { "type": "string", "minLength": 1 },
+        "diagnostics": { "type": "string", "minLength": 1 },
+        "diagnostics_schema": { "type": "string", "minLength": 1 }
+      }
+    },
+    "families": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "layer", "target", "version", "path", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]+$" },
+          "layer": { "enum": ["core", "capabilities", "execution", "trace"] },
+          "target": { "enum": ["core-parser", "trace-document", "trace-producer"] },
+          "version": { "type": "string", "minLength": 1 },
+          "path": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["draft", "normative"] }
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["profile", "families", "status"],
+        "properties": {
+          "profile": { "type": "string", "minLength": 1 },
+          "families": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string" }
+          },
+          "status": { "enum": ["candidate", "released"] }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "format_version": "0.1-draft",
+  "suite": {
+    "id": "promptsyntax-conformance",
+    "version": "0.0.0-bootstrap",
+    "status": "bootstrap"
+  },
+  "spec": {
+    "path": "spec/SPEC.md",
+    "commit": "7456634817f4eb68c8909a58b476505e6fd7c063",
+    "declared_version": "0.2 with settled 0.2.1 and proposed 0.2.2 material",
+    "baseline_status": "working-draft"
+  },
+  "files": {
+    "requirements": "conformance/requirements.json",
+    "requirements_schema": "conformance/requirements.schema.json",
+    "diagnostics": "conformance/diagnostic-registry.json",
+    "diagnostics_schema": "conformance/diagnostic-registry.schema.json"
+  },
+  "families": [],
+  "claims": []
+}

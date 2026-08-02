@@ -1,0 +1,149 @@
+{
+  "format_version": "0.1-draft",
+  "diagnostics": [
+    {
+      "code": "CORPUS_BLOCKED_WITHOUT_REASON",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A blocked requirement does not identify an audit blocker."
+    },
+    {
+      "code": "CORPUS_BLOCKER_DUPLICATE",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A requirement lists the same audit blocker more than once."
+    },
+    {
+      "code": "CORPUS_BLOCKER_ID_INVALID",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "An audit blocker identifier does not use the required A01 form."
+    },
+    {
+      "code": "CORPUS_BLOCKER_ON_UNBLOCKED_REQUIREMENT",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A requirement declares blockers while its testability is not blocked."
+    },
+    {
+      "code": "CORPUS_FORMAT_UNSUPPORTED",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "The corpus format version is not supported by this runner."
+    },
+    {
+      "code": "CORPUS_JSON_INVALID",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "The corpus document is not valid JSON or does not deserialize to the closed typed model."
+    },
+    {
+      "code": "CORPUS_READ_FAILED",
+      "phase": "io",
+      "severity": "error",
+      "description": "The corpus file could not be read."
+    },
+    {
+      "code": "CORPUS_REQUIREMENTS_EMPTY",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "The requirement inventory contains no requirements."
+    },
+    {
+      "code": "CORPUS_REQUIREMENT_ID_DUPLICATE",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A requirement identifier occurs more than once."
+    },
+    {
+      "code": "CORPUS_REQUIREMENT_ID_INVALID",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A requirement identifier is malformed or disagrees with its declared layer."
+    },
+    {
+      "code": "CORPUS_REQUIREMENT_STATEMENT_EMPTY",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A requirement has no non-whitespace statement."
+    },
+    {
+      "code": "CORPUS_SOURCE_ANCHOR_INVALID",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A candidate specification anchor is not a safe lowercase identifier."
+    },
+    {
+      "code": "CORPUS_SOURCE_PATH_INVALID",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A source path is absolute, empty, or contains parent traversal."
+    },
+    {
+      "code": "CORPUS_SOURCE_SECTION_EMPTY",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A requirement does not identify a source section."
+    },
+    {
+      "code": "CORPUS_SPEC_COMMIT_INVALID",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "The pinned specification commit is not 40 lowercase hexadecimal characters."
+    },
+    {
+      "code": "CORPUS_TARGETS_EMPTY",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A requirement does not identify a conformance target."
+    },
+    {
+      "code": "CORPUS_TARGET_DUPLICATE",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A requirement lists the same conformance target more than once."
+    },
+    {
+      "code": "INSTANCE_JSON_INVALID",
+      "phase": "instance",
+      "severity": "error",
+      "description": "The instance is not valid JSON."
+    },
+    {
+      "code": "INSTANCE_READ_FAILED",
+      "phase": "io",
+      "severity": "error",
+      "description": "The instance file could not be read."
+    },
+    {
+      "code": "SCHEMA_BUILD_FAILED",
+      "phase": "schema",
+      "severity": "error",
+      "description": "A Draft 2020-12 validator could not be built from the schema."
+    },
+    {
+      "code": "SCHEMA_INSTANCE_INVALID",
+      "phase": "instance",
+      "severity": "error",
+      "description": "An instance violates its declared schema."
+    },
+    {
+      "code": "SCHEMA_JSON_INVALID",
+      "phase": "schema",
+      "severity": "error",
+      "description": "The schema is not valid JSON."
+    },
+    {
+      "code": "SCHEMA_META_INVALID",
+      "phase": "schema",
+      "severity": "error",
+      "description": "The schema violates its JSON Schema meta-schema."
+    },
+    {
+      "code": "SCHEMA_READ_FAILED",
+      "phase": "io",
+      "severity": "error",
+      "description": "The schema file could not be read."
+    }
+  ]
+}

@@ -1,0 +1,792 @@
+{
+  "format_version": "0.1-draft",
+  "spec": {
+    "path": "spec/SPEC.md",
+    "commit": "7456634817f4eb68c8909a58b476505e6fd7c063",
+    "declared_version": "0.2 with settled 0.2.1 and proposed 0.2.2 material",
+    "baseline_status": "working-draft"
+  },
+  "requirements": [
+    {
+      "id": "PS-META-CLAIM-001",
+      "layer": "meta",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "4", "candidate_anchor": "ps-meta-claim-001" },
+      "statement": "A conformance claim names every claimed PromptSyntax layer and version.",
+      "testability": "manual",
+      "targets": ["documentation"]
+    },
+    {
+      "id": "PS-META-CLAIM-002",
+      "layer": "meta",
+      "normative_status": "settled",
+      "strength": "must_not",
+      "source": { "path": "spec/SPEC.md", "section": "4", "candidate_anchor": "ps-meta-claim-002" },
+      "statement": "An implementation described only as PS-shaped must not be presented as conformant.",
+      "testability": "manual",
+      "targets": ["documentation"]
+    },
+    {
+      "id": "PS-META-DET-001",
+      "layer": "meta",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "14", "candidate_anchor": "ps-meta-det-001" },
+      "statement": "Documentation and conformance claims distinguish routing-contract determinism, generation determinism, and semantic reproducibility.",
+      "testability": "manual",
+      "targets": ["documentation"]
+    },
+
+    {
+      "id": "PS-CORE-ZERO-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "3", "candidate_anchor": "ps-core-zero-001" },
+      "statement": "A prompt containing no directives is valid PromptSyntax and remains ordinary natural-language content.",
+      "testability": "automatic",
+      "targets": ["core-parser"]
+    },
+    {
+      "id": "PS-CORE-SPAN-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "5.2", "candidate_anchor": "ps-core-span-001" },
+      "statement": "A model-routing reference inside a span is rejected rather than ignored and reports SPAN_EXECUTION_UNSUPPORTED.",
+      "testability": "automatic",
+      "targets": ["core-parser", "execution-resolver"]
+    },
+    {
+      "id": "PS-CORE-BIND-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "6.2", "candidate_anchor": "ps-core-bind-001" },
+      "statement": "Resolution binds each reference to a globally canonical, immutable, versioned identifier.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-document"]
+    },
+    {
+      "id": "PS-CORE-BIND-002",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "6.2", "candidate_anchor": "ps-core-bind-002" },
+      "statement": "A trace never reports an unpinned entity binding.",
+      "testability": "automatic",
+      "targets": ["trace-document"]
+    },
+    {
+      "id": "PS-CORE-AMBIG-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "6.3", "candidate_anchor": "ps-core-ambig-001" },
+      "statement": "Multiple matching entities produce a surfaced ENTITY_AMBIGUOUS result.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-producer"]
+    },
+    {
+      "id": "PS-CORE-AMBIG-002",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "must_not",
+      "source": { "path": "spec/SPEC.md", "section": "6.3", "candidate_anchor": "ps-core-ambig-002" },
+      "statement": "An implementation must not silently choose among multiple matching entities.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-producer"]
+    },
+    {
+      "id": "PS-CORE-ACTION-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "6.4", "candidate_anchor": "ps-core-action-001" },
+      "statement": "A consequential action is fully qualified or explicitly confirmed by the user.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-producer"]
+    },
+    {
+      "id": "PS-CORE-STRICT-MODE-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "should",
+      "source": { "path": "spec/SPEC.md", "section": "6.4", "candidate_anchor": "ps-core-strict-mode-001" },
+      "statement": "A venue should offer a mode in which only ps tags and strict frontmatter are executable.",
+      "testability": "profile",
+      "targets": ["capability-document", "core-parser"]
+    },
+    {
+      "id": "PS-CORE-ROUNDTRIP-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "11", "candidate_anchor": "ps-core-roundtrip-001" },
+      "statement": "Compiling casual form is equivalent to compiling the strict form produced from that casual compilation.",
+      "testability": "automatic",
+      "targets": ["core-parser", "execution-resolver"]
+    },
+    {
+      "id": "PS-CORE-REIFY-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "11", "candidate_anchor": "ps-core-reify-001" },
+      "statement": "Intent reification emits an editable and re-submittable strict form.",
+      "testability": "automatic",
+      "targets": ["execution-resolver"]
+    },
+    {
+      "id": "PS-CORE-PROV-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "13", "candidate_anchor": "ps-core-prov-001" },
+      "statement": "Only explicitly designated authoring segments are parsed for directives.",
+      "testability": "automatic",
+      "targets": ["core-parser"]
+    },
+    {
+      "id": "PS-CORE-INERT-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "must_not",
+      "source": { "path": "spec/SPEC.md", "section": "13", "candidate_anchor": "ps-core-inert-001" },
+      "statement": "Retrieved documents, file contents, tool results, quoted messages, and model-generated text do not introduce directives without authority-checked promotion.",
+      "testability": "automatic",
+      "targets": ["core-parser", "trace-producer"]
+    },
+    {
+      "id": "PS-CORE-SERIALIZE-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "13", "candidate_anchor": "ps-core-serialize-001" },
+      "statement": "Canonical serialization carries included content by reference or typed data and never splices it into directive text.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-producer"]
+    },
+    {
+      "id": "PS-CORE-PROMOTE-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "13", "candidate_anchor": "ps-core-promote-001" },
+      "statement": "Promotion is explicit, authority-checked, and recorded in the trace, and it changes parse eligibility without granting capability.",
+      "testability": "blocked",
+      "targets": ["core-parser", "trace-producer"],
+      "blocked_by": ["A13"],
+      "notes": "The general invariant is settled, but the reusable surface and trace shape remain proposed."
+    },
+    {
+      "id": "PS-CORE-TAG-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "13", "candidate_anchor": "ps-core-tag-001" },
+      "statement": "Only the ps tag namespace is live; all other tag-shaped text remains content.",
+      "testability": "automatic",
+      "targets": ["core-parser"]
+    },
+    {
+      "id": "PS-CORE-BOUNDARY-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "13", "candidate_anchor": "ps-core-boundary-001" },
+      "statement": "Point islands require the defined boundary and a qualified or environment-resolvable name; email addresses and paths remain content.",
+      "testability": "automatic",
+      "targets": ["core-parser"]
+    },
+    {
+      "id": "PS-CORE-ESCAPE-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "13", "candidate_anchor": "ps-core-escape-001" },
+      "statement": "Escaped sigils and fenced code blocks always remain content.",
+      "testability": "automatic",
+      "targets": ["core-parser"]
+    },
+    {
+      "id": "PS-CORE-HIGHLIGHT-001",
+      "layer": "core",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "13", "candidate_anchor": "ps-core-highlight-001" },
+      "statement": "An interactive implementation visibly marks every recognized directive before submission.",
+      "testability": "manual",
+      "targets": ["interactive-ui"]
+    },
+    {
+      "id": "PS-CORE-WIDTH-001",
+      "layer": "core",
+      "normative_status": "proposed",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "13.1", "candidate_anchor": "ps-core-width-001" },
+      "statement": "Parsers treat full-width at and slash sigils as equivalent to their ASCII forms.",
+      "testability": "automatic",
+      "targets": ["core-parser"]
+    },
+    {
+      "id": "PS-CORE-UNICODE-ID-001",
+      "layer": "core",
+      "normative_status": "proposed",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "13.1", "candidate_anchor": "ps-core-unicode-id-001" },
+      "statement": "Entity identifiers follow UAX 31 with NFC normalization while canonical keywords remain English.",
+      "testability": "automatic",
+      "targets": ["core-parser"]
+    },
+    {
+      "id": "PS-CORE-SEGMENT-001",
+      "layer": "core",
+      "normative_status": "proposed",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "13.1", "candidate_anchor": "ps-core-segment-001" },
+      "statement": "Island boundaries follow UAX 29 and work in scripts without inter-word spaces.",
+      "testability": "automatic",
+      "targets": ["core-parser"]
+    },
+    {
+      "id": "PS-CORE-CORPUS-I18N-001",
+      "layer": "core",
+      "normative_status": "proposed",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "13.1", "candidate_anchor": "ps-core-corpus-i18n-001" },
+      "statement": "The conformance corpus includes cases for scripts without inter-word spacing.",
+      "testability": "automatic",
+      "targets": ["corpus"]
+    },
+    {
+      "id": "PS-CORE-BIDI-001",
+      "layer": "core",
+      "normative_status": "proposed",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "13.1", "candidate_anchor": "ps-core-bidi-001" },
+      "statement": "A parser rejects or neutralizes bidi control characters inside directive islands without leaking a partial directive.",
+      "testability": "automatic",
+      "targets": ["core-parser"]
+    },
+    {
+      "id": "PS-CORE-SURFACE-001",
+      "layer": "core",
+      "normative_status": "proposed",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "13.2", "candidate_anchor": "ps-core-surface-001" },
+      "statement": "A standing authoring-surface declaration binds identity, lifecycle, origin, frame, action set, capability scope, replay behavior, and trace obligations.",
+      "testability": "blocked",
+      "targets": ["capability-document", "core-parser", "trace-producer"],
+      "blocked_by": ["A13"]
+    },
+    {
+      "id": "PS-CORE-SURFACE-002",
+      "layer": "core",
+      "normative_status": "proposed",
+      "strength": "must_not",
+      "source": { "path": "spec/SPEC.md", "section": "13.2", "candidate_anchor": "ps-core-surface-002" },
+      "statement": "A host must not search undifferentiated transcript, concatenated prose, quoted content, or retrieved data for a surface delimiter.",
+      "testability": "blocked",
+      "targets": ["core-parser"],
+      "blocked_by": ["A13"]
+    },
+
+    {
+      "id": "PS-CAP-DOC-001",
+      "layer": "capabilities",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "7.1", "candidate_anchor": "ps-cap-doc-001" },
+      "statement": "A conformant venue publishes a machine-readable capability document and negotiates against it before fill.",
+      "testability": "blocked",
+      "targets": ["capability-document", "execution-resolver"],
+      "blocked_by": ["A19"]
+    },
+    {
+      "id": "PS-CAP-VERSION-001",
+      "layer": "capabilities",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "7.1", "candidate_anchor": "ps-cap-version-001" },
+      "statement": "A venue rejects a declared PromptSyntax version it cannot honor instead of degrading silently.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-producer"]
+    },
+    {
+      "id": "PS-CAP-PARAM-001",
+      "layer": "capabilities",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "7.2", "candidate_anchor": "ps-cap-param-001" },
+      "statement": "Every parameter records requested, normalized, and applied values with a defined status in the fill report.",
+      "testability": "automatic",
+      "targets": ["trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-CAP-PARAM-002",
+      "layer": "capabilities",
+      "normative_status": "settled",
+      "strength": "must_not",
+      "source": { "path": "spec/SPEC.md", "section": "7.2", "candidate_anchor": "ps-cap-param-002" },
+      "statement": "An implementation must not claim undocumented parameter passthrough as conforming normalization.",
+      "testability": "automatic",
+      "targets": ["trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-CAP-TIER-001",
+      "layer": "capabilities",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "12.2", "candidate_anchor": "ps-cap-tier-001" },
+      "statement": "The capability document declares the trace tiers supported by the venue.",
+      "testability": "blocked",
+      "targets": ["capability-document", "trace-document"],
+      "blocked_by": ["A19"]
+    },
+
+    {
+      "id": "PS-EXEC-STRICT-001",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "8.1", "candidate_anchor": "ps-exec-strict-001" },
+      "statement": "Strict fulfillment applies every requirement exactly or fails before execution.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-PARTIAL-001",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "8.1", "candidate_anchor": "ps-exec-partial-001" },
+      "statement": "Partial fulfillment records every dropped requirement.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-BEST-001",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "8.1", "candidate_anchor": "ps-exec-best-001" },
+      "statement": "Best-effort fulfillment records every degradation.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-DEFAULT-001",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "8.1", "candidate_anchor": "ps-exec-default-001" },
+      "statement": "The default policy is strict entity binding and partial parameter fulfillment.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-BANG-001",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "8.1", "candidate_anchor": "ps-exec-bang-001" },
+      "statement": "A bang marker makes the entire directive strict, permitting only declared semantics-preserving translation.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-REASON-001",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "8.2", "candidate_anchor": "ps-exec-reason-001" },
+      "statement": "Every fill failure and disclosed degradation carries a standardized or permitted extension reason code.",
+      "testability": "blocked",
+      "targets": ["trace-document", "trace-producer"],
+      "blocked_by": ["A02", "A03", "A12"]
+    },
+    {
+      "id": "PS-EXEC-BUDGET-001",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "9.1", "candidate_anchor": "ps-exec-budget-001" },
+      "statement": "A violated budget is a fill failure.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-BUDGET-002",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "9.1", "candidate_anchor": "ps-exec-budget-002" },
+      "statement": "Required cancellation against a venue declaring cancellation unsupported fails before execution with BUDGET_PREFLIGHT_REJECTED.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-BUDGET-003",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "9.1", "candidate_anchor": "ps-exec-budget-003" },
+      "statement": "A timeout that the venue could not cancel reports TIMEOUT_NOT_CANCELLED with observed cost.",
+      "testability": "automatic",
+      "targets": ["trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-BUDGET-004",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "must_not",
+      "source": { "path": "spec/SPEC.md", "section": "9.1", "candidate_anchor": "ps-exec-budget-004" },
+      "statement": "An implementation must not silently truncate or otherwise degrade output to satisfy a budget.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-BUDGET-005",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "9.1", "candidate_anchor": "ps-exec-budget-005" },
+      "statement": "A chain-scoped budget applies to the total across fallback attempts.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-FALLBACK-001",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "9.2", "candidate_anchor": "ps-exec-fallback-001" },
+      "statement": "A fill failure is the only trigger for advancing an authored fallback chain.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-FALLBACK-002",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "9.2", "candidate_anchor": "ps-exec-fallback-002" },
+      "statement": "The first successful legal fallback step wins.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-FALLBACK-003",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "9.2", "candidate_anchor": "ps-exec-fallback-003" },
+      "statement": "The fill report records every fallback attempt in order with outcome, codes, measured cost, and measured latency.",
+      "testability": "automatic",
+      "targets": ["trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-FALLBACK-004",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "9.2", "candidate_anchor": "ps-exec-fallback-004" },
+      "statement": "Every fallback step is checked against the same applicable capability, authorization, consent, data, residency, retention, and connector constraints.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-AUTH-001",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "must_not",
+      "source": { "path": "spec/SPEC.md", "section": "10.1", "candidate_anchor": "ps-exec-auth-001" },
+      "statement": "A lower authority must not expand permissions, budgets, or entity sets granted by higher authority.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-SPECIFICITY-001",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "10.2", "candidate_anchor": "ps-exec-specificity-001" },
+      "statement": "Within one authority level, span scope overrides point scope and point scope overrides document scope.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-ENVELOPE-001",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "10.3", "candidate_anchor": "ps-exec-envelope-001" },
+      "statement": "An out-of-envelope directive fails with ENTITY_UNAUTHORIZED or DATA_POLICY_BLOCKED and is never silently ignored.",
+      "testability": "automatic",
+      "targets": ["execution-resolver", "trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-ENVELOPE-002",
+      "layer": "execution",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "10.3", "candidate_anchor": "ps-exec-envelope-002" },
+      "statement": "Every envelope constraint that suppresses a directive is recorded as a typed refusal at the requesting user's tier.",
+      "testability": "automatic",
+      "targets": ["trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-EXEC-REFUSAL-001",
+      "layer": "execution",
+      "normative_status": "proposed",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "10.5", "candidate_anchor": "ps-exec-refusal-001" },
+      "statement": "A refusal distinguishes availability, safety, organization or data policy, and authorization, and records authority and available recourse.",
+      "testability": "blocked",
+      "targets": ["trace-document", "trace-producer"],
+      "blocked_by": ["A03", "A09"]
+    },
+
+    {
+      "id": "PS-TRACE-R1",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-r1" },
+      "statement": "Ordered trace segments reproduce the tier-scoped compiled prompt byte-exactly.",
+      "testability": "blocked",
+      "targets": ["trace-document", "trace-producer"],
+      "blocked_by": ["A06"]
+    },
+    {
+      "id": "PS-TRACE-R2",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-r2" },
+      "statement": "Every required segment provenance pointer resolves to a step in the same inference.",
+      "testability": "automatic",
+      "targets": ["trace-document"]
+    },
+    {
+      "id": "PS-TRACE-R3",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-r3" },
+      "statement": "Provenance parent chains resolve within their inference and are acyclic.",
+      "testability": "automatic",
+      "targets": ["trace-document"]
+    },
+    {
+      "id": "PS-TRACE-R4",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "must_not",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-r4" },
+      "statement": "The user-tier inline threshold must not be lower than 4096 bytes.",
+      "testability": "automatic",
+      "targets": ["trace-document"]
+    },
+    {
+      "id": "PS-TRACE-R5",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-r5" },
+      "statement": "An oversight-tier implementation supports a materialized export that resolves required external content inline.",
+      "testability": "profile",
+      "targets": ["trace-document", "trace-producer", "oversight-profile"]
+    },
+    {
+      "id": "PS-TRACE-R6",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-r6" },
+      "statement": "Trace coverage is explicitly declared and no unqualified conformance claim is accepted.",
+      "testability": "automatic",
+      "targets": ["trace-document", "documentation"]
+    },
+    {
+      "id": "PS-TRACE-EVENTS-001",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-events-001" },
+      "statement": "A Prompt Trace is a turn-level object whose ordered event array interleaves inference and boundary events in occurrence order.",
+      "testability": "automatic",
+      "targets": ["trace-document"]
+    },
+    {
+      "id": "PS-TRACE-ROUTING-001",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-routing-001" },
+      "statement": "Every venue invocation records a routing record and fill report.",
+      "testability": "automatic",
+      "targets": ["trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-TRACE-ASSEMBLY-001",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-assembly-001" },
+      "statement": "Every user-initiated inference records full tier-scoped compiled prompt segments.",
+      "testability": "automatic",
+      "targets": ["trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-TRACE-ASSEMBLY-002",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "should",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-assembly-002" },
+      "statement": "An internal continuation should record full tier-scoped compiled prompt segments, and an omission is typed and declared.",
+      "testability": "automatic",
+      "targets": ["trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-TRACE-BOUNDARY-001",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-boundary-001" },
+      "statement": "Every tool input and output crossing the venue boundary is recorded while tool internals remain outside the perimeter.",
+      "testability": "blocked",
+      "targets": ["trace-document", "trace-producer"],
+      "blocked_by": ["A11"]
+    },
+    {
+      "id": "PS-TRACE-CONTENT-001",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-content-001" },
+      "statement": "Trace content uses exactly one tier-appropriate inline, external, or withheld state.",
+      "testability": "automatic",
+      "targets": ["trace-document"]
+    },
+    {
+      "id": "PS-TRACE-RESOLUTION-001",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-resolution-001" },
+      "statement": "A trace records every binding, deciding rule, surfaced ambiguity, and envelope refusal in its resolution report.",
+      "testability": "automatic",
+      "targets": ["trace-document", "trace-producer"]
+    },
+    {
+      "id": "PS-TRACE-FILL-001",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-fill-001" },
+      "statement": "A routing record includes outcome codes, normalization records, and per-attempt outcomes with measured cost and latency.",
+      "testability": "blocked",
+      "targets": ["trace-document", "trace-producer"],
+      "blocked_by": ["A02", "A03", "A12"]
+    },
+    {
+      "id": "PS-TRACE-DRYRUN-001",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "should",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-dryrun-001" },
+      "statement": "An implementation should support a pre-execution dry-run trace.",
+      "testability": "profile",
+      "targets": ["capability-document", "trace-producer"]
+    },
+    {
+      "id": "PS-TRACE-SEGMENT-ID-001",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "should",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-segment-id-001" },
+      "statement": "An implementation should produce stable segment identifiers suitable for trace diffing.",
+      "testability": "automatic",
+      "targets": ["trace-producer"]
+    },
+    {
+      "id": "PS-TRACE-PRESENTATION-001",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "may",
+      "source": { "path": "spec/SPEC.md", "section": "12.1", "candidate_anchor": "ps-trace-presentation-001" },
+      "statement": "Presentation of conforming trace information is implementation-defined.",
+      "testability": "manual",
+      "targets": ["documentation", "interactive-ui"]
+    },
+    {
+      "id": "PS-TRACE-TIER-USER-001",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "12.2", "candidate_anchor": "ps-trace-tier-user-001" },
+      "statement": "A user-tier trace exposes user-visible sources, selected tools, applied parameters, typed envelope refusals, and the fill report.",
+      "testability": "blocked",
+      "targets": ["trace-document", "trace-producer"],
+      "blocked_by": ["A04", "A09"]
+    },
+    {
+      "id": "PS-TRACE-PLACEHOLDER-001",
+      "layer": "trace",
+      "normative_status": "open",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "12.2", "candidate_anchor": "ps-trace-placeholder-001" },
+      "statement": "Content above the current tier appears as a typed and safely sized placeholder.",
+      "testability": "blocked",
+      "targets": ["trace-document", "trace-producer"],
+      "blocked_by": ["A17"]
+    },
+    {
+      "id": "PS-TRACE-INTEGRITY-001",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "should",
+      "source": { "path": "spec/SPEC.md", "section": "12.3", "candidate_anchor": "ps-trace-integrity-001" },
+      "statement": "Core Trace should support integrity chaining or signing, with stronger requirements defined by oversight profiles.",
+      "testability": "blocked",
+      "targets": ["oversight-profile", "trace-document"],
+      "blocked_by": ["A18"]
+    },
+    {
+      "id": "PS-TRACE-OVERSIGHT-001",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "must",
+      "source": { "path": "spec/SPEC.md", "section": "12.3", "candidate_anchor": "ps-trace-oversight-001" },
+      "statement": "An implementation claiming oversight-tier support records retention and residency metadata.",
+      "testability": "blocked",
+      "targets": ["oversight-profile", "trace-document", "trace-producer"],
+      "blocked_by": ["A10"]
+    },
+    {
+      "id": "PS-TRACE-OVERSIGHT-002",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "12.3", "candidate_anchor": "ps-trace-oversight-002" },
+      "statement": "An oversight evidence stream represents omitted events with explicit signed sequence gaps rather than silence.",
+      "testability": "blocked",
+      "targets": ["oversight-profile", "trace-document", "trace-producer"],
+      "blocked_by": ["A10", "A18"]
+    },
+    {
+      "id": "PS-TRACE-OVERSIGHT-003",
+      "layer": "trace",
+      "normative_status": "settled",
+      "strength": "invariant",
+      "source": { "path": "spec/SPEC.md", "section": "12.3", "candidate_anchor": "ps-trace-oversight-003" },
+      "statement": "A withheld oversight segment supports evidence of its existence, kind, and timing without revealing its content.",
+      "testability": "blocked",
+      "targets": ["oversight-profile", "trace-document", "trace-producer"],
+      "blocked_by": ["A10", "A17", "A18"]
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "ps_trace": "0.3-draft",
+  "turn": "turn-example-001",
+  "tier": "user",
+  "mode": "executed",
+  "venue": {
+    "id": "venue:example",
+    "capability_document": "https://venue.example/ps-capabilities/0.3.json",
+    "vendor_profile": "vendor-profile/example-2026-08"
+  },
+  "coverage": {
+    "routing": "complete",
+    "assembly": "user-initiated-only",
+    "inline_threshold_bytes": 4096
+  },
+  "events": [
+    {
+      "id": "inference-001",
+      "event": "inference",
+      "kind": "user-initiated",
+      "routing": {
+        "requested": "@model:example/atlas-4@2026-08-01!",
+        "policy": "strict",
+        "outcome": "invoked",
+        "bound": "model:example/atlas-4@2026-08-01",
+        "attempts": [
+          {
+            "ref": "@model:example/atlas-4@2026-08-01!",
+            "bound": "model:example/atlas-4@2026-08-01",
+            "outcome": "filled",
+            "measured": {
+              "cost_usd": 0.041,
+              "wall_time_ms": 3210
+            }
+          }
+        ],
+        "fill": [
+          {
+            "kind": "entity",
+            "requested": "model:example/atlas-4@2026-08-01",
+            "applied": "model:example/atlas-4@2026-08-01",
+            "status": "kept",
+            "policy": "strict"
+          },
+          {
+            "kind": "parameter",
+            "name": "temperature",
+            "requested": 0.2,
+            "applied": 0.2,
+            "status": "applied",
+            "policy": "strict"
+          }
+        ]
+      },
+      "segments": [
+        {
+          "i": 0,
+          "id": "segment-user-001",
+          "origin": "user-authored",
+          "content": {
+            "state": "inline",
+            "text": "Summarize the report."
+          },
+          "step": "step-user-001"
+        }
+      ],
+      "steps": [
+        {
+          "id": "step-user-001",
+          "kind": "user-content",
+          "tier": "user"
+        }
+      ],
+      "resolution": {
+        "bindings": [
+          {
+            "ref": "@model:example/atlas-4@2026-08-01",
+            "bound": "model:example/atlas-4@2026-08-01",
+            "rule": "qualified-canonical-reference",
+            "ambiguity_surfaced": false
+          }
+        ],
+        "refusals": []
+      }
+    }
+  ]
+}
