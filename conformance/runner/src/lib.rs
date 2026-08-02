@@ -7,12 +7,14 @@ use jsonschema::PatternOptions;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+mod adversarial;
 mod core;
 mod generator;
 mod producer;
 mod suite;
 mod trace;
 
+pub use adversarial::{AdversarialReport, run_adversarial_benchmark};
 pub use core::{CoreDifferentialReport, compare_core_adapter_streams, compare_core_adapters_json};
 pub use generator::{GeneratorMetadata, write_generated_core_cases};
 pub use producer::{TraceProducerAdapterReport, run_trace_producer_adapter};

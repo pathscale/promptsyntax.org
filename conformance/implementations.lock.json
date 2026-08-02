@@ -9,17 +9,41 @@
       "fixture": "tests/conformance.json",
       "runtime": { "name": "rust", "version": "1.97.0" },
       "command": [
-        "cargo", "run", "--quiet", "--release", "--locked", "--bin",
-        "ps-core-adapter", "--", "{cases}", "{commit}"
+        "cargo",
+        "run",
+        "--quiet",
+        "--release",
+        "--locked",
+        "--bin",
+        "ps-core-adapter",
+        "--",
+        "{cases}",
+        "{commit}"
       ],
       "stream_command": [
-        "cargo", "run", "--quiet", "--release", "--locked", "--bin",
-        "ps-core-adapter", "--", "{cases}", "{commit}", "--jsonl"
+        "cargo",
+        "run",
+        "--quiet",
+        "--release",
+        "--locked",
+        "--bin",
+        "ps-core-adapter",
+        "--",
+        "{cases}",
+        "{commit}",
+        "--jsonl"
       ],
       "trace_adapter": "src/bin/ps-trace-producer.rs",
       "trace_command": [
-        "cargo", "run", "--quiet", "--release", "--locked", "--bin",
-        "ps-trace-producer", "--", "{input}"
+        "cargo",
+        "run",
+        "--quiet",
+        "--release",
+        "--locked",
+        "--bin",
+        "ps-trace-producer",
+        "--",
+        "{input}"
       ]
     },
     {
@@ -30,9 +54,7 @@
       "fixture": "test/conformance.json",
       "runtime": { "name": "bun", "version": "1.3.14" },
       "command": ["bun", "run", "core-adapter", "{cases}", "{commit}"],
-      "stream_command": [
-        "bun", "run", "core-adapter", "{cases}", "{commit}", "--jsonl"
-      ],
+      "stream_command": ["bun", "run", "core-adapter", "{cases}", "{commit}", "--jsonl"],
       "trace_adapter": "src/bin/trace-producer.ts",
       "trace_command": ["bun", "run", "trace-producer", "{input}"]
     }

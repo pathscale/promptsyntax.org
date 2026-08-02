@@ -17,8 +17,8 @@
   "conformant": true,
   "summary": {
     "families": 4,
-    "cases": 34,
-    "passed": 34,
+    "cases": 35,
+    "passed": 35,
     "failed": 0,
     "requirements_required": 22,
     "requirements_covered": 22
@@ -479,6 +479,17 @@
           "actual_diagnostics": [
             "TRACE_R2_STEP_NOT_FOUND"
           ],
+          "requirements": [
+            "PS-TRACE-R2"
+          ]
+        },
+        {
+          "id": "r2-injected-segment-step-valid",
+          "passed": true,
+          "expected_conformant": true,
+          "actual_conformant": true,
+          "expected_diagnostics": [],
+          "actual_diagnostics": [],
           "requirements": [
             "PS-TRACE-R2"
           ]

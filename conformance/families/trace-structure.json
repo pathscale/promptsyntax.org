@@ -67,13 +67,48 @@
       "expected": { "conformant": true, "diagnostics": [] }
     },
     {
+      "id": "r2-injected-segment-step-valid",
+      "description": "An injected segment resolves to a context-inclusion step in the same inference.",
+      "requirements": ["PS-TRACE-R2"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        { "op": "replace", "path": "/events/0/segments/0/origin", "value": "injected" },
+        {
+          "op": "replace",
+          "path": "/events/0/segments/0/step",
+          "value": "step-injected-001"
+        },
+        {
+          "op": "add",
+          "path": "/events/0/steps/-",
+          "value": {
+            "id": "step-injected-001",
+            "kind": "context-inclusion",
+            "parent": "step-user-001",
+            "tier": "user"
+          }
+        }
+      ],
+      "expected": { "conformant": true, "diagnostics": [] }
+    },
+    {
       "id": "r2-dangling-segment-step",
       "description": "An injected segment cannot point to a missing provenance step.",
       "requirements": ["PS-TRACE-R2"],
       "trace": "conformance/fixtures/trace-user-kept.json",
       "patch": [
         { "op": "replace", "path": "/events/0/segments/0/origin", "value": "injected" },
-        { "op": "replace", "path": "/events/0/segments/0/step", "value": "step-missing" }
+        { "op": "replace", "path": "/events/0/segments/0/step", "value": "step-missing" },
+        {
+          "op": "add",
+          "path": "/events/0/steps/-",
+          "value": {
+            "id": "step-injected-001",
+            "kind": "context-inclusion",
+            "parent": "step-user-001",
+            "tier": "user"
+          }
+        }
       ],
       "expected": {
         "conformant": false,
@@ -88,19 +123,39 @@
       "patch": [
         {
           "op": "replace",
+          "path": "/events/0/segments",
+          "value": [
+            {
+              "i": 0,
+              "id": "segment-user-001",
+              "origin": "user-authored",
+              "content": { "state": "inline", "text": "Summarize " },
+              "step": "step-user-001"
+            },
+            {
+              "i": 1,
+              "id": "segment-context-001",
+              "origin": "injected",
+              "content": { "state": "inline", "text": "the report." },
+              "step": "step-context-001"
+            }
+          ]
+        },
+        {
+          "op": "replace",
           "path": "/events/0/steps",
           "value": [
             {
               "id": "step-user-001",
               "kind": "user-content",
-              "parent": "step-policy-001",
+              "parent": "step-context-001",
               "tier": "user"
             },
             {
-              "id": "step-policy-001",
-              "kind": "policy-injection",
+              "id": "step-context-001",
+              "kind": "context-inclusion",
               "parent": "step-user-001",
-              "tier": "operator"
+              "tier": "user"
             }
           ]
         }

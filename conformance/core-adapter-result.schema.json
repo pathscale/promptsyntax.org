@@ -42,13 +42,7 @@
     "output": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "round_trip",
-        "data_plane",
-        "segments",
-        "directives",
-        "parser_diagnostics"
-      ],
+      "required": ["round_trip", "data_plane", "segments", "directives", "parser_diagnostics"],
       "properties": {
         "round_trip": { "type": "string" },
         "data_plane": { "type": "string" },
