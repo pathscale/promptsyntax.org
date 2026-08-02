@@ -13,13 +13,22 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "repository", "commit", "adapter", "fixture", "command"],
+        "required": ["id", "repository", "commit", "adapter", "fixture", "runtime", "command"],
         "properties": {
           "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]+$" },
           "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
           "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
           "adapter": { "type": "string", "minLength": 1 },
           "fixture": { "type": "string", "minLength": 1 },
+          "runtime": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "version"],
+            "properties": {
+              "name": { "enum": ["rust", "bun"] },
+              "version": { "type": "string", "minLength": 1 }
+            }
+          },
           "command": {
             "type": "array",
             "minItems": 1,
