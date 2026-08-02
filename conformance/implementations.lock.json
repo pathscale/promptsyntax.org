@@ -1,0 +1,21 @@
+{
+  "format_version": "0.1-draft",
+  "implementations": [
+    {
+      "id": "promptsyntax-rs",
+      "repository": "pathscale/PromptSyntax-rs",
+      "commit": "c64072f618ffdb53cc389fc40dfe0370c4cf05be",
+      "adapter": "tests/conformance.rs",
+      "fixture": "tests/conformance.json",
+      "command": ["cargo", "test"]
+    },
+    {
+      "id": "promptsyntax-ts",
+      "repository": "pathscale/PromptSyntax-ts",
+      "commit": "b22acfac066c0ea6eec7d042d69040c695ef5422",
+      "adapter": "test/parser.test.ts",
+      "fixture": "test/conformance.json",
+      "command": ["bun", "test"]
+    }
+  ]
+}

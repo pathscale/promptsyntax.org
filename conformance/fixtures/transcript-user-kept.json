@@ -1,0 +1,16 @@
+{
+  "format_version": "0.1-draft",
+  "turn": "turn-example-001",
+  "inferences": [
+    {
+      "id": "inference-001",
+      "actual_request_utf8": "Summarize the report.",
+      "routing": {
+        "outcome": "invoked",
+        "bound": "model:example/atlas-4@2026-08-01"
+      }
+    }
+  ],
+  "boundaries": [],
+  "external_artifacts": []
+}

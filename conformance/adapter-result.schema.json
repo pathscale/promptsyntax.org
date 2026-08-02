@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptsyntax.org/conformance/adapter-result/0.1-draft",
+  "title": "PromptSyntax implementation adapter result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format_version", "target", "implementation", "results"],
+  "properties": {
+    "format_version": { "const": "0.1-draft" },
+    "target": { "enum": ["core-parser", "trace-producer"] },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "commit"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+      }
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["case_id", "conformant", "diagnostics", "output"],
+        "properties": {
+          "case_id": { "type": "string", "minLength": 1 },
+          "conformant": { "type": "boolean" },
+          "diagnostics": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "output": true
+        }
+      }
+    }
+  }
+}

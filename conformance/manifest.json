@@ -2,21 +2,77 @@
   "format_version": "0.1-draft",
   "suite": {
     "id": "promptsyntax-conformance",
-    "version": "0.0.0-bootstrap",
-    "status": "bootstrap"
+    "version": "0.1.0-rc.1",
+    "status": "candidate"
   },
   "spec": {
     "path": "spec/SPEC.md",
     "commit": "7456634817f4eb68c8909a58b476505e6fd7c063",
-    "declared_version": "0.2 with settled 0.2.1 and proposed 0.2.2 material",
+    "declared_version": "0.3 candidate over the PR #4 working draft",
     "baseline_status": "working-draft"
   },
   "files": {
     "requirements": "conformance/requirements.json",
     "requirements_schema": "conformance/requirements.schema.json",
     "diagnostics": "conformance/diagnostic-registry.json",
-    "diagnostics_schema": "conformance/diagnostic-registry.schema.json"
+    "diagnostics_schema": "conformance/diagnostic-registry.schema.json",
+    "trace_schema": "schemas/prompt-trace-0.3-draft.schema.json",
+    "family_schema": "conformance/case-family.schema.json",
+    "transcript_schema": "conformance/transcript.schema.json",
+    "profile": "conformance/profiles/trace-user-0.3-draft.json",
+    "profile_schema": "conformance/profile.schema.json",
+    "report_schema": "conformance/report.schema.json",
+    "core_cases": "conformance/cases/core-parser.json",
+    "core_cases_schema": "conformance/core-cases.schema.json",
+    "adapter_result_schema": "conformance/adapter-result.schema.json",
+    "implementations_lock": "conformance/implementations.lock.json",
+    "implementations_schema": "conformance/implementations.schema.json",
+    "candidate_report": "conformance/reports/0.1.0-rc.1.json"
   },
-  "families": [],
-  "claims": []
+  "families": [
+    {
+      "id": "trace-structure",
+      "layer": "trace",
+      "target": "trace-document",
+      "version": "0.1.0-rc.1",
+      "path": "conformance/families/trace-structure.json",
+      "status": "candidate"
+    },
+    {
+      "id": "trace-outcomes",
+      "layer": "trace",
+      "target": "trace-document",
+      "version": "0.1.0-rc.1",
+      "path": "conformance/families/trace-outcomes.json",
+      "status": "candidate"
+    },
+    {
+      "id": "trace-boundary-tamper",
+      "layer": "trace",
+      "target": "trace-document",
+      "version": "0.1.0-rc.1",
+      "path": "conformance/families/trace-boundary-tamper.json",
+      "status": "candidate"
+    },
+    {
+      "id": "trace-producer-replay",
+      "layer": "trace",
+      "target": "trace-producer",
+      "version": "0.1.0-rc.1",
+      "path": "conformance/families/trace-producer-replay.json",
+      "status": "candidate"
+    }
+  ],
+  "claims": [
+    {
+      "profile": "trace-user-0-3-draft",
+      "families": [
+        "trace-structure",
+        "trace-outcomes",
+        "trace-boundary-tamper",
+        "trace-producer-replay"
+      ],
+      "status": "candidate"
+    }
+  ]
 }

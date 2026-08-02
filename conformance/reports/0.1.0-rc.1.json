@@ -1,0 +1,602 @@
+{
+  "format_version": "0.1-draft",
+  "suite": {
+    "id": "promptsyntax-conformance",
+    "version": "0.1.0-rc.1",
+    "status": "candidate"
+  },
+  "spec": {
+    "commit": "7456634817f4eb68c8909a58b476505e6fd7c063",
+    "declared_version": "0.3 candidate over the PR #4 working draft"
+  },
+  "profile": {
+    "id": "trace-user-0-3-draft",
+    "version": "0.1.0-rc.1",
+    "status": "candidate"
+  },
+  "conformant": true,
+  "summary": {
+    "families": 4,
+    "cases": 34,
+    "passed": 34,
+    "failed": 0,
+    "requirements_required": 22,
+    "requirements_covered": 22
+  },
+  "coverage": {
+    "required": [
+      "PS-CAP-PARAM-001",
+      "PS-CORE-BIND-002",
+      "PS-EXEC-BEST-001",
+      "PS-EXEC-FALLBACK-001",
+      "PS-EXEC-FALLBACK-002",
+      "PS-EXEC-FALLBACK-003",
+      "PS-EXEC-STRICT-001",
+      "PS-TRACE-ASSEMBLY-001",
+      "PS-TRACE-ASSEMBLY-002",
+      "PS-TRACE-BOUNDARY-001",
+      "PS-TRACE-CONTENT-001",
+      "PS-TRACE-EVENTS-001",
+      "PS-TRACE-FILL-001",
+      "PS-TRACE-R1",
+      "PS-TRACE-R2",
+      "PS-TRACE-R3",
+      "PS-TRACE-R4",
+      "PS-TRACE-R5",
+      "PS-TRACE-R6",
+      "PS-TRACE-RESOLUTION-001",
+      "PS-TRACE-ROUTING-001",
+      "PS-TRACE-SEGMENT-ID-001"
+    ],
+    "covered": [
+      "PS-CAP-PARAM-001",
+      "PS-CORE-BIND-002",
+      "PS-EXEC-BEST-001",
+      "PS-EXEC-FALLBACK-001",
+      "PS-EXEC-FALLBACK-002",
+      "PS-EXEC-FALLBACK-003",
+      "PS-EXEC-STRICT-001",
+      "PS-TRACE-ASSEMBLY-001",
+      "PS-TRACE-ASSEMBLY-002",
+      "PS-TRACE-BOUNDARY-001",
+      "PS-TRACE-CONTENT-001",
+      "PS-TRACE-EVENTS-001",
+      "PS-TRACE-FILL-001",
+      "PS-TRACE-R1",
+      "PS-TRACE-R2",
+      "PS-TRACE-R3",
+      "PS-TRACE-R4",
+      "PS-TRACE-R5",
+      "PS-TRACE-R6",
+      "PS-TRACE-RESOLUTION-001",
+      "PS-TRACE-ROUTING-001",
+      "PS-TRACE-SEGMENT-ID-001"
+    ],
+    "missing": []
+  },
+  "families": [
+    {
+      "id": "trace-boundary-tamper",
+      "target": "trace-document",
+      "status": "candidate",
+      "cases": [
+        {
+          "id": "boundary-failure-recorded-valid",
+          "passed": true,
+          "expected_conformant": true,
+          "actual_conformant": true,
+          "expected_diagnostics": [],
+          "actual_diagnostics": [],
+          "requirements": [
+            "PS-TRACE-BOUNDARY-001",
+            "PS-TRACE-EVENTS-001"
+          ]
+        },
+        {
+          "id": "boundary-success-received-missing",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "SCHEMA_INSTANCE_INVALID"
+          ],
+          "actual_diagnostics": [
+            "SCHEMA_INSTANCE_INVALID"
+          ],
+          "requirements": [
+            "PS-TRACE-BOUNDARY-001"
+          ]
+        },
+        {
+          "id": "tamper-duplicate-segment-id",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_SEGMENT_ID_DUPLICATE"
+          ],
+          "actual_diagnostics": [
+            "TRACE_SEGMENT_ID_DUPLICATE"
+          ],
+          "requirements": [
+            "PS-TRACE-SEGMENT-ID-001"
+          ]
+        },
+        {
+          "id": "tamper-external-digest-mismatch",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_CONTENT_DIGEST_MISMATCH"
+          ],
+          "actual_diagnostics": [
+            "TRACE_CONTENT_DIGEST_MISMATCH"
+          ],
+          "requirements": [
+            "PS-TRACE-CONTENT-001",
+            "PS-TRACE-R1"
+          ]
+        },
+        {
+          "id": "tamper-external-length-mismatch",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_CONTENT_LENGTH_MISMATCH"
+          ],
+          "actual_diagnostics": [
+            "TRACE_CONTENT_LENGTH_MISMATCH"
+          ],
+          "requirements": [
+            "PS-TRACE-CONTENT-001",
+            "PS-TRACE-R1"
+          ]
+        },
+        {
+          "id": "tamper-unknown-field-rejected",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "SCHEMA_INSTANCE_INVALID"
+          ],
+          "actual_diagnostics": [
+            "SCHEMA_INSTANCE_INVALID"
+          ],
+          "requirements": [
+            "PS-TRACE-R6"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trace-outcomes",
+      "target": "trace-document",
+      "status": "candidate",
+      "cases": [
+        {
+          "id": "entity-authored-fallback-valid",
+          "passed": true,
+          "expected_conformant": true,
+          "actual_conformant": true,
+          "expected_diagnostics": [],
+          "actual_diagnostics": [],
+          "requirements": [
+            "PS-EXEC-FALLBACK-001",
+            "PS-EXEC-FALLBACK-002",
+            "PS-EXEC-FALLBACK-003",
+            "PS-TRACE-FILL-001"
+          ]
+        },
+        {
+          "id": "entity-fallback-step-does-not-match",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_ENTITY_FALLBACK_STEP_INVALID"
+          ],
+          "actual_diagnostics": [
+            "TRACE_ENTITY_FALLBACK_STEP_INVALID"
+          ],
+          "requirements": [
+            "PS-EXEC-FALLBACK-002",
+            "PS-EXEC-FALLBACK-003"
+          ]
+        },
+        {
+          "id": "entity-kept-applied-mismatch",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_ENTITY_KEPT_MISMATCH",
+            "TRACE_ROUTING_FILL_MISMATCH"
+          ],
+          "actual_diagnostics": [
+            "TRACE_ENTITY_KEPT_MISMATCH",
+            "TRACE_ROUTING_FILL_MISMATCH"
+          ],
+          "requirements": [
+            "PS-CORE-BIND-002",
+            "PS-EXEC-STRICT-001"
+          ]
+        },
+        {
+          "id": "entity-kept-strict-valid",
+          "passed": true,
+          "expected_conformant": true,
+          "actual_conformant": true,
+          "expected_diagnostics": [],
+          "actual_diagnostics": [],
+          "requirements": [
+            "PS-CAP-PARAM-001",
+            "PS-EXEC-STRICT-001",
+            "PS-TRACE-FILL-001"
+          ]
+        },
+        {
+          "id": "entity-strict-refusal-valid",
+          "passed": true,
+          "expected_conformant": true,
+          "actual_conformant": true,
+          "expected_diagnostics": [],
+          "actual_diagnostics": [],
+          "requirements": [
+            "PS-EXEC-STRICT-001",
+            "PS-TRACE-FILL-001",
+            "PS-TRACE-RESOLUTION-001"
+          ]
+        },
+        {
+          "id": "entity-substituted-best-effort-valid",
+          "passed": true,
+          "expected_conformant": true,
+          "actual_conformant": true,
+          "expected_diagnostics": [],
+          "actual_diagnostics": [],
+          "requirements": [
+            "PS-EXEC-BEST-001",
+            "PS-TRACE-FILL-001"
+          ]
+        },
+        {
+          "id": "entity-substituted-under-strict",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_ENTITY_SUBSTITUTION_NOT_AUTHORIZED"
+          ],
+          "actual_diagnostics": [
+            "TRACE_ENTITY_SUBSTITUTION_NOT_AUTHORIZED"
+          ],
+          "requirements": [
+            "PS-EXEC-STRICT-001",
+            "PS-TRACE-FILL-001"
+          ]
+        },
+        {
+          "id": "resolution-missing-applied-binding",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_RESOLUTION_BOUND_MISSING"
+          ],
+          "actual_diagnostics": [
+            "TRACE_RESOLUTION_BOUND_MISSING"
+          ],
+          "requirements": [
+            "PS-CORE-BIND-002",
+            "PS-TRACE-RESOLUTION-001"
+          ]
+        },
+        {
+          "id": "routing-bound-disagrees-with-fill",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_ROUTING_BOUND_MISMATCH",
+            "TRACE_ROUTING_FILL_MISMATCH"
+          ],
+          "actual_diagnostics": [
+            "TRACE_ROUTING_BOUND_MISMATCH",
+            "TRACE_ROUTING_FILL_MISMATCH"
+          ],
+          "requirements": [
+            "PS-CORE-BIND-002",
+            "PS-TRACE-FILL-001",
+            "PS-TRACE-ROUTING-001"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trace-producer-replay",
+      "target": "trace-producer",
+      "status": "candidate",
+      "cases": [
+        {
+          "id": "producer-bound-entity-mismatch",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_PRODUCER_BOUND_MISMATCH"
+          ],
+          "actual_diagnostics": [
+            "TRACE_PRODUCER_BOUND_MISMATCH"
+          ],
+          "requirements": [
+            "PS-CORE-BIND-002",
+            "PS-TRACE-ROUTING-001"
+          ]
+        },
+        {
+          "id": "producer-boundary-outcome-match",
+          "passed": true,
+          "expected_conformant": true,
+          "actual_conformant": true,
+          "expected_diagnostics": [],
+          "actual_diagnostics": [],
+          "requirements": [
+            "PS-TRACE-BOUNDARY-001"
+          ]
+        },
+        {
+          "id": "producer-boundary-outcome-mismatch",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_PRODUCER_BOUNDARY_MISMATCH"
+          ],
+          "actual_diagnostics": [
+            "TRACE_PRODUCER_BOUNDARY_MISMATCH"
+          ],
+          "requirements": [
+            "PS-TRACE-BOUNDARY-001"
+          ]
+        },
+        {
+          "id": "producer-external-artifact-digest-tampered",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_CONTENT_DIGEST_MISMATCH"
+          ],
+          "actual_diagnostics": [
+            "TRACE_CONTENT_DIGEST_MISMATCH"
+          ],
+          "requirements": [
+            "PS-TRACE-CONTENT-001",
+            "PS-TRACE-R1"
+          ]
+        },
+        {
+          "id": "producer-external-artifact-valid",
+          "passed": true,
+          "expected_conformant": true,
+          "actual_conformant": true,
+          "expected_diagnostics": [],
+          "actual_diagnostics": [],
+          "requirements": [
+            "PS-TRACE-CONTENT-001",
+            "PS-TRACE-R1"
+          ]
+        },
+        {
+          "id": "producer-request-and-bound-match",
+          "passed": true,
+          "expected_conformant": true,
+          "actual_conformant": true,
+          "expected_diagnostics": [],
+          "actual_diagnostics": [],
+          "requirements": [
+            "PS-CORE-BIND-002",
+            "PS-TRACE-R1",
+            "PS-TRACE-ROUTING-001"
+          ]
+        },
+        {
+          "id": "producer-request-bytes-mismatch",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_R1_REQUEST_BYTES_MISMATCH"
+          ],
+          "actual_diagnostics": [
+            "TRACE_R1_REQUEST_BYTES_MISMATCH"
+          ],
+          "requirements": [
+            "PS-TRACE-R1"
+          ]
+        },
+        {
+          "id": "producer-turn-mismatch",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_PRODUCER_TURN_MISMATCH"
+          ],
+          "actual_diagnostics": [
+            "TRACE_PRODUCER_TURN_MISMATCH"
+          ],
+          "requirements": [
+            "PS-TRACE-EVENTS-001"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trace-structure",
+      "target": "trace-document",
+      "status": "candidate",
+      "cases": [
+        {
+          "id": "r1-inline-segments-contiguous",
+          "passed": true,
+          "expected_conformant": true,
+          "actual_conformant": true,
+          "expected_diagnostics": [],
+          "actual_diagnostics": [],
+          "requirements": [
+            "PS-TRACE-ASSEMBLY-001",
+            "PS-TRACE-CONTENT-001",
+            "PS-TRACE-R1"
+          ]
+        },
+        {
+          "id": "r1-segment-index-gap",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_R1_SEGMENT_INDEX_INVALID"
+          ],
+          "actual_diagnostics": [
+            "TRACE_R1_SEGMENT_INDEX_INVALID"
+          ],
+          "requirements": [
+            "PS-TRACE-R1"
+          ]
+        },
+        {
+          "id": "r2-dangling-segment-step",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_R2_STEP_NOT_FOUND"
+          ],
+          "actual_diagnostics": [
+            "TRACE_R2_STEP_NOT_FOUND"
+          ],
+          "requirements": [
+            "PS-TRACE-R2"
+          ]
+        },
+        {
+          "id": "r2-r3-injected-provenance-valid",
+          "passed": true,
+          "expected_conformant": true,
+          "actual_conformant": true,
+          "expected_diagnostics": [],
+          "actual_diagnostics": [],
+          "requirements": [
+            "PS-TRACE-R2",
+            "PS-TRACE-R3"
+          ]
+        },
+        {
+          "id": "r3-provenance-cycle",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_R3_STEP_CYCLE"
+          ],
+          "actual_diagnostics": [
+            "TRACE_R3_STEP_CYCLE"
+          ],
+          "requirements": [
+            "PS-TRACE-R3"
+          ]
+        },
+        {
+          "id": "r4-user-inline-floor",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "SCHEMA_INSTANCE_INVALID"
+          ],
+          "actual_diagnostics": [
+            "SCHEMA_INSTANCE_INVALID"
+          ],
+          "requirements": [
+            "PS-TRACE-R4"
+          ]
+        },
+        {
+          "id": "r5-oversight-materialization-missing",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_R5_MATERIALIZATION_REQUIRED"
+          ],
+          "actual_diagnostics": [
+            "TRACE_R5_MATERIALIZATION_REQUIRED"
+          ],
+          "requirements": [
+            "PS-TRACE-R5"
+          ]
+        },
+        {
+          "id": "r5-oversight-materialized-valid",
+          "passed": true,
+          "expected_conformant": true,
+          "actual_conformant": true,
+          "expected_diagnostics": [],
+          "actual_diagnostics": [],
+          "requirements": [
+            "PS-TRACE-CONTENT-001",
+            "PS-TRACE-R5"
+          ]
+        },
+        {
+          "id": "r6-internal-omission-declared",
+          "passed": true,
+          "expected_conformant": true,
+          "actual_conformant": true,
+          "expected_diagnostics": [],
+          "actual_diagnostics": [],
+          "requirements": [
+            "PS-TRACE-ASSEMBLY-002",
+            "PS-TRACE-R6"
+          ]
+        },
+        {
+          "id": "r6-user-assembly-cannot-be-omitted",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "SCHEMA_INSTANCE_INVALID"
+          ],
+          "actual_diagnostics": [
+            "SCHEMA_INSTANCE_INVALID"
+          ],
+          "requirements": [
+            "PS-TRACE-ASSEMBLY-001",
+            "PS-TRACE-R6"
+          ]
+        },
+        {
+          "id": "turn-event-identifiers-unique",
+          "passed": true,
+          "expected_conformant": false,
+          "actual_conformant": false,
+          "expected_diagnostics": [
+            "TRACE_EVENT_ID_DUPLICATE"
+          ],
+          "actual_diagnostics": [
+            "TRACE_EVENT_ID_DUPLICATE"
+          ],
+          "requirements": [
+            "PS-TRACE-EVENTS-001"
+          ]
+        }
+      ]
+    }
+  ],
+  "diagnostics": []
+}

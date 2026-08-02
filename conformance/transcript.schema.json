@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptsyntax.org/conformance/producer-transcript/0.1-draft",
+  "title": "PromptSyntax deterministic producer transcript",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format_version", "turn", "inferences", "boundaries", "external_artifacts"],
+  "properties": {
+    "format_version": { "const": "0.1-draft" },
+    "turn": { "type": "string", "minLength": 1 },
+    "inferences": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/inference" }
+    },
+    "boundaries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/boundary" }
+    },
+    "external_artifacts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/artifact" }
+    }
+  },
+  "$defs": {
+    "inference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "actual_request_utf8", "routing"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "actual_request_utf8": { "type": "string" },
+        "routing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["outcome"],
+          "properties": {
+            "outcome": { "enum": ["invoked", "refused"] },
+            "bound": { "type": "string", "minLength": 1 }
+          },
+          "allOf": [
+            {
+              "if": {
+                "required": ["outcome"],
+                "properties": { "outcome": { "const": "invoked" } }
+              },
+              "then": { "required": ["bound"] },
+              "else": { "not": { "required": ["bound"] } }
+            }
+          ]
+        }
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "outcome"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "outcome": { "enum": ["succeeded", "failed", "blocked", "cancelled"] }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "length", "content_utf8"],
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "length": { "type": "integer", "minimum": 0 },
+        "content_utf8": { "type": "string" }
+      }
+    }
+  }
+}

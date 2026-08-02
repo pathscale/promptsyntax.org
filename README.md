@@ -52,12 +52,14 @@ anything.
 | [`examples/`](./examples/) | Machine-validated example trace |
 | [`decisions/`](./decisions/) | Design decision records (with rejected alternatives) |
 | [`profiles/`](./profiles/) | Externalized mappings: vendor, oversight, policy bindings |
+| [`conformance/`](./conformance/) | Language-independent requirements, vectors, schemas, reports, and Rust runner |
 
 ## Status
 
-**Draft v0.2.1, pre-implementation. Not yet stable.** A reference implementation and a
-formative multi-stakeholder study are in progress; an academic paper is in preparation.
-This is a proposal seeking scrutiny, not a finished standard.
+**Draft v0.2.1 with experimental implementations. Not yet stable.** Rust and TypeScript
+Core parsers and a candidate Trace conformance suite are under active review; a formative
+multi-stakeholder study and academic paper are in preparation. This is a proposal seeking
+scrutiny, not a finished standard.
 
 ## Design principles
 
@@ -71,6 +73,20 @@ not by escaping.
 Per-layer, versioned, and named, e.g. `PS/Core 0.2 + PS/Trace 0.2 (user tier,
 routing-complete/assembly-partial)`. **Unqualified conformance claims are
 non-conformant:** an implementation must state what it covers.
+
+The draft suite is self-contained in this repository. Its stable-Rust runner has no
+provider, model, Node, or Python dependency:
+
+```sh
+cargo test --manifest-path conformance/runner/Cargo.toml
+cargo run --manifest-path conformance/runner/Cargo.toml -- \
+  check-requirements conformance/requirements.json
+cargo run --manifest-path conformance/runner/Cargo.toml -- run-suite .
+```
+
+Candidate `0.1.0-rc.1` currently executes 34 Trace document and producer cases with full
+coverage of its explicitly named 22-requirement profile. Candidate status is not a released
+or unqualified implementation-conformance claim.
 
 ## Contributing
 

@@ -60,6 +60,15 @@
     }
   },
   "files": {
-    "includes": ["**", "!dist", "!node_modules", "!*.config.js", "!*.config.ts", "!.claude"]
+    "includes": [
+      "**",
+      "!dist",
+      "!node_modules",
+      "!*.config.js",
+      "!*.config.ts",
+      "!.claude",
+      "!conformance/reports",
+      "!conformance/runner/target"
+    ]
   }
 }

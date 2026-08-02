@@ -144,6 +144,324 @@
       "phase": "io",
       "severity": "error",
       "description": "The schema file could not be read."
+    },
+    {
+      "code": "CASE_PATCH_INVALID",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A case JSON Patch operation is invalid or cannot be applied to its fixture."
+    },
+    {
+      "code": "SUITE_BASELINE_STATUS_INVALID",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "Suite and specification baseline statuses form an invalid release combination."
+    },
+    {
+      "code": "SUITE_CASE_ID_DUPLICATE",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A case identifier occurs more than once across the suite."
+    },
+    {
+      "code": "SUITE_CASE_REQUIREMENT_OUTSIDE_PROFILE",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A case cites a requirement outside the active conformance profile."
+    },
+    {
+      "code": "SUITE_CASE_REQUIREMENT_UNKNOWN",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A case cites a requirement absent from the requirements inventory."
+    },
+    {
+      "code": "SUITE_CLAIM_FAMILY_UNKNOWN",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A conformance claim cites a family absent from the suite manifest."
+    },
+    {
+      "code": "SUITE_CLAIM_PROFILE_MISMATCH",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A conformance claim disagrees with the active profile identifier or status."
+    },
+    {
+      "code": "SUITE_DIAGNOSTIC_DUPLICATE",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "The diagnostic registry contains a duplicate diagnostic code."
+    },
+    {
+      "code": "SUITE_DIAGNOSTIC_UNREGISTERED",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A case expects or emits a diagnostic absent from the registry."
+    },
+    {
+      "code": "SUITE_FAMILY_METADATA_MISMATCH",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "Manifest family metadata disagrees with the referenced family document."
+    },
+    {
+      "code": "SUITE_FILE_READ_FAILED",
+      "phase": "io",
+      "severity": "error",
+      "description": "A suite artifact could not be read."
+    },
+    {
+      "code": "SUITE_FORMAT_UNSUPPORTED",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "The suite manifest uses an unsupported format version."
+    },
+    {
+      "code": "SUITE_IMPLEMENTATION_LOCK_INVALID",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "The pinned implementation lock is malformed or uses an unsupported format."
+    },
+    {
+      "code": "SUITE_JSON_INVALID",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "A suite artifact is not valid JSON or does not match its typed model."
+    },
+    {
+      "code": "SUITE_PATH_INVALID",
+      "phase": "io",
+      "severity": "error",
+      "description": "A suite artifact path is unsafe or resolves outside the repository."
+    },
+    {
+      "code": "SUITE_PRODUCER_TRANSCRIPT_REQUIRED",
+      "phase": "producer",
+      "severity": "error",
+      "description": "A Trace producer case does not supply an independent deterministic transcript."
+    },
+    {
+      "code": "SUITE_PROFILE_COVERAGE_MISSING",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "An active profile requirement has no passing conformance case."
+    },
+    {
+      "code": "SUITE_PROFILE_REQUIREMENT_UNKNOWN",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "The active profile cites a requirement absent from the inventory."
+    },
+    {
+      "code": "SUITE_REPORT_INVALID",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "The generated deterministic report does not satisfy the report contract."
+    },
+    {
+      "code": "TRACE_CONTENT_DIGEST_MISMATCH",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "Materialized or supplied content bytes do not match their declared SHA-256 digest."
+    },
+    {
+      "code": "TRACE_CONTENT_LENGTH_MISMATCH",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "Materialized or supplied content does not match its declared UTF-8 byte length."
+    },
+    {
+      "code": "TRACE_ENTITY_FALLBACK_STEP_INVALID",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "An entity fallback does not identify the first successful authored route step."
+    },
+    {
+      "code": "TRACE_ENTITY_KEPT_MISMATCH",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "An entity marked kept has different requested and applied canonical identifiers."
+    },
+    {
+      "code": "TRACE_ENTITY_POLICY_MISMATCH",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "An entity fill policy disagrees with the routing policy."
+    },
+    {
+      "code": "TRACE_ENTITY_REFUSAL_MISMATCH",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "An entity refusal disagrees with the routing outcome or reports an applied entity."
+    },
+    {
+      "code": "TRACE_ENTITY_SUBSTITUTION_NOT_AUTHORIZED",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "An entity substitution lacks explicit best-effort policy or the required authority."
+    },
+    {
+      "code": "TRACE_EVENT_ID_DUPLICATE",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "A turn contains the same event identifier more than once."
+    },
+    {
+      "code": "TRACE_INLINE_CONTENT_EXCEEDS_THRESHOLD",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "Inline content exceeds the trace's declared UTF-8 byte threshold."
+    },
+    {
+      "code": "TRACE_PRODUCER_ARTIFACT_DUPLICATE",
+      "phase": "producer",
+      "severity": "error",
+      "description": "A producer transcript supplies the same external artifact digest more than once."
+    },
+    {
+      "code": "TRACE_PRODUCER_BOUNDARY_MISMATCH",
+      "phase": "producer",
+      "severity": "error",
+      "description": "A boundary outcome differs from the independently observed producer outcome."
+    },
+    {
+      "code": "TRACE_PRODUCER_BOUNDARY_MISSING",
+      "phase": "producer",
+      "severity": "error",
+      "description": "A trace boundary event has no corresponding independent producer fact."
+    },
+    {
+      "code": "TRACE_PRODUCER_BOUND_MISMATCH",
+      "phase": "producer",
+      "severity": "error",
+      "description": "The trace's bound entity differs from the entity independently observed as invoked."
+    },
+    {
+      "code": "TRACE_PRODUCER_FORMAT_UNSUPPORTED",
+      "phase": "producer",
+      "severity": "error",
+      "description": "The deterministic producer transcript uses an unsupported format."
+    },
+    {
+      "code": "TRACE_PRODUCER_INFERENCE_MISSING",
+      "phase": "producer",
+      "severity": "error",
+      "description": "A trace inference has no corresponding independent producer fact."
+    },
+    {
+      "code": "TRACE_PRODUCER_ROUTING_OUTCOME_MISMATCH",
+      "phase": "producer",
+      "severity": "error",
+      "description": "The trace routing outcome differs from the independent producer outcome."
+    },
+    {
+      "code": "TRACE_PRODUCER_TRACE_EVENT_MISSING",
+      "phase": "producer",
+      "severity": "error",
+      "description": "An independently observed event is absent from the trace."
+    },
+    {
+      "code": "TRACE_PRODUCER_TURN_MISMATCH",
+      "phase": "producer",
+      "severity": "error",
+      "description": "The trace and deterministic producer transcript identify different turns."
+    },
+    {
+      "code": "TRACE_R1_CONTENT_UNAVAILABLE",
+      "phase": "producer",
+      "severity": "error",
+      "description": "R1 producer validation cannot reconstruct every request byte from supplied evidence."
+    },
+    {
+      "code": "TRACE_R1_REQUEST_BYTES_MISMATCH",
+      "phase": "producer",
+      "severity": "error",
+      "description": "Reconstructed trace segments differ byte-for-byte from the independent UTF-8 request."
+    },
+    {
+      "code": "TRACE_R1_SEGMENT_INDEX_INVALID",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "A segment index differs from its zero-based position in the inference."
+    },
+    {
+      "code": "TRACE_R2_STEP_NOT_FOUND",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "A segment provenance pointer does not resolve within its inference."
+    },
+    {
+      "code": "TRACE_R3_PARENT_NOT_FOUND",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "A provenance parent pointer does not resolve within its inference."
+    },
+    {
+      "code": "TRACE_R3_STEP_CYCLE",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "A provenance parent chain contains a cycle."
+    },
+    {
+      "code": "TRACE_R5_MATERIALIZATION_REQUIRED",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "A materialized oversight export contains unresolved external or withheld content."
+    },
+    {
+      "code": "TRACE_R5_MODE_TIER_INVALID",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "Materialized content mode is declared outside an oversight-tier export."
+    },
+    {
+      "code": "TRACE_RESOLUTION_BINDING_UNPINNED",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "A resolution binding is not a canonical pinned entity identifier."
+    },
+    {
+      "code": "TRACE_RESOLUTION_BOUND_MISSING",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "The resolution report omits the successfully invoked entity."
+    },
+    {
+      "code": "TRACE_RESOLUTION_REFUSAL_MISSING",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "A refused routing outcome has no typed resolution refusal."
+    },
+    {
+      "code": "TRACE_ROUTING_ATTEMPT_INVALID",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "Routing outcome and successful attempt count disagree."
+    },
+    {
+      "code": "TRACE_ROUTING_BOUND_MISMATCH",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "The routing bound entity differs from the successful attempt."
+    },
+    {
+      "code": "TRACE_ROUTING_FILL_MISMATCH",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "The entity fill differs from the routing bound entity."
+    },
+    {
+      "code": "TRACE_SEGMENT_ID_DUPLICATE",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "A segment identifier occurs more than once within an inference."
+    },
+    {
+      "code": "TRACE_STEP_ID_DUPLICATE",
+      "phase": "semantic",
+      "severity": "error",
+      "description": "A provenance step identifier occurs more than once within an inference."
     }
   ]
 }
