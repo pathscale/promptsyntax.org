@@ -31,12 +31,41 @@
     "files": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["requirements", "requirements_schema", "diagnostics", "diagnostics_schema"],
+      "required": [
+        "requirements",
+        "requirements_schema",
+        "diagnostics",
+        "diagnostics_schema",
+        "trace_schema",
+        "family_schema",
+        "transcript_schema",
+        "profile",
+        "profile_schema",
+        "report_schema",
+        "core_cases",
+        "core_cases_schema",
+        "adapter_result_schema",
+        "implementations_lock",
+        "implementations_schema",
+        "candidate_report"
+      ],
       "properties": {
         "requirements": { "type": "string", "minLength": 1 },
         "requirements_schema": { "type": "string", "minLength": 1 },
         "diagnostics": { "type": "string", "minLength": 1 },
-        "diagnostics_schema": { "type": "string", "minLength": 1 }
+        "diagnostics_schema": { "type": "string", "minLength": 1 },
+        "trace_schema": { "type": "string", "minLength": 1 },
+        "family_schema": { "type": "string", "minLength": 1 },
+        "transcript_schema": { "type": "string", "minLength": 1 },
+        "profile": { "type": "string", "minLength": 1 },
+        "profile_schema": { "type": "string", "minLength": 1 },
+        "report_schema": { "type": "string", "minLength": 1 },
+        "core_cases": { "type": "string", "minLength": 1 },
+        "core_cases_schema": { "type": "string", "minLength": 1 },
+        "adapter_result_schema": { "type": "string", "minLength": 1 },
+        "implementations_lock": { "type": "string", "minLength": 1 },
+        "implementations_schema": { "type": "string", "minLength": 1 },
+        "candidate_report": { "type": "string", "minLength": 1 }
       }
     },
     "families": {
@@ -51,7 +80,7 @@
           "target": { "enum": ["core-parser", "trace-document", "trace-producer"] },
           "version": { "type": "string", "minLength": 1 },
           "path": { "type": "string", "minLength": 1 },
-          "status": { "enum": ["draft", "normative"] }
+          "status": { "enum": ["candidate", "normative"] }
         }
       }
     },

@@ -1,0 +1,53 @@
+{
+  "format_version": "0.1-draft",
+  "id": "trace-user-0-3-draft",
+  "version": "0.1.0-rc.1",
+  "status": "candidate",
+  "claim": "PS/Trace 0.3-draft (user tier, routing complete, user-initiated assembly)",
+  "spec": {
+    "path": "spec/SPEC.md",
+    "commit": "7456634817f4eb68c8909a58b476505e6fd7c063",
+    "declared_version": "0.3 candidate over the PR #4 working draft",
+    "baseline_status": "working-draft"
+  },
+  "tier": "user",
+  "coverage": {
+    "routing": "complete",
+    "assembly": "user-initiated-only",
+    "standing_authoring_surfaces": "excluded",
+    "oversight": "informative"
+  },
+  "decisions": {
+    "exact_entity_policy": "strict-kept-or-refused",
+    "substitution_policy": "explicit-best-effort-only",
+    "substitution_authority": "venue-operations",
+    "unknown_fields": "reject-except-namespaced-extensions",
+    "request_encoding": "utf-8",
+    "unicode_normalization": "none",
+    "line_endings": "preserve"
+  },
+  "requirements": [
+    "PS-CORE-BIND-002",
+    "PS-CAP-PARAM-001",
+    "PS-EXEC-STRICT-001",
+    "PS-EXEC-BEST-001",
+    "PS-EXEC-FALLBACK-001",
+    "PS-EXEC-FALLBACK-002",
+    "PS-EXEC-FALLBACK-003",
+    "PS-TRACE-R1",
+    "PS-TRACE-R2",
+    "PS-TRACE-R3",
+    "PS-TRACE-R4",
+    "PS-TRACE-R5",
+    "PS-TRACE-R6",
+    "PS-TRACE-EVENTS-001",
+    "PS-TRACE-ROUTING-001",
+    "PS-TRACE-ASSEMBLY-001",
+    "PS-TRACE-ASSEMBLY-002",
+    "PS-TRACE-BOUNDARY-001",
+    "PS-TRACE-CONTENT-001",
+    "PS-TRACE-RESOLUTION-001",
+    "PS-TRACE-FILL-001",
+    "PS-TRACE-SEGMENT-ID-001"
+  ]
+}

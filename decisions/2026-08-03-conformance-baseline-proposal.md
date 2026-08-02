@@ -1,7 +1,7 @@
 # Decision proposal: conformance baseline and execution-receipt outcomes
 
 - **Date:** 2026-08-03
-- **Status:** Proposed for v0.3
+- **Status:** Proposed for v0.3; exercised by candidate suite `0.1.0-rc.1`
 - **Spec locations:** §4, §8, §10.5, §12, §16 OQ14 and OQ15
 - **Decision requested:** How PromptSyntax freezes a test oracle and represents exact
   binding, fallback, substitution, and refusal without conflating them.
@@ -202,6 +202,12 @@ typed Rust runner against PromptSyntax requirements. No Prompty runtime is requi
   independent certification.
 
 ## Questions for PR review
+
+Candidate `0.1.0-rc.1` uses the recommended answers below so executable review can proceed.
+They remain provisional until this decision is accepted: substitution is legal only under
+an explicitly selected best-effort policy; capacity substitution names
+`venue-operations`; R1 producer checks compare independent UTF-8 request bytes without
+normalization; and unknown fields are rejected outside namespaced `extensions` objects.
 
 1. Should `substituted` ever be legal under an explicitly selected `best-effort` entity
    policy, or should entity substitution always require pre-execution confirmation?

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptsyntax.org/conformance/implementations-lock/0.1-draft",
+  "title": "PromptSyntax pinned conformance implementations",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format_version", "implementations"],
+  "properties": {
+    "format_version": { "const": "0.1-draft" },
+    "implementations": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "repository", "commit", "adapter", "fixture", "command"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]+$" },
+          "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+          "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+          "adapter": { "type": "string", "minLength": 1 },
+          "fixture": { "type": "string", "minLength": 1 },
+          "command": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

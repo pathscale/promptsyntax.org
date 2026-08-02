@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptsyntax.org/conformance/report/0.1-draft",
+  "title": "PromptSyntax conformance suite report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format_version",
+    "suite",
+    "spec",
+    "profile",
+    "conformant",
+    "summary",
+    "coverage",
+    "families",
+    "diagnostics"
+  ],
+  "properties": {
+    "format_version": { "const": "0.1-draft" },
+    "suite": { "$ref": "#/$defs/versioned_identity" },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "declared_version"],
+      "properties": {
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "declared_version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "profile": { "$ref": "#/$defs/versioned_identity" },
+    "conformant": { "type": "boolean" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "families",
+        "cases",
+        "passed",
+        "failed",
+        "requirements_required",
+        "requirements_covered"
+      ],
+      "properties": {
+        "families": { "type": "integer", "minimum": 0 },
+        "cases": { "type": "integer", "minimum": 0 },
+        "passed": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "requirements_required": { "type": "integer", "minimum": 0 },
+        "requirements_covered": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "covered", "missing"],
+      "properties": {
+        "required": { "$ref": "#/$defs/string_set" },
+        "covered": { "$ref": "#/$defs/string_set" },
+        "missing": { "$ref": "#/$defs/string_set" }
+      }
+    },
+    "families": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "target", "status", "cases"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "target": { "enum": ["trace-document", "trace-producer"] },
+          "status": { "enum": ["candidate", "normative"] },
+          "cases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "passed",
+                "expected_conformant",
+                "actual_conformant",
+                "expected_diagnostics",
+                "actual_diagnostics",
+                "requirements"
+              ],
+              "properties": {
+                "id": { "type": "string", "minLength": 1 },
+                "passed": { "type": "boolean" },
+                "expected_conformant": { "type": "boolean" },
+                "actual_conformant": { "type": "boolean" },
+                "expected_diagnostics": { "$ref": "#/$defs/string_set" },
+                "actual_diagnostics": { "$ref": "#/$defs/string_set" },
+                "requirements": { "$ref": "#/$defs/string_set" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "pointer", "message"],
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "pointer": { "type": "string" },
+          "message": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "versioned_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "status"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "minLength": 1 }
+      }
+    },
+    "string_set": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string" }
+    }
+  }
+}

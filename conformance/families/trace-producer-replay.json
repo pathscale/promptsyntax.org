@@ -1,0 +1,214 @@
+{
+  "format_version": "0.1-draft",
+  "id": "trace-producer-replay",
+  "version": "0.1.0-rc.1",
+  "status": "candidate",
+  "profile": "trace-user-0-3-draft",
+  "target": "trace-producer",
+  "cases": [
+    {
+      "id": "producer-request-and-bound-match",
+      "description": "The trace agrees with independent UTF-8 request bytes and the entity actually invoked.",
+      "requirements": ["PS-TRACE-R1", "PS-TRACE-ROUTING-001", "PS-CORE-BIND-002"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "transcript": "conformance/fixtures/transcript-user-kept.json",
+      "expected": { "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "producer-request-bytes-mismatch",
+      "description": "R1 fails when the independent request bytes differ from reconstructed trace segments.",
+      "requirements": ["PS-TRACE-R1"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "transcript": "conformance/fixtures/transcript-user-kept.json",
+      "transcript_patch": [
+        {
+          "op": "replace",
+          "path": "/inferences/0/actual_request_utf8",
+          "value": "Summarize the report.\n"
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_R1_REQUEST_BYTES_MISMATCH"]
+      }
+    },
+    {
+      "id": "producer-bound-entity-mismatch",
+      "description": "The trace cannot report Atlas-4 when the deterministic transcript says Atlas-Mini ran.",
+      "requirements": ["PS-TRACE-ROUTING-001", "PS-CORE-BIND-002"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "transcript": "conformance/fixtures/transcript-user-kept.json",
+      "transcript_patch": [
+        {
+          "op": "replace",
+          "path": "/inferences/0/routing/bound",
+          "value": "model:example/atlas-mini@2026-08-01"
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_PRODUCER_BOUND_MISMATCH"]
+      }
+    },
+    {
+      "id": "producer-turn-mismatch",
+      "description": "A producer transcript must describe the same turn as the supplied trace.",
+      "requirements": ["PS-TRACE-EVENTS-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "transcript": "conformance/fixtures/transcript-user-kept.json",
+      "transcript_patch": [{ "op": "replace", "path": "/turn", "value": "turn-other-002" }],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_PRODUCER_TURN_MISMATCH"]
+      }
+    },
+    {
+      "id": "producer-external-artifact-valid",
+      "description": "R1 reconstructs external content from independently supplied artifact bytes.",
+      "requirements": ["PS-TRACE-R1", "PS-TRACE-CONTENT-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "replace",
+          "path": "/events/0/segments/0/content",
+          "value": {
+            "state": "external",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            "length": 3,
+            "handle": "https://artifacts.example/content/abc"
+          }
+        }
+      ],
+      "transcript": "conformance/fixtures/transcript-user-kept.json",
+      "transcript_patch": [
+        { "op": "replace", "path": "/inferences/0/actual_request_utf8", "value": "abc" },
+        {
+          "op": "add",
+          "path": "/external_artifacts/-",
+          "value": {
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            "length": 3,
+            "content_utf8": "abc"
+          }
+        }
+      ],
+      "expected": { "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "producer-external-artifact-digest-tampered",
+      "description": "A supplied external artifact is rejected when its bytes do not match its digest.",
+      "requirements": ["PS-TRACE-R1", "PS-TRACE-CONTENT-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "replace",
+          "path": "/events/0/segments/0/content",
+          "value": {
+            "state": "external",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            "length": 3,
+            "handle": "https://artifacts.example/content/abc"
+          }
+        }
+      ],
+      "transcript": "conformance/fixtures/transcript-user-kept.json",
+      "transcript_patch": [
+        { "op": "replace", "path": "/inferences/0/actual_request_utf8", "value": "abc" },
+        {
+          "op": "add",
+          "path": "/external_artifacts/-",
+          "value": {
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            "length": 3,
+            "content_utf8": "abd"
+          }
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_CONTENT_DIGEST_MISMATCH"]
+      }
+    },
+    {
+      "id": "producer-boundary-outcome-match",
+      "description": "A boundary event agrees with the independently observed tool outcome.",
+      "requirements": ["PS-TRACE-BOUNDARY-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "add",
+          "path": "/events/-",
+          "value": {
+            "id": "boundary-001",
+            "event": "boundary",
+            "tool": "tool:example/search@1",
+            "outcome": "failed",
+            "sent": { "state": "inline", "text": "query" },
+            "reason": "ENTITY_UNAVAILABLE",
+            "fill": [
+              {
+                "kind": "action",
+                "requested": "tool:example/search@1",
+                "status": "refused",
+                "reason": "ENTITY_UNAVAILABLE",
+                "deciding_authority": "venue-operations"
+              }
+            ],
+            "measured": { "wall_time_ms": 5 }
+          }
+        }
+      ],
+      "transcript": "conformance/fixtures/transcript-user-kept.json",
+      "transcript_patch": [
+        {
+          "op": "add",
+          "path": "/boundaries/-",
+          "value": { "id": "boundary-001", "outcome": "failed" }
+        }
+      ],
+      "expected": { "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "producer-boundary-outcome-mismatch",
+      "description": "A trace cannot call a tool outcome failed when the independent transcript observed success.",
+      "requirements": ["PS-TRACE-BOUNDARY-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "add",
+          "path": "/events/-",
+          "value": {
+            "id": "boundary-001",
+            "event": "boundary",
+            "tool": "tool:example/search@1",
+            "outcome": "failed",
+            "sent": { "state": "inline", "text": "query" },
+            "reason": "ENTITY_UNAVAILABLE",
+            "fill": [
+              {
+                "kind": "action",
+                "requested": "tool:example/search@1",
+                "status": "refused",
+                "reason": "ENTITY_UNAVAILABLE",
+                "deciding_authority": "venue-operations"
+              }
+            ],
+            "measured": { "wall_time_ms": 5 }
+          }
+        }
+      ],
+      "transcript": "conformance/fixtures/transcript-user-kept.json",
+      "transcript_patch": [
+        {
+          "op": "add",
+          "path": "/boundaries/-",
+          "value": { "id": "boundary-001", "outcome": "succeeded" }
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_PRODUCER_BOUNDARY_MISMATCH"]
+      }
+    }
+  ]
+}

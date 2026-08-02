@@ -1,0 +1,319 @@
+{
+  "format_version": "0.1-draft",
+  "id": "trace-outcomes",
+  "version": "0.1.0-rc.1",
+  "status": "candidate",
+  "profile": "trace-user-0-3-draft",
+  "target": "trace-document",
+  "cases": [
+    {
+      "id": "entity-kept-strict-valid",
+      "description": "A strict exact entity is kept and every requested parameter is reported.",
+      "requirements": ["PS-EXEC-STRICT-001", "PS-CAP-PARAM-001", "PS-TRACE-FILL-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "expected": { "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "entity-kept-applied-mismatch",
+      "description": "A kept outcome cannot name a different applied entity.",
+      "requirements": ["PS-CORE-BIND-002", "PS-EXEC-STRICT-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "replace",
+          "path": "/events/0/routing/fill/0/applied",
+          "value": "model:example/atlas-mini@2026-08-01"
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_ENTITY_KEPT_MISMATCH", "TRACE_ROUTING_FILL_MISMATCH"]
+      }
+    },
+    {
+      "id": "entity-substituted-under-strict",
+      "description": "A strict exact entity request cannot be silently substituted.",
+      "requirements": ["PS-EXEC-STRICT-001", "PS-TRACE-FILL-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "replace",
+          "path": "/events/0/routing",
+          "value": {
+            "requested": "@model:example/atlas-4@2026-08-01!",
+            "policy": "strict",
+            "outcome": "invoked",
+            "bound": "model:example/atlas-mini@2026-08-01",
+            "attempts": [
+              {
+                "ref": "@model:example/atlas-4@2026-08-01!",
+                "bound": "model:example/atlas-mini@2026-08-01",
+                "outcome": "filled",
+                "measured": { "cost_usd": 0.02, "wall_time_ms": 1200 }
+              }
+            ],
+            "fill": [
+              {
+                "kind": "entity",
+                "requested": "model:example/atlas-4@2026-08-01",
+                "applied": "model:example/atlas-mini@2026-08-01",
+                "status": "substituted",
+                "policy": "strict",
+                "reason": "ENTITY_SUBSTITUTED",
+                "deciding_authority": "venue-operations"
+              }
+            ]
+          }
+        },
+        {
+          "op": "replace",
+          "path": "/events/0/resolution/bindings/0/bound",
+          "value": "model:example/atlas-mini@2026-08-01"
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_ENTITY_SUBSTITUTION_NOT_AUTHORIZED"]
+      }
+    },
+    {
+      "id": "entity-substituted-best-effort-valid",
+      "description": "An explicit best-effort request may disclose a venue-operations substitution.",
+      "requirements": ["PS-EXEC-BEST-001", "PS-TRACE-FILL-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "replace",
+          "path": "/events/0/routing",
+          "value": {
+            "requested": "@model:example/atlas-4@2026-08-01",
+            "policy": "best-effort",
+            "outcome": "invoked",
+            "bound": "model:example/atlas-mini@2026-08-01",
+            "attempts": [
+              {
+                "ref": "@model:example/atlas-4@2026-08-01",
+                "bound": "model:example/atlas-mini@2026-08-01",
+                "outcome": "filled",
+                "measured": { "cost_usd": 0.02, "wall_time_ms": 1200 }
+              }
+            ],
+            "fill": [
+              {
+                "kind": "entity",
+                "requested": "model:example/atlas-4@2026-08-01",
+                "applied": "model:example/atlas-mini@2026-08-01",
+                "status": "substituted",
+                "policy": "best-effort",
+                "reason": "ENTITY_SUBSTITUTED",
+                "deciding_authority": "venue-operations"
+              }
+            ]
+          }
+        },
+        {
+          "op": "replace",
+          "path": "/events/0/resolution/bindings/0/bound",
+          "value": "model:example/atlas-mini@2026-08-01"
+        }
+      ],
+      "expected": { "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "entity-authored-fallback-valid",
+      "description": "A fill failure advances to the first successful authored fallback step.",
+      "requirements": [
+        "PS-EXEC-FALLBACK-001",
+        "PS-EXEC-FALLBACK-002",
+        "PS-EXEC-FALLBACK-003",
+        "PS-TRACE-FILL-001"
+      ],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "replace",
+          "path": "/events/0/routing",
+          "value": {
+            "requested": "@model:example/atlas-4@2026-08-01! else @model:example/atlas-mini@2026-08-01!",
+            "policy": "strict",
+            "outcome": "invoked",
+            "bound": "model:example/atlas-mini@2026-08-01",
+            "attempts": [
+              {
+                "ref": "@model:example/atlas-4@2026-08-01!",
+                "outcome": "failed",
+                "reasons": ["ENTITY_UNAVAILABLE"],
+                "measured": { "wall_time_ms": 20 }
+              },
+              {
+                "ref": "@model:example/atlas-mini@2026-08-01!",
+                "bound": "model:example/atlas-mini@2026-08-01",
+                "outcome": "filled",
+                "measured": { "cost_usd": 0.02, "wall_time_ms": 1200 }
+              }
+            ],
+            "fill": [
+              {
+                "kind": "entity",
+                "requested": "model:example/atlas-4@2026-08-01",
+                "applied": "model:example/atlas-mini@2026-08-01",
+                "status": "fallback",
+                "policy": "strict",
+                "route_step": 1
+              }
+            ]
+          }
+        },
+        {
+          "op": "replace",
+          "path": "/events/0/resolution/bindings",
+          "value": [
+            {
+              "ref": "@model:example/atlas-4@2026-08-01",
+              "bound": "model:example/atlas-4@2026-08-01",
+              "rule": "qualified-canonical-reference",
+              "ambiguity_surfaced": false
+            },
+            {
+              "ref": "@model:example/atlas-mini@2026-08-01",
+              "bound": "model:example/atlas-mini@2026-08-01",
+              "rule": "qualified-canonical-reference",
+              "ambiguity_surfaced": false
+            }
+          ]
+        }
+      ],
+      "expected": { "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "entity-fallback-step-does-not-match",
+      "description": "The fallback route_step must identify the successful attempt.",
+      "requirements": ["PS-EXEC-FALLBACK-002", "PS-EXEC-FALLBACK-003"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "replace",
+          "path": "/events/0/routing",
+          "value": {
+            "requested": "@model:example/atlas-4@2026-08-01! else @model:example/atlas-mini@2026-08-01!",
+            "policy": "strict",
+            "outcome": "invoked",
+            "bound": "model:example/atlas-mini@2026-08-01",
+            "attempts": [
+              {
+                "ref": "@model:example/atlas-4@2026-08-01!",
+                "outcome": "failed",
+                "reasons": ["ENTITY_UNAVAILABLE"],
+                "measured": { "wall_time_ms": 20 }
+              },
+              {
+                "ref": "@model:example/atlas-mini@2026-08-01!",
+                "bound": "model:example/atlas-mini@2026-08-01",
+                "outcome": "filled",
+                "measured": { "cost_usd": 0.02, "wall_time_ms": 1200 }
+              }
+            ],
+            "fill": [
+              {
+                "kind": "entity",
+                "requested": "model:example/atlas-4@2026-08-01",
+                "applied": "model:example/atlas-mini@2026-08-01",
+                "status": "fallback",
+                "policy": "strict",
+                "route_step": 0
+              }
+            ]
+          }
+        },
+        {
+          "op": "replace",
+          "path": "/events/0/resolution/bindings/0/bound",
+          "value": "model:example/atlas-mini@2026-08-01"
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_ENTITY_FALLBACK_STEP_INVALID"]
+      }
+    },
+    {
+      "id": "entity-strict-refusal-valid",
+      "description": "An unavailable strict exact entity is refused before invocation with recourse.",
+      "requirements": ["PS-EXEC-STRICT-001", "PS-TRACE-FILL-001", "PS-TRACE-RESOLUTION-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "replace",
+          "path": "/events/0/routing",
+          "value": {
+            "requested": "@model:example/atlas-4@2026-08-01!",
+            "policy": "strict",
+            "outcome": "refused",
+            "attempts": [
+              {
+                "ref": "@model:example/atlas-4@2026-08-01!",
+                "outcome": "failed",
+                "reasons": ["ENTITY_UNAVAILABLE"],
+                "measured": { "wall_time_ms": 4 }
+              }
+            ],
+            "fill": [
+              {
+                "kind": "entity",
+                "requested": "model:example/atlas-4@2026-08-01",
+                "status": "refused",
+                "policy": "strict",
+                "reason": "ENTITY_UNAVAILABLE",
+                "deciding_authority": "venue-operations"
+              }
+            ]
+          }
+        },
+        {
+          "op": "replace",
+          "path": "/events/0/resolution",
+          "value": {
+            "bindings": [],
+            "refusals": [
+              {
+                "ref": "@model:example/atlas-4@2026-08-01",
+                "reason": "ENTITY_UNAVAILABLE",
+                "authority": "venue-operations",
+                "recourse": { "available": true, "kind": "retry" }
+              }
+            ]
+          }
+        }
+      ],
+      "expected": { "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "routing-bound-disagrees-with-fill",
+      "description": "The routing bound entity must match the successful attempt and entity fill.",
+      "requirements": ["PS-CORE-BIND-002", "PS-TRACE-ROUTING-001", "PS-TRACE-FILL-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "replace",
+          "path": "/events/0/routing/bound",
+          "value": "model:example/atlas-mini@2026-08-01"
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_ROUTING_BOUND_MISMATCH", "TRACE_ROUTING_FILL_MISMATCH"]
+      }
+    },
+    {
+      "id": "resolution-missing-applied-binding",
+      "description": "An invoked canonical entity must appear in the resolution report.",
+      "requirements": ["PS-TRACE-RESOLUTION-001", "PS-CORE-BIND-002"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [{ "op": "replace", "path": "/events/0/resolution/bindings", "value": [] }],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_RESOLUTION_BOUND_MISSING"]
+      }
+    }
+  ]
+}

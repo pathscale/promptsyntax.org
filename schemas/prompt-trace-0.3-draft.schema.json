@@ -5,12 +5,13 @@
   "description": "Non-normative candidate schema used to resolve the v0.2 conformance audit. It must not be used for an unqualified conformance claim.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["ps_trace", "turn", "tier", "mode", "venue", "coverage", "events"],
+  "required": ["ps_trace", "turn", "tier", "mode", "content_mode", "venue", "coverage", "events"],
   "properties": {
     "ps_trace": { "const": "0.3-draft" },
     "turn": { "type": "string", "minLength": 1 },
     "tier": { "enum": ["user", "developer", "operator", "oversight"] },
     "mode": { "enum": ["dry-run", "executed"] },
+    "content_mode": { "enum": ["tiered", "materialized"] },
     "venue": { "$ref": "#/$defs/venue" },
     "coverage": { "$ref": "#/$defs/coverage" },
     "integrity": { "$ref": "#/$defs/integrity" },
@@ -18,10 +19,7 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "oneOf": [
-          { "$ref": "#/$defs/inference" },
-          { "$ref": "#/$defs/boundary_event" }
-        ]
+        "oneOf": [{ "$ref": "#/$defs/inference" }, { "$ref": "#/$defs/boundary_event" }]
       }
     },
     "extensions": { "$ref": "#/$defs/extensions" }
@@ -62,10 +60,7 @@
         "kind": { "enum": ["user-initiated", "internal-continuation"] },
         "routing": { "$ref": "#/$defs/routing_record" },
         "segments": {
-          "oneOf": [
-            { "$ref": "#/$defs/segment_list" },
-            { "$ref": "#/$defs/segments_omitted" }
-          ]
+          "oneOf": [{ "$ref": "#/$defs/segment_list" }, { "$ref": "#/$defs/segments_omitted" }]
         },
         "steps": {
           "type": "array",

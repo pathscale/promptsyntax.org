@@ -1,0 +1,160 @@
+{
+  "format_version": "0.1-draft",
+  "id": "trace-boundary-tamper",
+  "version": "0.1.0-rc.1",
+  "status": "candidate",
+  "profile": "trace-user-0-3-draft",
+  "target": "trace-document",
+  "cases": [
+    {
+      "id": "boundary-failure-recorded-valid",
+      "description": "A failed tool call records what was sent, a typed reason, fill, and measurement without inventing received content.",
+      "requirements": ["PS-TRACE-BOUNDARY-001", "PS-TRACE-EVENTS-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "add",
+          "path": "/events/-",
+          "value": {
+            "id": "boundary-001",
+            "event": "boundary",
+            "tool": "tool:example/search@1",
+            "outcome": "failed",
+            "sent": { "state": "inline", "text": "quarterly results" },
+            "reason": "ENTITY_UNAVAILABLE",
+            "fill": [
+              {
+                "kind": "action",
+                "requested": "tool:example/search@1",
+                "status": "refused",
+                "reason": "ENTITY_UNAVAILABLE",
+                "deciding_authority": "venue-operations"
+              }
+            ],
+            "measured": { "wall_time_ms": 5 },
+            "internal": "outside-trace-perimeter"
+          }
+        }
+      ],
+      "expected": { "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "boundary-success-received-missing",
+      "description": "A successful tool call cannot omit what crossed back over the boundary.",
+      "requirements": ["PS-TRACE-BOUNDARY-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "add",
+          "path": "/events/-",
+          "value": {
+            "id": "boundary-001",
+            "event": "boundary",
+            "tool": "tool:example/search@1",
+            "outcome": "succeeded",
+            "sent": { "state": "inline", "text": "quarterly results" },
+            "fill": [
+              {
+                "kind": "action",
+                "requested": "tool:example/search@1",
+                "applied": "tool:example/search@1",
+                "status": "applied"
+              }
+            ],
+            "measured": { "wall_time_ms": 18 }
+          }
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["SCHEMA_INSTANCE_INVALID"]
+      }
+    },
+    {
+      "id": "tamper-unknown-field-rejected",
+      "description": "An undeclared field is rejected outside a namespaced extensions object.",
+      "requirements": ["PS-TRACE-R6"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [{ "op": "add", "path": "/events/0/undisclosed_override", "value": true }],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["SCHEMA_INSTANCE_INVALID"]
+      }
+    },
+    {
+      "id": "tamper-external-digest-mismatch",
+      "description": "Materialized external content must match its declared SHA-256 digest.",
+      "requirements": ["PS-TRACE-CONTENT-001", "PS-TRACE-R1"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "replace",
+          "path": "/events/0/segments/0/content",
+          "value": {
+            "state": "external",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            "length": 3,
+            "handle": "https://artifacts.example/content/abc",
+            "materialized": {
+              "text": "abd",
+              "materialized_at": "2026-08-03T00:00:00Z"
+            }
+          }
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_CONTENT_DIGEST_MISMATCH"]
+      }
+    },
+    {
+      "id": "tamper-external-length-mismatch",
+      "description": "Materialized external content must match its declared UTF-8 byte length.",
+      "requirements": ["PS-TRACE-CONTENT-001", "PS-TRACE-R1"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "replace",
+          "path": "/events/0/segments/0/content",
+          "value": {
+            "state": "external",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            "length": 4,
+            "handle": "https://artifacts.example/content/abc",
+            "materialized": {
+              "text": "abc",
+              "materialized_at": "2026-08-03T00:00:00Z"
+            }
+          }
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_CONTENT_LENGTH_MISMATCH"]
+      }
+    },
+    {
+      "id": "tamper-duplicate-segment-id",
+      "description": "Stable segment identifiers cannot be reused within one inference.",
+      "requirements": ["PS-TRACE-SEGMENT-ID-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "add",
+          "path": "/events/0/segments/-",
+          "value": {
+            "i": 1,
+            "id": "segment-user-001",
+            "origin": "user-authored",
+            "content": { "state": "inline", "text": " Duplicate." },
+            "step": "step-user-001"
+          }
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_SEGMENT_ID_DUPLICATE"]
+      }
+    }
+  ]
+}

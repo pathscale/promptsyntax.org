@@ -1,0 +1,248 @@
+{
+  "format_version": "0.1-draft",
+  "id": "trace-structure",
+  "version": "0.1.0-rc.1",
+  "status": "candidate",
+  "profile": "trace-user-0-3-draft",
+  "target": "trace-document",
+  "cases": [
+    {
+      "id": "r1-inline-segments-contiguous",
+      "description": "A user-initiated inline segment list is ordered and reconstructable.",
+      "requirements": ["PS-TRACE-R1", "PS-TRACE-ASSEMBLY-001", "PS-TRACE-CONTENT-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "expected": { "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "r1-segment-index-gap",
+      "description": "A segment index must equal its zero-based position.",
+      "requirements": ["PS-TRACE-R1"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [{ "op": "replace", "path": "/events/0/segments/0/i", "value": 1 }],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_R1_SEGMENT_INDEX_INVALID"]
+      }
+    },
+    {
+      "id": "r2-r3-injected-provenance-valid",
+      "description": "An injected segment resolves to an acyclic step chain in its inference.",
+      "requirements": ["PS-TRACE-R2", "PS-TRACE-R3"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "replace",
+          "path": "/events/0/segments",
+          "value": [
+            {
+              "i": 0,
+              "id": "segment-user-001",
+              "origin": "user-authored",
+              "content": { "state": "inline", "text": "Summarize " },
+              "step": "step-user-001"
+            },
+            {
+              "i": 1,
+              "id": "segment-context-001",
+              "origin": "injected",
+              "content": { "state": "inline", "text": "the report." },
+              "step": "step-context-001"
+            }
+          ]
+        },
+        {
+          "op": "replace",
+          "path": "/events/0/steps",
+          "value": [
+            { "id": "step-user-001", "kind": "user-content", "tier": "user" },
+            {
+              "id": "step-context-001",
+              "kind": "context-inclusion",
+              "parent": "step-user-001",
+              "tier": "user"
+            }
+          ]
+        }
+      ],
+      "expected": { "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "r2-dangling-segment-step",
+      "description": "An injected segment cannot point to a missing provenance step.",
+      "requirements": ["PS-TRACE-R2"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        { "op": "replace", "path": "/events/0/segments/0/origin", "value": "injected" },
+        { "op": "replace", "path": "/events/0/segments/0/step", "value": "step-missing" }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_R2_STEP_NOT_FOUND"]
+      }
+    },
+    {
+      "id": "r3-provenance-cycle",
+      "description": "A provenance parent chain cannot contain a cycle.",
+      "requirements": ["PS-TRACE-R3"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "replace",
+          "path": "/events/0/steps",
+          "value": [
+            {
+              "id": "step-user-001",
+              "kind": "user-content",
+              "parent": "step-policy-001",
+              "tier": "user"
+            },
+            {
+              "id": "step-policy-001",
+              "kind": "policy-injection",
+              "parent": "step-user-001",
+              "tier": "operator"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_R3_STEP_CYCLE"]
+      }
+    },
+    {
+      "id": "r4-user-inline-floor",
+      "description": "The declared user-tier inline threshold cannot be below 4096 bytes.",
+      "requirements": ["PS-TRACE-R4"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [{ "op": "replace", "path": "/coverage/inline_threshold_bytes", "value": 1024 }],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["SCHEMA_INSTANCE_INVALID"]
+      }
+    },
+    {
+      "id": "r5-oversight-materialized-valid",
+      "description": "A materialized oversight export embeds the external content it references.",
+      "requirements": ["PS-TRACE-R5", "PS-TRACE-CONTENT-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        { "op": "replace", "path": "/tier", "value": "oversight" },
+        { "op": "replace", "path": "/content_mode", "value": "materialized" },
+        {
+          "op": "replace",
+          "path": "/events/0/segments/0/content",
+          "value": {
+            "state": "external",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            "length": 3,
+            "handle": "https://artifacts.example/content/abc",
+            "materialized": {
+              "text": "abc",
+              "materialized_at": "2026-08-03T00:00:00Z"
+            }
+          }
+        }
+      ],
+      "expected": { "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "r5-oversight-materialization-missing",
+      "description": "A materialized oversight export cannot leave external content unresolved.",
+      "requirements": ["PS-TRACE-R5"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        { "op": "replace", "path": "/tier", "value": "oversight" },
+        { "op": "replace", "path": "/content_mode", "value": "materialized" },
+        {
+          "op": "replace",
+          "path": "/events/0/segments/0/content",
+          "value": {
+            "state": "external",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            "length": 3,
+            "handle": "https://artifacts.example/content/abc"
+          }
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_R5_MATERIALIZATION_REQUIRED"]
+      }
+    },
+    {
+      "id": "r6-internal-omission-declared",
+      "description": "An internal continuation may omit assembly only through a typed coverage declaration.",
+      "requirements": ["PS-TRACE-R6", "PS-TRACE-ASSEMBLY-002"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        { "op": "replace", "path": "/events/0/kind", "value": "internal-continuation" },
+        {
+          "op": "replace",
+          "path": "/events/0/segments",
+          "value": {
+            "coverage": "not-provided",
+            "reason": "should-level-not-implemented",
+            "declared_in": "coverage.assembly"
+          }
+        }
+      ],
+      "expected": { "conformant": true, "diagnostics": [] }
+    },
+    {
+      "id": "r6-user-assembly-cannot-be-omitted",
+      "description": "A user-initiated inference cannot replace required segments with an omission marker.",
+      "requirements": ["PS-TRACE-R6", "PS-TRACE-ASSEMBLY-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "replace",
+          "path": "/events/0/segments",
+          "value": {
+            "coverage": "not-provided",
+            "reason": "should-level-not-implemented",
+            "declared_in": "coverage.assembly"
+          }
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["SCHEMA_INSTANCE_INVALID"]
+      }
+    },
+    {
+      "id": "turn-event-identifiers-unique",
+      "description": "Event identifiers are unique within one turn.",
+      "requirements": ["PS-TRACE-EVENTS-001"],
+      "trace": "conformance/fixtures/trace-user-kept.json",
+      "patch": [
+        {
+          "op": "add",
+          "path": "/events/-",
+          "value": {
+            "id": "inference-001",
+            "event": "boundary",
+            "tool": "tool:example/search@1",
+            "outcome": "failed",
+            "sent": { "state": "inline", "text": "query" },
+            "reason": "ENTITY_UNAVAILABLE",
+            "fill": [
+              {
+                "kind": "action",
+                "requested": "tool:example/search@1",
+                "status": "refused",
+                "reason": "ENTITY_UNAVAILABLE",
+                "deciding_authority": "venue-operations"
+              }
+            ],
+            "measured": { "wall_time_ms": 5 }
+          }
+        }
+      ],
+      "expected": {
+        "conformant": false,
+        "diagnostics": ["TRACE_EVENT_ID_DUPLICATE"]
+      }
+    }
+  ]
+}
