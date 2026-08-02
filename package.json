@@ -10,7 +10,7 @@
   "scripts": {
     "start": "rsbuild dev",
     "dev": "rsbuild dev",
-    "build": "npm run typecheck && rsbuild build && bun run cleanup",
+    "build": "bun run typecheck && rsbuild build && bun run cleanup",
     "typecheck": "tsc --noEmit",
     "preview": "rsbuild preview",
     "cleanup": "bun run src/scripts/cleanup.js",
@@ -23,6 +23,7 @@
     "@solidjs/router": "^0.15.3",
     "clsx": "^2.1.1",
     "glob": "^11.0.3",
+    "promptsyntax": "^0.1.0",
     "solid-js": "^1.9.5",
     "tailwind-merge": "^3.6.0"
   },

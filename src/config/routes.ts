@@ -2,6 +2,7 @@ export const ROUTES = {
   HOME: "/",
   SPEC: "/spec",
   SYNTAX: "/syntax",
+  VIGNETTE: "/vignette",
 } as const;
 
 export const GITHUB_URL = "https://github.com/pathscale/promptsyntax.org";
