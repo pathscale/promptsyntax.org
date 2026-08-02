@@ -9,7 +9,12 @@ are the oracle. Implementations consume the corpus but do not define its expecte
 Version `0.1.0-rc.1` is a candidate suite against the specification draft at commit
 `7456634817f4eb68c8909a58b476505e6fd7c063`. It executes 34 document and producer cases
 across four Trace families and covers all 22 requirements in its named candidate profile.
-It is not a released conformance suite and must not be used for an unqualified claim.
+It also owns 101 Core parser vectors and a full normalized-output differential protocol for
+the Rust and TypeScript implementations. A deterministic grammar generator adds a
+100,000-input differential lane without treating either parser as the expected-answer
+oracle. A separate ten-case executable adapter corpus tests real Trace producers in both
+languages against independent transcripts. It is not a released conformance suite and must
+not be used for an unqualified claim.
 
 The cases freeze provisional v0.3 decisions for review without pretending those decisions
 are already normative. The machine-readable inventory retains blocked, proposed, and open
@@ -34,6 +39,21 @@ cargo run --manifest-path conformance/runner/Cargo.toml -- \
   check-requirements conformance/requirements.json
 
 cargo run --manifest-path conformance/runner/Cargo.toml -- run-suite .
+
+cargo run --manifest-path conformance/runner/Cargo.toml -- \
+  compare-core-adapters conformance/cases/core-parser.json \
+  /tmp/promptsyntax-rs-core.json /tmp/promptsyntax-ts-core.json
+
+cargo run --release --manifest-path conformance/runner/Cargo.toml -- \
+  generate-core-differential 100000 20270803 > /tmp/core-generated.json
+
+cargo run --release --manifest-path conformance/runner/Cargo.toml -- \
+  compare-core-streams 100000 20270803 \
+  /tmp/promptsyntax-rs-generated.jsonl /tmp/promptsyntax-ts-generated.jsonl
+
+cargo run --manifest-path conformance/runner/Cargo.toml -- \
+  run-trace-producer-adapter . promptsyntax-rs 0.1.0 <commit> \
+  /path/to/ps-trace-producer
 ```
 
 The command emits the deterministic report stored in
@@ -44,7 +64,13 @@ The command emits the deterministic report stored in
 - `profiles/` freezes the named scope and candidate semantic decisions.
 - `families/` contains language-independent cases and expected diagnostics.
 - `fixtures/` contains reusable Trace and deterministic transcript inputs.
-- `cases/core-parser.json` is the single Core fixture consumed by both parser adapters.
+- `cases/core-parser.json` is the single 101-case Core fixture consumed by both adapters.
+- `core-differential-input.schema.json` freezes the generator-to-adapter input shape.
+- `core-adapter-result.schema.json` freezes the normalized cross-language output shape.
+- `core-differential-report.schema.json` freezes the independent comparison report shape.
+- `cases/trace-producer.json` lists six valid and four rejection cases for real producers.
+- `trace-producer-input.schema.json` defines deterministic facts without expected output.
+- `trace-producer-cases.schema.json` freezes the external producer adapter protocol.
 - `reports/` contains deterministic, machine-readable evidence snapshots.
 - `runner/` contains the independent stable-Rust checker.
 - `adapters/` defines the implementation boundary and forbids embedded expected answers.

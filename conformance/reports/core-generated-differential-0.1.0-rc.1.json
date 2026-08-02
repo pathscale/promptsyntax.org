@@ -1,0 +1,23 @@
+{
+  "format_version": "0.1-draft",
+  "target": "core-parser-differential",
+  "generator": {
+    "id": "promptsyntax-core-grammar",
+    "version": "0.1-draft",
+    "seed": "20270803"
+  },
+  "compatible": true,
+  "left": {
+    "id": "promptsyntax-rs",
+    "version": "0.1.0",
+    "commit": "2789fac8acb810279ece887f46c025ef987ce0bf"
+  },
+  "right": {
+    "id": "promptsyntax-ts",
+    "version": "0.1.0",
+    "commit": "3c2c505d6f8fa836aa42abe12c0b466bcc3ba254"
+  },
+  "case_count": 100000,
+  "matched_case_count": 100000,
+  "diagnostics": []
+}

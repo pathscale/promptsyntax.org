@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptsyntax.org/conformance/trace-producer-cases/0.1-draft",
+  "title": "PromptSyntax Trace producer adapter cases",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format_version", "cases"],
+  "properties": {
+    "format_version": { "const": "0.1-draft" },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "input", "expected"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^producer-[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "input": { "type": "string", "minLength": 1 },
+          "transcript": { "type": "string", "minLength": 1 },
+          "expected": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["outcome", "conformant", "diagnostics"],
+                "properties": {
+                  "outcome": { "const": "trace" },
+                  "conformant": { "const": true },
+                  "diagnostics": {
+                    "type": "array",
+                    "maxItems": 0
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["outcome", "code"],
+                "properties": {
+                  "outcome": { "const": "error" },
+                  "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]+$" }
+                }
+              }
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "required": ["expected"],
+              "properties": {
+                "expected": {
+                  "required": ["outcome"],
+                  "properties": { "outcome": { "const": "trace" } }
+                }
+              }
+            },
+            "then": { "required": ["transcript"] },
+            "else": { "not": { "required": ["transcript"] } }
+          }
+        ]
+      }
+    }
+  }
+}

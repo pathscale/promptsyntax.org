@@ -104,6 +104,150 @@
       "description": "A requirement lists the same conformance target more than once."
     },
     {
+      "code": "CORE_ADAPTER_FORMAT_UNSUPPORTED",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "A Core parser adapter uses an unsupported result format version."
+    },
+    {
+      "code": "CORE_ADAPTER_IMPLEMENTATION_INVALID",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "A Core parser adapter supplies invalid implementation identity, version, or commit metadata."
+    },
+    {
+      "code": "CORE_ADAPTER_IMPLEMENTATIONS_IDENTICAL",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "A differential comparison was given the same implementation identity, version, and commit on both sides."
+    },
+    {
+      "code": "CORE_ADAPTER_TARGET_INVALID",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "A Core parser differential input does not declare the core-parser target."
+    },
+    {
+      "code": "CORE_CASE_ID_DUPLICATE",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "A Core parser adapter emits the same canonical case identifier more than once."
+    },
+    {
+      "code": "CORE_CASES_ID_DUPLICATE",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "The canonical Core parser corpus contains a duplicate case identifier."
+    },
+    {
+      "code": "CORE_CASES_JSON_INVALID",
+      "phase": "corpus",
+      "severity": "error",
+      "description": "The canonical Core parser corpus cannot be read as a case array."
+    },
+    {
+      "code": "CORE_CASES_READ_FAILED",
+      "phase": "io",
+      "severity": "error",
+      "description": "The canonical Core parser corpus could not be read."
+    },
+    {
+      "code": "CORE_CASE_MISSING_LEFT",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "A Core parser case emitted by the right adapter is absent from the left adapter output."
+    },
+    {
+      "code": "CORE_CASE_MISSING_RIGHT",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "A Core parser case emitted by the left adapter is absent from the right adapter output."
+    },
+    {
+      "code": "CORE_CASE_NONCONFORMANT_LEFT",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "The left Core parser adapter disagrees with a specification-owned expected outcome."
+    },
+    {
+      "code": "CORE_CASE_NONCONFORMANT_RIGHT",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "The right Core parser adapter disagrees with a specification-owned expected outcome."
+    },
+    {
+      "code": "CORE_CASE_UNEXPECTED_LEFT",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "The left Core parser adapter emits a case absent from the canonical corpus."
+    },
+    {
+      "code": "CORE_CASE_UNEXPECTED_RIGHT",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "The right Core parser adapter emits a case absent from the canonical corpus."
+    },
+    {
+      "code": "CORE_CASE_EXPECTATION_INCOMPLETE",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "A Core parser case supplies only part of the canonical expected-answer tuple."
+    },
+    {
+      "code": "CORE_DATA_PLANE_MISMATCH",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "A Core parser data-plane projection disagrees with the canonical case."
+    },
+    {
+      "code": "CORE_DIAGNOSTIC_SEQUENCE_MISMATCH",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "A Core parser diagnostic sequence disagrees with the canonical case."
+    },
+    {
+      "code": "CORE_DIRECTIVE_SEQUENCE_MISMATCH",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "A Core parser directive sequence disagrees with the canonical case."
+    },
+    {
+      "code": "CORE_OUTPUT_DIFFERENTIAL",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "Two Core parser adapters produce different normalized outputs for the same canonical case."
+    },
+    {
+      "code": "CORE_ROUND_TRIP_MISMATCH",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "A Core parser does not reproduce the canonical authored source exactly."
+    },
+    {
+      "code": "LEFT_ADAPTER_JSON_INVALID",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "The left Core parser adapter result is not valid closed-model JSON."
+    },
+    {
+      "code": "LEFT_ADAPTER_READ_FAILED",
+      "phase": "io",
+      "severity": "error",
+      "description": "The left Core parser adapter result could not be read."
+    },
+    {
+      "code": "RIGHT_ADAPTER_JSON_INVALID",
+      "phase": "adapter",
+      "severity": "error",
+      "description": "The right Core parser adapter result is not valid closed-model JSON."
+    },
+    {
+      "code": "RIGHT_ADAPTER_READ_FAILED",
+      "phase": "io",
+      "severity": "error",
+      "description": "The right Core parser adapter result could not be read."
+    },
+    {
       "code": "INSTANCE_JSON_INVALID",
       "phase": "instance",
       "severity": "error",
@@ -312,6 +456,102 @@
       "phase": "semantic",
       "severity": "error",
       "description": "Inline content exceeds the trace's declared UTF-8 byte threshold."
+    },
+    {
+      "code": "TRACE_PRODUCER_ATTEMPT_ORDER_INVALID",
+      "phase": "producer",
+      "severity": "error",
+      "description": "A deterministic routing transcript contains an attempt after its filled attempt."
+    },
+    {
+      "code": "TRACE_PRODUCER_ATTEMPT_ROUTE_MISMATCH",
+      "phase": "producer",
+      "severity": "error",
+      "description": "A deterministic routing attempt does not align with the corresponding authored route step."
+    },
+    {
+      "code": "TRACE_PRODUCER_EVENT_ID_DUPLICATE",
+      "phase": "producer",
+      "severity": "error",
+      "description": "Trace producer input repeats an inference or boundary event identifier."
+    },
+    {
+      "code": "TRACE_PRODUCER_INPUT_INVALID",
+      "phase": "producer",
+      "severity": "error",
+      "description": "Trace producer input is malformed or lacks a required deterministic fact."
+    },
+    {
+      "code": "TRACE_PRODUCER_INPUT_READ_FAILED",
+      "phase": "io",
+      "severity": "error",
+      "description": "A Trace producer input fixture could not be read."
+    },
+    {
+      "code": "TRACE_PRODUCER_INPUT_UNSUPPORTED",
+      "phase": "producer",
+      "severity": "error",
+      "description": "Trace producer input requests a tier, mode, or profile outside the producer contract."
+    },
+    {
+      "code": "TRACE_PRODUCER_MULTIPLE_FILLED",
+      "phase": "producer",
+      "severity": "error",
+      "description": "Deterministic routing facts report more than one filled attempt for one inference."
+    },
+    {
+      "code": "TRACE_PRODUCER_OUTPUT_INVALID",
+      "phase": "producer",
+      "severity": "error",
+      "description": "A Trace producer process did not emit its required JSON result envelope."
+    },
+    {
+      "code": "TRACE_PRODUCER_PROCESS_FAILED",
+      "phase": "producer",
+      "severity": "error",
+      "description": "A Trace producer process could not be started or exited contrary to its expected outcome."
+    },
+    {
+      "code": "TRACE_PRODUCER_REFUSAL_CONFLICT",
+      "phase": "producer",
+      "severity": "error",
+      "description": "Deterministic routing facts contain both a filled attempt and a refusal fact."
+    },
+    {
+      "code": "TRACE_PRODUCER_REFUSAL_REQUIRED",
+      "phase": "producer",
+      "severity": "error",
+      "description": "Deterministic routing facts with no filled attempt omit the required refusal fact."
+    },
+    {
+      "code": "TRACE_PRODUCER_ROUTE_DUPLICATE",
+      "phase": "producer",
+      "severity": "error",
+      "description": "A Trace producer input repeats a canonical entity in one authored route."
+    },
+    {
+      "code": "TRACE_PRODUCER_ROUTE_INVALID",
+      "phase": "producer",
+      "severity": "error",
+      "description": "A Trace producer input lacks a route step or execution attempt."
+    },
+    {
+      "code": "TRACE_PRODUCER_SUBSTITUTION_NOT_AUTHORIZED",
+      "phase": "producer",
+      "severity": "error",
+      "description": "Execution facts report an entity outside the authored route without explicit best-effort authorization."
+    },
+    {
+      "code": "TRACE_PRODUCER_TRANSCRIPT_READ_FAILED",
+      "phase": "io",
+      "severity": "error",
+      "description": "An independent Trace producer transcript fixture could not be read."
+    },
+    {
+      "code": "TRACE_PRODUCER_TRANSCRIPT_REQUIRED",
+      "phase": "producer",
+      "severity": "error",
+      "description": "A successful Trace producer adapter case lacks an independent transcript."
     },
     {
       "code": "TRACE_PRODUCER_ARTIFACT_DUPLICATE",

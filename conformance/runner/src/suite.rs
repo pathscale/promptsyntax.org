@@ -106,15 +106,25 @@ struct ManifestFiles {
     trace_schema: String,
     family_schema: String,
     transcript_schema: String,
+    trace_producer_input_schema: String,
+    trace_producer_cases: String,
+    trace_producer_cases_schema: String,
     profile: String,
     profile_schema: String,
     report_schema: String,
     core_cases: String,
     core_cases_schema: String,
+    core_differential_input_schema: String,
+    core_adapter_result_schema: String,
+    core_differential_report_schema: String,
     adapter_result_schema: String,
     implementations_lock: String,
     implementations_schema: String,
     candidate_report: String,
+    core_differential_report: String,
+    core_generated_differential_report: String,
+    trace_producer_rs_report: String,
+    trace_producer_ts_report: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -177,6 +187,20 @@ struct PatchOperation {
     op: String,
     path: String,
     value: Option<Value>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ProducerCaseCorpus {
+    format_version: String,
+    cases: Vec<ProducerCorpusCase>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ProducerCorpusCase {
+    id: String,
+    input: String,
+    transcript: Option<String>,
+    expected: Value,
 }
 
 #[must_use]
@@ -261,10 +285,20 @@ fn run_suite_inner(root: &Path) -> Result<SuiteReport, Diagnostic> {
     let trace_schema = checked_schema(root, &manifest.files.trace_schema)?;
     let family_schema = checked_schema(root, &manifest.files.family_schema)?;
     let transcript_schema = checked_schema(root, &manifest.files.transcript_schema)?;
+    let trace_producer_input_schema =
+        checked_schema(root, &manifest.files.trace_producer_input_schema)?;
+    let trace_producer_cases_schema =
+        checked_schema(root, &manifest.files.trace_producer_cases_schema)?;
     let profile_schema = checked_schema(root, &manifest.files.profile_schema)?;
     let report_schema = checked_schema(root, &manifest.files.report_schema)?;
     let core_cases_schema = checked_schema(root, &manifest.files.core_cases_schema)?;
-    let _adapter_result_schema = checked_schema(root, &manifest.files.adapter_result_schema)?;
+    let _core_differential_input_schema =
+        checked_schema(root, &manifest.files.core_differential_input_schema)?;
+    let _core_adapter_result_schema =
+        checked_schema(root, &manifest.files.core_adapter_result_schema)?;
+    let core_differential_report_schema =
+        checked_schema(root, &manifest.files.core_differential_report_schema)?;
+    let adapter_result_schema = checked_schema(root, &manifest.files.adapter_result_schema)?;
 
     let core_cases = read_json(root, &manifest.files.core_cases)?;
     append_validation(
@@ -279,12 +313,43 @@ fn run_suite_inner(root: &Path) -> Result<SuiteReport, Diagnostic> {
         validate_value(&implementations_schema, &implementations_lock),
         &manifest.files.implementations_lock,
     );
+    validate_producer_corpus(
+        root,
+        &manifest.files.trace_producer_cases,
+        &trace_producer_cases_schema,
+        &trace_producer_input_schema,
+        &transcript_schema,
+        &diagnostic_codes,
+        &mut suite_diagnostics,
+    )?;
     let candidate_report = read_json(root, &manifest.files.candidate_report)?;
     append_validation(
         &mut suite_diagnostics,
         validate_value(&report_schema, &candidate_report),
         &manifest.files.candidate_report,
     );
+    for report_path in [
+        &manifest.files.core_differential_report,
+        &manifest.files.core_generated_differential_report,
+    ] {
+        let report = read_json(root, report_path)?;
+        append_validation(
+            &mut suite_diagnostics,
+            validate_value(&core_differential_report_schema, &report),
+            report_path,
+        );
+    }
+    for report_path in [
+        &manifest.files.trace_producer_rs_report,
+        &manifest.files.trace_producer_ts_report,
+    ] {
+        let report = read_json(root, report_path)?;
+        append_validation(
+            &mut suite_diagnostics,
+            validate_value(&adapter_result_schema, &report),
+            report_path,
+        );
+    }
 
     let profile_value = read_json(root, &manifest.files.profile)?;
     append_validation(
@@ -583,6 +648,77 @@ fn load_transcript(
             None
         }
     }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn validate_producer_corpus(
+    root: &Path,
+    cases_path: &str,
+    cases_schema: &Value,
+    input_schema: &Value,
+    transcript_schema: &Value,
+    diagnostic_codes: &HashSet<String>,
+    diagnostics: &mut Vec<Diagnostic>,
+) -> Result<(), Diagnostic> {
+    let cases_value = read_json(root, cases_path)?;
+    let cases_validation = validate_value(cases_schema, &cases_value);
+    append_validation(diagnostics, cases_validation.clone(), cases_path);
+    if !cases_validation.conformant {
+        return Ok(());
+    }
+    let corpus: ProducerCaseCorpus = deserialize_value(cases_value, cases_path)?;
+    if corpus.format_version != FORMAT_VERSION {
+        push(
+            diagnostics,
+            "SUITE_FORMAT_UNSUPPORTED",
+            cases_path,
+            format!("Trace producer case format must be {FORMAT_VERSION}"),
+        );
+    }
+
+    let mut case_ids = HashSet::new();
+    for case in corpus.cases {
+        if !case_ids.insert(case.id.clone()) {
+            push(
+                diagnostics,
+                "SUITE_CASE_ID_DUPLICATE",
+                cases_path,
+                format!("Trace producer case id {} occurs more than once", case.id),
+            );
+        }
+        match read_json(root, &case.input) {
+            Ok(input) => append_validation(
+                diagnostics,
+                validate_value(input_schema, &input),
+                &case.input,
+            ),
+            Err(error) => diagnostics.push(error),
+        }
+        if let Some(transcript_path) = &case.transcript {
+            match read_json(root, transcript_path) {
+                Ok(transcript) => append_validation(
+                    diagnostics,
+                    validate_value(transcript_schema, &transcript),
+                    transcript_path,
+                ),
+                Err(error) => diagnostics.push(error),
+            }
+        }
+        if let Some(code) = case.expected.get("code").and_then(Value::as_str) {
+            if !diagnostic_codes.contains(code) {
+                push(
+                    diagnostics,
+                    "SUITE_DIAGNOSTIC_UNREGISTERED",
+                    cases_path,
+                    format!(
+                        "Trace producer case {} expects unregistered code {code}",
+                        case.id
+                    ),
+                );
+            }
+        }
+    }
+    Ok(())
 }
 
 fn validate_family_metadata(

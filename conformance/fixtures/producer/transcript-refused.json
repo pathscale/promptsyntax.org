@@ -1,0 +1,13 @@
+{
+  "format_version": "0.1-draft",
+  "turn": "turn-producer-refused-001",
+  "inferences": [
+    {
+      "id": "inference-refused-001",
+      "actual_request_utf8": "Summarize the restricted report.",
+      "routing": { "outcome": "refused" }
+    }
+  ],
+  "boundaries": [],
+  "external_artifacts": []
+}

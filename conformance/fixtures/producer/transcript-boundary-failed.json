@@ -1,0 +1,16 @@
+{
+  "format_version": "0.1-draft",
+  "turn": "turn-producer-boundary-failed-001",
+  "inferences": [
+    {
+      "id": "inference-boundary-failed-001",
+      "actual_request_utf8": "Find the latest customer note.",
+      "routing": {
+        "outcome": "invoked",
+        "bound": "model:example/atlas-4@2026-08-01"
+      }
+    }
+  ],
+  "boundaries": [{ "id": "boundary-failed-001", "outcome": "failed" }],
+  "external_artifacts": []
+}

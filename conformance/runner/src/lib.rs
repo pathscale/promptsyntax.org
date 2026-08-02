@@ -7,9 +7,15 @@ use jsonschema::PatternOptions;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+mod core;
+mod generator;
+mod producer;
 mod suite;
 mod trace;
 
+pub use core::{CoreDifferentialReport, compare_core_adapter_streams, compare_core_adapters_json};
+pub use generator::{GeneratorMetadata, write_generated_core_cases};
+pub use producer::{TraceProducerAdapterReport, run_trace_producer_adapter};
 pub use suite::{SuiteReport, run_suite};
 
 const SUPPORTED_FORMAT: &str = "0.1-draft";
@@ -297,6 +303,58 @@ pub fn validate_instance_json(schema_input: &[u8], instance_input: &[u8]) -> Val
 
     ValidationReport {
         kind: "instance".to_owned(),
+        conformant: diagnostics.is_empty(),
+        diagnostics,
+    }
+}
+
+#[must_use]
+pub fn validate_trace_producer_json(
+    trace_schema_input: &[u8],
+    trace_input: &[u8],
+    transcript_schema_input: &[u8],
+    transcript_input: &[u8],
+) -> ValidationReport {
+    let trace_structure = validate_instance_json(trace_schema_input, trace_input);
+    if !trace_structure.conformant {
+        return ValidationReport {
+            kind: "trace-producer".to_owned(),
+            conformant: false,
+            diagnostics: trace_structure.diagnostics,
+        };
+    }
+    let transcript_structure = validate_instance_json(transcript_schema_input, transcript_input);
+    if !transcript_structure.conformant {
+        return ValidationReport {
+            kind: "trace-producer".to_owned(),
+            conformant: false,
+            diagnostics: transcript_structure.diagnostics,
+        };
+    }
+
+    let trace = match serde_json::from_slice::<Value>(trace_input) {
+        Ok(value) => value,
+        Err(error) => {
+            return ValidationReport::invalid_input(
+                "trace-producer",
+                "INSTANCE_JSON_INVALID",
+                error.to_string(),
+            );
+        }
+    };
+    let transcript = match serde_json::from_slice::<trace::ProducerTranscript>(transcript_input) {
+        Ok(value) => value,
+        Err(error) => {
+            return ValidationReport::invalid_input(
+                "trace-producer",
+                "INSTANCE_JSON_INVALID",
+                error.to_string(),
+            );
+        }
+    };
+    let diagnostics = trace::validate_trace(&trace, Some(&transcript));
+    ValidationReport {
+        kind: "trace-producer".to_owned(),
         conformant: diagnostics.is_empty(),
         diagnostics,
     }
