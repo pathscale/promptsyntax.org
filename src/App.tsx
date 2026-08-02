@@ -7,6 +7,7 @@ import { ROUTES } from "~/config/routes";
 import HomePage from "~/pages/HomePage";
 import SpecPage from "~/pages/SpecPage";
 import SyntaxPage from "~/pages/SyntaxPage";
+import VignettePage from "~/pages/VignettePage";
 
 const Shell: ParentComponent = (props) => (
   <div class="flex min-h-screen flex-col">
@@ -22,6 +23,7 @@ const App = () => {
       <Route path={ROUTES.HOME} component={HomePage} />
       <Route path={ROUTES.SPEC} component={SpecPage} />
       <Route path={ROUTES.SYNTAX} component={SyntaxPage} />
+      <Route path={ROUTES.VIGNETTE} component={VignettePage} />
       <Route path="*" component={HomePage} />
     </Router>
   );
