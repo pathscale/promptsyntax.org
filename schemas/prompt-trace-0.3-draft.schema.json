@@ -1,0 +1,643 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptsyntax.org/schemas/prompt-trace/0.3-draft",
+  "title": "Prompt Trace 0.3 candidate",
+  "description": "Non-normative candidate schema used to resolve the v0.2 conformance audit. It must not be used for an unqualified conformance claim.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ps_trace", "turn", "tier", "mode", "venue", "coverage", "events"],
+  "properties": {
+    "ps_trace": { "const": "0.3-draft" },
+    "turn": { "type": "string", "minLength": 1 },
+    "tier": { "enum": ["user", "developer", "operator", "oversight"] },
+    "mode": { "enum": ["dry-run", "executed"] },
+    "venue": { "$ref": "#/$defs/venue" },
+    "coverage": { "$ref": "#/$defs/coverage" },
+    "integrity": { "$ref": "#/$defs/integrity" },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/inference" },
+          { "$ref": "#/$defs/boundary_event" }
+        ]
+      }
+    },
+    "extensions": { "$ref": "#/$defs/extensions" }
+  },
+  "$defs": {
+    "venue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "capability_document"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "capability_document": { "type": "string", "format": "uri" },
+        "vendor_profile": { "type": "string", "minLength": 1 },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["routing", "assembly", "inline_threshold_bytes"],
+      "properties": {
+        "routing": { "const": "complete" },
+        "assembly": { "enum": ["complete", "user-initiated-only"] },
+        "inline_threshold_bytes": { "type": "integer", "minimum": 4096 },
+        "profile": { "type": "string", "minLength": 1 },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "inference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "event", "kind", "routing", "segments", "steps", "resolution"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "event": { "const": "inference" },
+        "kind": { "enum": ["user-initiated", "internal-continuation"] },
+        "routing": { "$ref": "#/$defs/routing_record" },
+        "segments": {
+          "oneOf": [
+            { "$ref": "#/$defs/segment_list" },
+            { "$ref": "#/$defs/segments_omitted" }
+          ]
+        },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/step" }
+        },
+        "resolution": { "$ref": "#/$defs/resolution_report" },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["kind"],
+            "properties": { "kind": { "const": "user-initiated" } }
+          },
+          "then": {
+            "properties": { "segments": { "$ref": "#/$defs/segment_list" } }
+          }
+        }
+      ]
+    },
+
+    "routing_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requested", "policy", "outcome", "attempts", "fill"],
+      "properties": {
+        "requested": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Authored directive text or synthesized canonical route."
+        },
+        "policy": { "enum": ["strict", "partial", "best-effort"] },
+        "outcome": { "enum": ["invoked", "refused"] },
+        "bound": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Canonical pinned entity actually invoked."
+        },
+        "attempts": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/attempt" }
+        },
+        "fill": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/fill_entry" }
+        },
+        "budget": { "$ref": "#/$defs/budget_echo" },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["outcome"],
+            "properties": { "outcome": { "const": "invoked" } }
+          },
+          "then": { "required": ["bound"] },
+          "else": { "not": { "required": ["bound"] } }
+        }
+      ]
+    },
+
+    "attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref", "outcome"],
+      "properties": {
+        "ref": { "type": "string", "minLength": 1 },
+        "bound": { "type": "string", "minLength": 1 },
+        "outcome": { "enum": ["filled", "failed", "blocked"] },
+        "reasons": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/outcome_reason" }
+        },
+        "measured": { "$ref": "#/$defs/measured" },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["outcome"],
+            "properties": { "outcome": { "const": "filled" } }
+          },
+          "then": { "required": ["bound", "measured"] },
+          "else": { "required": ["reasons"] }
+        }
+      ]
+    },
+
+    "fill_entry": {
+      "oneOf": [
+        { "$ref": "#/$defs/entity_fill" },
+        { "$ref": "#/$defs/parameter_fill" },
+        { "$ref": "#/$defs/budget_fill" },
+        { "$ref": "#/$defs/action_fill" }
+      ]
+    },
+
+    "entity_fill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "requested", "status", "policy"],
+      "properties": {
+        "kind": { "const": "entity" },
+        "requested": { "type": "string", "minLength": 1 },
+        "applied": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["kept", "fallback", "substituted", "refused"] },
+        "policy": { "enum": ["strict", "partial", "best-effort"] },
+        "route_step": { "type": "integer", "minimum": 0 },
+        "reason": { "$ref": "#/$defs/outcome_reason" },
+        "deciding_authority": { "$ref": "#/$defs/authority" },
+        "mapping_rule": { "type": "string", "minLength": 1 },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["status"],
+            "properties": { "status": { "enum": ["kept", "fallback", "substituted"] } }
+          },
+          "then": { "required": ["applied"] },
+          "else": {
+            "required": ["reason", "deciding_authority"],
+            "not": { "required": ["applied"] }
+          }
+        },
+        {
+          "if": {
+            "required": ["status"],
+            "properties": { "status": { "const": "fallback" } }
+          },
+          "then": { "required": ["route_step"] }
+        },
+        {
+          "if": {
+            "required": ["status"],
+            "properties": { "status": { "const": "substituted" } }
+          },
+          "then": {
+            "required": ["reason", "deciding_authority"],
+            "properties": { "reason": { "const": "ENTITY_SUBSTITUTED" } }
+          }
+        }
+      ]
+    },
+
+    "parameter_fill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "requested", "status", "policy"],
+      "properties": {
+        "kind": { "const": "parameter" },
+        "name": { "type": "string", "minLength": 1 },
+        "requested": true,
+        "normalized": true,
+        "applied": true,
+        "status": {
+          "enum": ["applied", "translated", "clamped", "unsupported", "ignored", "refused"]
+        },
+        "policy": { "enum": ["strict", "partial", "best-effort"] },
+        "reason": { "$ref": "#/$defs/outcome_reason" },
+        "mapping_rule": { "type": "string", "minLength": 1 },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["status"],
+            "properties": { "status": { "enum": ["applied", "translated", "clamped"] } }
+          },
+          "then": { "required": ["applied"] },
+          "else": { "required": ["reason"] }
+        },
+        {
+          "if": {
+            "required": ["status"],
+            "properties": { "status": { "enum": ["translated", "clamped"] } }
+          },
+          "then": { "required": ["normalized", "mapping_rule"] }
+        }
+      ]
+    },
+
+    "budget_fill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "requested", "status"],
+      "properties": {
+        "kind": { "const": "budget" },
+        "name": { "type": "string", "minLength": 1 },
+        "requested": true,
+        "applied": true,
+        "status": { "enum": ["applied", "exceeded", "unsupported", "refused"] },
+        "reason": { "$ref": "#/$defs/outcome_reason" },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["status"],
+            "properties": { "status": { "const": "applied" } }
+          },
+          "then": { "required": ["applied"] },
+          "else": { "required": ["reason"] }
+        }
+      ]
+    },
+
+    "action_fill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "requested", "status"],
+      "properties": {
+        "kind": { "const": "action" },
+        "requested": { "type": "string", "minLength": 1 },
+        "applied": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["applied", "refused"] },
+        "reason": { "$ref": "#/$defs/outcome_reason" },
+        "deciding_authority": { "$ref": "#/$defs/authority" },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["status"],
+            "properties": { "status": { "const": "applied" } }
+          },
+          "then": { "required": ["applied"] },
+          "else": { "required": ["reason", "deciding_authority"] }
+        }
+      ]
+    },
+
+    "outcome_reason": {
+      "enum": [
+        "ENTITY_NOT_FOUND",
+        "ENTITY_AMBIGUOUS",
+        "ENTITY_UNAVAILABLE",
+        "ENTITY_SUBSTITUTED",
+        "ENTITY_UNAUTHORIZED",
+        "PARAM_UNSUPPORTED",
+        "PARAM_CLAMPED",
+        "PARAM_IGNORED",
+        "BUDGET_PREFLIGHT_REJECTED",
+        "BUDGET_EXCEEDED",
+        "TIMEOUT_NOT_CANCELLED",
+        "DATA_POLICY_BLOCKED",
+        "SAFETY_BLOCKED",
+        "SPAN_EXECUTION_UNSUPPORTED",
+        "VERSION_UNSUPPORTED",
+        "FALLBACK_EXHAUSTED"
+      ]
+    },
+
+    "authority": {
+      "enum": [
+        "law-regulation",
+        "platform",
+        "venue-operations",
+        "organization",
+        "application",
+        "user",
+        "prompt"
+      ]
+    },
+
+    "budget_echo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "estimated_cost_max_usd": { "type": "number", "minimum": 0 },
+        "observed_cost_max_usd": { "type": "number", "minimum": 0 },
+        "wall_time_max_ms": { "type": "integer", "minimum": 0 },
+        "first_token_max_ms": { "type": "integer", "minimum": 0 },
+        "cancellation": { "enum": ["required", "preferred", "unsupported"] },
+        "scope": { "enum": ["attempt", "chain"] },
+        "set_by_authority": { "$ref": "#/$defs/authority" },
+        "measurement_profile": { "type": "string", "minLength": 1 },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "measured": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cost_usd": { "type": "number", "minimum": 0 },
+        "wall_time_ms": { "type": "integer", "minimum": 0 },
+        "first_token_ms": { "type": "integer", "minimum": 0 },
+        "cancelled": { "type": "boolean" },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "segment_list": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/segment" }
+    },
+
+    "segment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["i", "origin", "content"],
+      "properties": {
+        "i": { "type": "integer", "minimum": 0 },
+        "id": { "type": "string", "minLength": 1 },
+        "origin": { "enum": ["user-authored", "injected"] },
+        "content": { "$ref": "#/$defs/content" },
+        "step": { "type": "string", "minLength": 1 },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["origin"],
+            "properties": { "origin": { "const": "injected" } }
+          },
+          "then": { "required": ["step"] }
+        }
+      ]
+    },
+
+    "content": {
+      "oneOf": [
+        { "$ref": "#/$defs/content_inline" },
+        { "$ref": "#/$defs/content_external" },
+        { "$ref": "#/$defs/content_withheld" }
+      ]
+    },
+
+    "content_inline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "text"],
+      "properties": {
+        "state": { "const": "inline" },
+        "text": { "type": "string" },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "content_external": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "sha256", "length", "handle"],
+      "properties": {
+        "state": { "const": "external" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "length": { "type": "integer", "minimum": 0 },
+        "media": { "type": "string", "minLength": 1 },
+        "handle": { "type": "string", "format": "uri" },
+        "materialized": { "$ref": "#/$defs/materialized" },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "materialized": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "materialized_at"],
+      "properties": {
+        "text": { "type": "string" },
+        "materialized_at": { "type": "string", "format": "date-time" },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "content_withheld": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "digest", "length_band", "tier", "kind"],
+      "properties": {
+        "state": { "const": "withheld" },
+        "digest": { "type": "string", "minLength": 1 },
+        "length_band": { "enum": ["<1KB", "1-4KB", "4-16KB", "16-64KB", ">64KB"] },
+        "tier": { "enum": ["developer", "operator", "oversight"] },
+        "kind": { "type": "string", "minLength": 1 },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "segments_omitted": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coverage", "reason", "declared_in"],
+      "properties": {
+        "coverage": { "const": "not-provided" },
+        "reason": { "enum": ["should-level-not-implemented", "tier-excluded"] },
+        "declared_in": { "type": "string", "minLength": 1 },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": {
+          "enum": [
+            "user-content",
+            "context-inclusion",
+            "retrieval",
+            "skill-invocation",
+            "template-expansion",
+            "policy-injection",
+            "system-injection",
+            "tool-result-inclusion",
+            "loop-instruction",
+            "truncation",
+            "transformation",
+            "promotion"
+          ]
+        },
+        "via": { "type": "string", "minLength": 1 },
+        "of": { "type": "string", "minLength": 1 },
+        "parent": { "type": "string", "minLength": 1 },
+        "tier": { "enum": ["user", "developer", "operator", "oversight"] },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "resolution_report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bindings", "refusals"],
+      "properties": {
+        "bindings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/binding" }
+        },
+        "refusals": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/refusal" }
+        },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref", "bound", "rule", "ambiguity_surfaced"],
+      "properties": {
+        "ref": { "type": "string", "minLength": 1 },
+        "bound": { "type": "string", "minLength": 1 },
+        "rule": { "type": "string", "minLength": 1 },
+        "ambiguity_surfaced": { "type": "boolean" },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "refusal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref", "reason", "authority", "recourse"],
+      "properties": {
+        "ref": { "type": "string", "minLength": 1 },
+        "reason": { "$ref": "#/$defs/outcome_reason" },
+        "authority": { "$ref": "#/$defs/authority" },
+        "triggering_step": { "type": "string", "minLength": 1 },
+        "recourse": { "$ref": "#/$defs/recourse" },
+        "policy_decision_id": { "type": "string", "minLength": 1 },
+        "policy_bundle": { "type": "string", "minLength": 1 },
+        "policy_engine": { "type": "string", "minLength": 1 },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["reason"],
+            "properties": { "reason": { "const": "SAFETY_BLOCKED" } }
+          },
+          "then": { "required": ["triggering_step"] }
+        }
+      ]
+    },
+
+    "recourse": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["available", "kind"],
+          "properties": {
+            "available": { "const": true },
+            "kind": { "enum": ["appeal", "verification", "feedback", "retry"] },
+            "uri": { "type": "string", "format": "uri" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["available", "reason"],
+          "properties": {
+            "available": { "const": false },
+            "reason": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+
+    "boundary_event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "event", "tool", "outcome", "sent", "fill", "measured"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "event": { "const": "boundary" },
+        "tool": { "type": "string", "minLength": 1 },
+        "outcome": { "enum": ["succeeded", "failed", "blocked", "cancelled"] },
+        "sent": { "$ref": "#/$defs/content" },
+        "received": { "$ref": "#/$defs/content" },
+        "reason": { "$ref": "#/$defs/outcome_reason" },
+        "fill": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/fill_entry" }
+        },
+        "internal": { "const": "outside-trace-perimeter" },
+        "measured": { "$ref": "#/$defs/measured" },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["outcome"],
+            "properties": { "outcome": { "const": "succeeded" } }
+          },
+          "then": { "required": ["received"] },
+          "else": { "required": ["reason"] }
+        }
+      ]
+    },
+
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": { "const": "sha256-chain" },
+        "event_hashes": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        },
+        "signature": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["alg", "key_id", "value"],
+          "properties": {
+            "alg": { "type": "string", "minLength": 1 },
+            "key_id": { "type": "string", "minLength": 1 },
+            "value": { "type": "string", "minLength": 1 },
+            "timestamp": { "type": "string", "format": "date-time" },
+            "timestamp_authority": { "type": "string", "minLength": 1 }
+          }
+        },
+        "completeness_attestation": { "type": "string", "minLength": 1 },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "extensions": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z0-9][a-z0-9.-]*:[a-zA-Z0-9_.-]+$"
+      },
+      "additionalProperties": true
+    }
+  }
+}

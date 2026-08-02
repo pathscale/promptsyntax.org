@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptsyntax.org/conformance/requirements/0.1-draft",
+  "title": "PromptSyntax conformance requirement inventory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format_version", "spec", "requirements"],
+  "properties": {
+    "format_version": { "const": "0.1-draft" },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "commit", "declared_version", "baseline_status"],
+      "properties": {
+        "path": { "type": "string" },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "declared_version": { "type": "string" },
+        "baseline_status": { "enum": ["working-draft", "frozen"] }
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/requirement" }
+    }
+  },
+  "$defs": {
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "layer",
+        "normative_status",
+        "strength",
+        "source",
+        "statement",
+        "testability",
+        "targets"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^PS-(META|CORE|CAP|EXEC|TRACE)-[A-Z0-9-]+$"
+        },
+        "layer": {
+          "enum": ["meta", "core", "capabilities", "execution", "trace"]
+        },
+        "normative_status": { "enum": ["settled", "proposed", "open"] },
+        "strength": {
+          "enum": ["must", "must_not", "should", "should_not", "may", "invariant"]
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "section", "candidate_anchor"],
+          "properties": {
+            "path": { "type": "string" },
+            "section": { "type": "string" },
+            "candidate_anchor": { "type": "string", "pattern": "^[a-z0-9-]+$" }
+          }
+        },
+        "statement": { "type": "string", "minLength": 1 },
+        "testability": {
+          "enum": ["automatic", "manual", "profile", "blocked"]
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "corpus",
+              "core-parser",
+              "capability-document",
+              "execution-resolver",
+              "trace-document",
+              "trace-producer",
+              "interactive-ui",
+              "documentation",
+              "oversight-profile"
+            ]
+          }
+        },
+        "blocked_by": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^A[0-9]{2}$" }
+        },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}
