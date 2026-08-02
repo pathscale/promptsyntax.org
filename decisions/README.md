@@ -13,5 +13,6 @@
 | 9 | Content encoding | Hybrid + materialized export | Always inline; always by-ref | SPEC §12.1 |
 | 10 | Oversight | Evidence substrate + external profiles | Fixed audit tier; jurisdiction rules in core | SPEC §12.3 |
 | 11 | Policy systems | PEP/PDP seam + external bindings | Policy language in core | SPEC §10.4 |
+| 12 | Standing promotion (proposed) | Versioned, origin-bound declared authoring surfaces | Parse-all output; delimiter-only promotion; envelope widening | SPEC §13.2 |
 
 Full rationale: the spec's decision-record notes and the project's design documents.

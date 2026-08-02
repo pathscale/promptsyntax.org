@@ -3,7 +3,22 @@ Specification Draft v0.2</h1>
 <p><strong>Status:</strong> Working draft, design decisions marked ✅
 (settled), 🔶 (proposed, awaiting confirmation), ❓ (open question)
 <strong>Editors:</strong> [author], with drafting assistance
-<strong>Last updated:</strong> 2026-07-19</p>
+<strong>Last updated:</strong> 2026-08-02</p>
+<blockquote>
+<p><strong>Candidate change for v0.2.2:</strong> proposes
+<strong>standing promotion</strong> (§13.2): an application may declare
+a versioned, origin-bound authoring surface through which a named agent
+principal can request a closed set of actions. The declaration changes
+which segments are eligible for parsing; it does not widen the
+capability envelope. Each exercise remains subject to current
+authorization and produces a typed fill outcome in the trace.
+Motivation: v0.2.1 required authority-checked promotion but illustrated
+only per-event user acceptance, leaving no specified reusable form for
+agentic applications. Source: an author-controlled application review
+(2026-08-01) that found a live capability-escalation instance of the
+gap. Also proposed: explicit producer and framing bounds, replay
+handling, closed-action confusable handling, and open question 16.</p>
+</blockquote>
 <blockquote>
 <p><strong>Changelog v0.1 → v0.2:</strong> major revision incorporating
 external platform-operator review (2026-07-19). Added:
@@ -125,6 +140,22 @@ the capability envelope, rather than the model inferring intent.</td>
 <td>The property that the user can inspect, at their tier, what will run
 (pre-execution) and what ran (post-execution).</td>
 </tr>
+<tr>
+<td><strong>Promotion</strong></td>
+<td>An authority-checked change in provenance type that makes a specific
+segment eligible for parsing. Promotion never grants a capability.</td>
+</tr>
+<tr>
+<td><strong>Declared authoring surface</strong></td>
+<td>A versioned, origin-bound interface through which output from a
+named principal may be parsed for a closed set of actions (§13.2).</td>
+</tr>
+<tr>
+<td><strong>PS-shaped</strong></td>
+<td>Descriptive only: an implementation uses PS syntax or one or more
+PS-aligned behaviors but does not satisfy a named layer-and-version
+conformance claim.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="design-principles">3. Design principles ✅</h2>
@@ -203,7 +234,12 @@ authorization surface</td>
 </tbody>
 </table>
 <p>A conformance claim names layers and version: e.g.,
-<code>PS/Core 0.2 + PS/Trace 0.2 (user tier)</code>.</p>
+<code>PS/Core 0.2 + PS/Trace 0.2 (user tier)</code>. An implementation
+that borrows PS syntax or behavior without meeting such a claim is
+<strong>PS-shaped</strong> only. PS-shaped is not a conformance level
+and MUST NOT be presented as conformance. The adoption path is
+PS-shaped, then named-layer conformance, with independent certification
+left to the governance work in OQ#15.</p>
 <h2 id="directive-scopes">5. Directive scopes ✅</h2>
 <table>
 <colgroup>
@@ -756,12 +792,14 @@ designated <strong>authoring segments</strong>, text the principal typed
 or an authority-checked surface produced as PS, are parsed for
 directives. Retrieved documents, file contents, tool results, quoted
 messages, and model-generated text are typed <strong>inert</strong>:
-PS-shaped text inside them (e.g., a document containing
+directive-shaped text inside them (e.g., a document containing
 <code>@tool:send_email!(…)</code>) is content, never a directive, and
 cannot introduce directives except through an explicit,
-authority-checked <em>promotion</em> operation recorded in the trace.
-This rule is prior to and stronger than fence exemption; without it, PS
-would be a prompt-injection and capability-escalation surface.</li>
+authority-checked <em>promotion</em> operation recorded in the trace
+(per-event acceptance, or the proposed declared standing surface in
+§13.2). This rule is prior to and stronger than fence exemption; without
+it, PS would be a prompt-injection and capability-escalation
+surface.</li>
 <li><strong>The parameterization principle ✅
 <em>(v0.2.1)</em>:</strong> security rests on provenance, never on
 escaping. PS is parsed only at the interface layer, only over authored
@@ -780,9 +818,11 @@ in typed data fields, never spliced into directive text, so
 serialize-then-recompile cannot promote inert content (round-trip
 safety). Nested-span conflict semantics: pending conflict table (OQ).
 <strong>Model-generated PS</strong> (including the reification layer’s
-proposed strict form) is inert until explicitly accepted by the user,
-reification acceptance is the archetypal authority-checked promotion,
-and the promotion event is recorded in the trace.</li>
+proposed strict form) is inert until promoted: explicitly accepted by
+the user (per-event reification acceptance, the archetypal promotion),
+or, where supported, exercised through a declared standing surface
+(§13.2). Either way the promotion is authority-checked and recorded in
+the trace.</li>
 <li>Only the <code>ps</code> tag namespace is live; all other
 <code>&lt;…&gt;</code> is content.</li>
 <li><code>@</code>/<code>/</code> islands require a word boundary and a
@@ -828,9 +868,14 @@ Source-style reordering (CVE-2021-42574) could otherwise visually
 disguise what a directive does, defeating mandatory highlighting.</li>
 <li><strong>Confusables.</strong> Homoglyph references
 (<code>@оpus</code> with Cyrillic <code>о</code>) are a spoofing vector
-against entity binding. Resolvers SHOULD apply confusable detection (UTS
-#39) and surface skeleton-matches as ambiguity conditions rather than
-silently binding.</li>
+against entity binding. Open-namespace resolvers SHOULD apply confusable
+detection (UTS #39) and surface skeleton matches as ambiguity conditions
+rather than silently binding. For small, closed identifier sets such as
+declared action names, canonical identifiers SHOULD be ASCII-restricted
+and implementations MAY accept ASCII case-folded aliases. A non-ASCII
+confusable does not bind as an alias and, once it appears in an
+authoring segment, produces a typed failure. Prose arguments remain
+Unicode content.</li>
 <li><strong>Localized scalars.</strong> Budget/parameter input MAY use
 locale conventions (decimal comma, local currency); canonical form and
 traces always use canonical units (USD, <code>ms</code>/<code>s</code>,
@@ -839,6 +884,86 @@ dot-decimal).</li>
 <p>❓ <em>Open: governance of localized keyword-alias tables
 (per-language registries? vendor-defined?); which locales the
 conformance suite must cover.</em></p>
+<h3
+id="standing-promotion-declared-authoring-surfaces-proposed-for-v0.2.2">13.2
+Standing promotion: declared authoring surfaces 🔶 <em>(proposed for
+v0.2.2)</em></h3>
+<p>PS governs the forward channel, principal to venue. Agentic
+applications also run a continuous <strong>reverse channel</strong>: the
+application acts on model output to write records, open pull requests,
+or edit files. Section 13 types model-generated text inert. v0.2.1
+required any promotion to be explicit, authority-checked, and traced,
+but illustrated only per-event user acceptance. It did not specify a
+reusable promotion form for a machine principal.</p>
+<p>A standing declaration fills that gap without weakening provenance
+safety. It changes only whether a segment is eligible for parsing. It
+does <strong>not</strong> widen an authority or capability envelope, and
+it does not make the segment trustworthy. Resolution, policy, and
+authorization are evaluated again for every requested action.</p>
+<p><strong>Proposed normative rule.</strong> An application MAY, at
+application/developer authority or above, publish a versioned
+declaration that output from a named agent principal through a named,
+origin-bound frame is a <strong>declared authoring surface</strong>. The
+declaration is standing (made once, not accepted by a user on every
+event) and MUST specify:</p>
+<ol type="1">
+<li><strong>Identity and lifecycle.</strong> A stable declaration
+identifier and version, the declaring authority, the producer principal
+or principal class, the scope in which it is valid, and how it is
+activated, revoked, and replaced. Model text cannot create, amend, or
+reactivate its own declaration.</li>
+<li><strong>Origin and framing.</strong> The transport, message or
+invocation boundary, output field, and exact segment framing. Hosts MUST
+preserve those boundaries and parse the designated frame directly.
+Searching an undifferentiated transcript, concatenated prose, quoted
+content, or retrieved data for a delimiter is NOT a valid surface. A
+delimiter found inside inert content cannot create an authoring
+segment.</li>
+<li><strong>Live namespace and action set.</strong> The vendor-ext
+namespace whose references are live inside the frame, plus a closed set
+of actions and parameter schemas. One surface being live grants no
+meaning to any other namespace, entity, tool, or action. Actions MAY be
+authority-differentiated, and an agent-authored segment MUST NOT claim
+user provenance or user authority.</li>
+<li><strong>Capability and authorization bound.</strong> The surface
+operates strictly within the current envelope of the declared producer
+and application. Non-escalation (principle 8) applies unchanged.
+Cross-scope reach MUST be explicit, and every exercise MUST be
+authorized against the envelope and policy in force at execution time. A
+stale declaration is never an authorization grant.</li>
+<li><strong>Fill and replay behavior.</strong> Every qualified or
+otherwise directive-shaped reference inside the frame ends in exactly
+one recorded outcome. A reference that fails to parse, bind, or
+authorize is a typed, surfaced failure, never a silent no-op. A frame is
+consumed at most once unless the declaration defines an idempotent
+replay rule; rejected duplicates also receive a typed outcome. Alias
+acceptance is MAY; accepted aliases compile to canonical form.</li>
+<li><strong>Trace obligations.</strong> The declaration is recorded in
+or referenced by the capability document (§7.1). Each exercise records
+the declaration id and version, declaring and producing principals,
+invocation and frame identifiers, provenance type, current authorization
+decision, replay disposition, and per-reference fill outcomes. Segment
+content follows the tier-scoped
+<code>inline | external | withheld</code> rules of §12.1 rather than
+being copied into every trace tier.</li>
+</ol>
+<p>Content outside a declared frame remains inert per §13. Reification
+acceptance is the per-event, user-authority form of promotion; a
+declared authoring surface is a reusable, higher-authority provenance
+rule. Both make a segment parse-eligible, and neither grants capability
+by itself.</p>
+<p><strong>Security boundary.</strong> A standing declaration authorizes
+a machine principal to request bounded actions. It does not establish
+that the principal’s output is correct, that the principal was not
+influenced by indirect prompt injection, or that the requested action
+reflects user intent. The control limits effects, fails closed outside
+the declared surface, and makes each outcome auditable. Consequential
+actions remain subject to the qualification or confirmation requirement
+in §6.4.</p>
+<p><strong>Confusables in closed action sets.</strong> Declared actions
+follow the closed-identifier guidance in §13.1. Inside a declared frame,
+a rejected confusable MUST produce a typed failure rather than becoming
+inert or binding silently.</p>
 <h2 id="determinism-taxonomy-v0.2">14. Determinism taxonomy ✅
 <em>(v0.2)</em></h2>
 <p>Documentation and conformance language MUST distinguish, and never
@@ -922,6 +1047,14 @@ exactly one baseline.</li>
 requirements, signed capability documents, and a path to independent
 verification (currently: two author-controlled implementations
 demonstrate spec precision, not third-party assurance).</li>
+<li><em>(from author-controlled agentic-application review,
+2026-08-01)</em> Standing-promotion governance (§13.2): declaration
+schema detail in the capability document and Prompt Trace; whether
+routing directives (model or tool references) are ever legal inside an
+agent-authored surface; nested interactions between surfaces and spans;
+origin-bound framing across streaming transports; replay and idempotency
+profiles; and migration guidance for PS-shaped implementations toward
+honest named-layer conformance claims.</li>
 </ol>
 <hr />
 <p><em>Naming: properties are routing <strong>control</strong> and

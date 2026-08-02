@@ -2,7 +2,19 @@
 
 **Status:** Working draft, design decisions marked ✅ (settled), 🔶 (proposed, awaiting confirmation), ❓ (open question)
 **Editors:** [author], with drafting assistance
-**Last updated:** 2026-07-19
+**Last updated:** 2026-08-02
+
+> **Candidate change for v0.2.2:** proposes **standing promotion** (§13.2): an
+> application may declare a versioned, origin-bound authoring surface through which a
+> named agent principal can request a closed set of actions. The declaration changes
+> which segments are eligible for parsing; it does not widen the capability envelope.
+> Each exercise remains subject to current authorization and produces a typed fill
+> outcome in the trace. Motivation: v0.2.1 required authority-checked promotion but
+> illustrated only per-event user acceptance, leaving no specified reusable form for
+> agentic applications. Source: an author-controlled application review (2026-08-01)
+> that found a live capability-escalation instance of the gap. Also proposed: explicit
+> producer and framing bounds, replay handling, closed-action confusable handling, and
+> open question 16.
 
 > **Changelog v0.1 → v0.2:** major revision incorporating external platform-operator review
 > (2026-07-19). Added: authority/specificity precedence split with non-escalation rule (§10);
@@ -47,6 +59,9 @@ UX, and it promises portable *expression of intent*, never portable execution.
 | **Trace tier** | A defined visibility level of the trace: user / developer / operator / oversight (§12.2). |
 | **Routing control** | The property that directives *guarantee* what runs, within the capability envelope, rather than the model inferring intent. |
 | **Routing transparency** | The property that the user can inspect, at their tier, what will run (pre-execution) and what ran (post-execution). |
+| **Promotion** | An authority-checked change in provenance type that makes a specific segment eligible for parsing. Promotion never grants a capability. |
+| **Declared authoring surface** | A versioned, origin-bound interface through which output from a named principal may be parsed for a closed set of actions (§13.2). |
+| **PS-shaped** | Descriptive only: an implementation uses PS syntax or one or more PS-aligned behaviors but does not satisfy a named layer-and-version conformance claim. |
 
 ## 3. Design principles ✅
 
@@ -74,6 +89,10 @@ and runtimes are not).
 | **PS/Trace** | Trace schema, tiers, fill reports, failure codes | Medium-high |
 
 A conformance claim names layers and version: e.g., `PS/Core 0.2 + PS/Trace 0.2 (user tier)`.
+An implementation that borrows PS syntax or behavior without meeting such a claim is
+**PS-shaped** only. PS-shaped is not a conformance level and MUST NOT be presented as
+conformance. The adoption path is PS-shaped, then named-layer conformance, with
+independent certification left to the governance work in OQ#15.
 
 ## 5. Directive scopes ✅
 
@@ -507,7 +526,7 @@ profile.
 
 ## 13. Content safety and input marking ✅
 
-- **Provenance-typed parsing (inert content) ✅ *(v0.2.1, security-critical, from external review)*:** Only explicitly designated **authoring segments**, text the principal typed or an authority-checked surface produced as PS, are parsed for directives. Retrieved documents, file contents, tool results, quoted messages, and model-generated text are typed **inert**: PS-shaped text inside them (e.g., a document containing `@tool:send_email!(…)`) is content, never a directive, and cannot introduce directives except through an explicit, authority-checked *promotion* operation recorded in the trace. This rule is prior to and stronger than fence exemption; without it, PS would be a prompt-injection and capability-escalation surface.
+- **Provenance-typed parsing (inert content) ✅ *(v0.2.1, security-critical, from external review)*:** Only explicitly designated **authoring segments**, text the principal typed or an authority-checked surface produced as PS, are parsed for directives. Retrieved documents, file contents, tool results, quoted messages, and model-generated text are typed **inert**: directive-shaped text inside them (e.g., a document containing `@tool:send_email!(…)`) is content, never a directive, and cannot introduce directives except through an explicit, authority-checked *promotion* operation recorded in the trace (per-event acceptance, or the proposed declared standing surface in §13.2). This rule is prior to and stronger than fence exemption; without it, PS would be a prompt-injection and capability-escalation surface.
 - **The parameterization principle ✅ *(v0.2.1)*:** security rests on provenance, never
   on escaping. PS is parsed only at the interface layer, only over authored segments, models never execute PS, so inert content is never "escaped for safety"; it is never
   parsed at all. Content inclusion is **by reference** (canonical id + digest), the
@@ -519,9 +538,10 @@ profile.
   or in typed data fields, never spliced into directive text, so
   serialize-then-recompile cannot promote inert content (round-trip safety). Nested-span
   conflict semantics: pending conflict table (OQ). **Model-generated PS** (including the
-  reification layer's proposed strict form) is inert until explicitly accepted by the
-  user, reification acceptance is the archetypal authority-checked promotion, and the
-  promotion event is recorded in the trace.
+  reification layer's proposed strict form) is inert until promoted: explicitly accepted
+  by the user (per-event reification acceptance, the archetypal promotion), or, where
+  supported, exercised through a declared standing surface (§13.2). Either way the
+  promotion is authority-checked and recorded in the trace.
 - Only the `ps` tag namespace is live; all other `<…>` is content.
 - `@`/`/` islands require a word boundary and a resolvable or qualified name; emails and paths do not parse.
 - Escapes `\@`, `\/` and fenced code blocks are always content.
@@ -535,10 +555,77 @@ PS prompts are natural language in any script; the grammar must not assume Latin
 - **Unicode identifiers.** Entity names follow Unicode identifier rules (UAX #31) with NFC normalization, `@file:របាយការណ៍.md` is valid. Namespace keywords, policy names, and `else` remain English in the **canonical form** (the portability lesson of Excel's localized function names: localized *canonical* syntax destroys portability). Implementations MAY accept localized input aliases for keywords and units; these compile to canonical form, internationalization rides the same casual→strict machinery as everything else, and the round-trip property applies.
 - **Script-aware boundaries.** The "word boundary before a sigil" rule is defined by Unicode segmentation (UAX #29), not ASCII `\b`, scripts without inter-word spaces (Khmer, Thai, Japanese, Chinese) MUST still get correct island detection. Conformance test corpora MUST include non-spacing-script cases.
 - **Bidirectional text safety.** In RTL contexts (Arabic, Hebrew), editors SHOULD wrap islands in bidi isolates (FSI…PDI) for stable rendering. Security-normative: parsers MUST reject or neutralize bidi control characters *inside* directive islands, Trojan Source-style reordering (CVE-2021-42574) could otherwise visually disguise what a directive does, defeating mandatory highlighting.
-- **Confusables.** Homoglyph references (`@оpus` with Cyrillic `о`) are a spoofing vector against entity binding. Resolvers SHOULD apply confusable detection (UTS #39) and surface skeleton-matches as ambiguity conditions rather than silently binding.
+- **Confusables.** Homoglyph references (`@оpus` with Cyrillic `о`) are a spoofing vector against entity binding. Open-namespace resolvers SHOULD apply confusable detection (UTS #39) and surface skeleton matches as ambiguity conditions rather than silently binding. For small, closed identifier sets such as declared action names, canonical identifiers SHOULD be ASCII-restricted and implementations MAY accept ASCII case-folded aliases. A non-ASCII confusable does not bind as an alias and, once it appears in an authoring segment, produces a typed failure. Prose arguments remain Unicode content.
 - **Localized scalars.** Budget/parameter input MAY use locale conventions (decimal comma, local currency); canonical form and traces always use canonical units (USD, `ms`/`s`, dot-decimal).
 
 ❓ *Open: governance of localized keyword-alias tables (per-language registries? vendor-defined?); which locales the conformance suite must cover.*
+
+### 13.2 Standing promotion: declared authoring surfaces 🔶 *(proposed for v0.2.2)*
+
+PS governs the forward channel, principal to venue. Agentic applications also run a
+continuous **reverse channel**: the application acts on model output to write records,
+open pull requests, or edit files. Section 13 types model-generated text inert. v0.2.1
+required any promotion to be explicit, authority-checked, and traced, but illustrated
+only per-event user acceptance. It did not specify a reusable promotion form for a
+machine principal.
+
+A standing declaration fills that gap without weakening provenance safety. It changes
+only whether a segment is eligible for parsing. It does **not** widen an authority or
+capability envelope, and it does not make the segment trustworthy. Resolution, policy,
+and authorization are evaluated again for every requested action.
+
+**Proposed normative rule.** An application MAY, at application/developer authority or
+above, publish a versioned declaration that output from a named agent principal through
+a named, origin-bound frame is a **declared authoring surface**. The declaration is
+standing (made once, not accepted by a user on every event) and MUST specify:
+
+1. **Identity and lifecycle.** A stable declaration identifier and version, the
+   declaring authority, the producer principal or principal class, the scope in which
+   it is valid, and how it is activated, revoked, and replaced. Model text cannot
+   create, amend, or reactivate its own declaration.
+2. **Origin and framing.** The transport, message or invocation boundary, output field,
+   and exact segment framing. Hosts MUST preserve those boundaries and parse the
+   designated frame directly. Searching an undifferentiated transcript, concatenated
+   prose, quoted content, or retrieved data for a delimiter is NOT a valid surface. A
+   delimiter found inside inert content cannot create an authoring segment.
+3. **Live namespace and action set.** The vendor-ext namespace whose references are live
+   inside the frame, plus a closed set of actions and parameter schemas. One surface
+   being live grants no meaning to any other namespace, entity, tool, or action. Actions
+   MAY be authority-differentiated, and an agent-authored segment MUST NOT claim user
+   provenance or user authority.
+4. **Capability and authorization bound.** The surface operates strictly within the
+   current envelope of the declared producer and application. Non-escalation
+   (principle 8) applies unchanged. Cross-scope reach MUST be explicit, and every
+   exercise MUST be authorized against the envelope and policy in force at execution
+   time. A stale declaration is never an authorization grant.
+5. **Fill and replay behavior.** Every qualified or otherwise directive-shaped
+   reference inside the frame ends in exactly one recorded outcome. A reference that
+   fails to parse, bind, or authorize is a typed, surfaced failure, never a silent no-op.
+   A frame is consumed at most once unless the declaration defines an idempotent replay
+   rule; rejected duplicates also receive a typed outcome. Alias acceptance is MAY;
+   accepted aliases compile to canonical form.
+6. **Trace obligations.** The declaration is recorded in or referenced by the capability
+   document (§7.1). Each exercise records the declaration id and version, declaring and
+   producing principals, invocation and frame identifiers, provenance type, current
+   authorization decision, replay disposition, and per-reference fill outcomes. Segment
+   content follows the tier-scoped `inline | external | withheld` rules of §12.1 rather
+   than being copied into every trace tier.
+
+Content outside a declared frame remains inert per §13. Reification acceptance is the
+per-event, user-authority form of promotion; a declared authoring surface is a reusable,
+higher-authority provenance rule. Both make a segment parse-eligible, and neither grants
+capability by itself.
+
+**Security boundary.** A standing declaration authorizes a machine principal to request
+bounded actions. It does not establish that the principal's output is correct, that the
+principal was not influenced by indirect prompt injection, or that the requested action
+reflects user intent. The control limits effects, fails closed outside the declared
+surface, and makes each outcome auditable. Consequential actions remain subject to the
+qualification or confirmation requirement in §6.4.
+
+**Confusables in closed action sets.** Declared actions follow the closed-identifier
+guidance in §13.1. Inside a declared frame, a rejected confusable MUST produce a typed
+failure rather than becoming inert or binding silently.
 
 ## 14. Determinism taxonomy ✅ *(v0.2)*
 
@@ -574,6 +661,7 @@ point. Agent orchestration graphs (DSPy, LangGraph) and multi-model span executi
 13. Trace-privacy deployment profiles: field-level encryption, access logging, deletion, legal hold, retention conflicts, purpose limitation (§12.2).
 14. Version-baseline consolidation: merge v0.2.1 markers into a clean v0.3 baseline before public spec release; conformance tests reference exactly one baseline.
 15. Conformance vs. certification: negative/adversarial test requirements, signed capability documents, and a path to independent verification (currently: two author-controlled implementations demonstrate spec precision, not third-party assurance).
+16. *(from author-controlled agentic-application review, 2026-08-01)* Standing-promotion governance (§13.2): declaration schema detail in the capability document and Prompt Trace; whether routing directives (model or tool references) are ever legal inside an agent-authored surface; nested interactions between surfaces and spans; origin-bound framing across streaming transports; replay and idempotency profiles; and migration guidance for PS-shaped implementations toward honest named-layer conformance claims.
 
 ---
 
