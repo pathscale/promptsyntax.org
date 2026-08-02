@@ -227,8 +227,21 @@
         },
         {
           "op": "replace",
-          "path": "/events/0/resolution/bindings/0/bound",
-          "value": "model:example/atlas-mini@2026-08-01"
+          "path": "/events/0/resolution/bindings",
+          "value": [
+            {
+              "ref": "@model:example/atlas-4@2026-08-01",
+              "bound": "model:example/atlas-4@2026-08-01",
+              "rule": "qualified-canonical-reference",
+              "ambiguity_surfaced": false
+            },
+            {
+              "ref": "@model:example/atlas-mini@2026-08-01",
+              "bound": "model:example/atlas-mini@2026-08-01",
+              "rule": "qualified-canonical-reference",
+              "ambiguity_surfaced": false
+            }
+          ]
         }
       ],
       "expected": {

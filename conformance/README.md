@@ -7,7 +7,7 @@ are the oracle. Implementations consume the corpus but do not define its expecte
 ## Current status
 
 Version `0.1.0-rc.1` is a candidate suite against the specification draft at commit
-`7456634817f4eb68c8909a58b476505e6fd7c063`. It executes 34 document and producer cases
+`7456634817f4eb68c8909a58b476505e6fd7c063`. It executes 35 document and producer cases
 across four Trace families and covers all 22 requirements in its named candidate profile.
 It also owns 101 Core parser vectors and a full normalized-output differential protocol for
 the Rust and TypeScript implementations. A deterministic grammar generator adds a
@@ -32,6 +32,34 @@ The normative runner does not require Python, Node, Bun, a provider SDK, a netwo
 connection, or model credentials. The TypeScript implementation may be invoked separately
 with Bun when producing cross-language evidence.
 
+## Adversarial mutation benchmark
+
+The candidate suite also defines a scored adversarial benchmark over specification-owned
+Trace cases. Each mutation is paired with a conformant control. A mutation earns credit
+only when the control still passes and the mutant fails with the exact intended diagnostic
+set; merely rejecting the document is insufficient. The `0.1.0-rc.1` snapshot accepts all
+10 unique controls and exactly detects all 18 mutations across assembly and provenance,
+content integrity, routing and resolution, event and boundary integrity, and independent
+producer replay. The runner also enforces the declared selection rule: every negative case
+in the candidate families whose expected diagnostics are all Trace-specific must appear
+exactly once in the score. This makes the current result exhaustive over that bounded
+semantic-negative corpus rather than a hand-selected subset. The runner materializes each
+control and mutant, computes their observed JSON-pointer differences, and rejects a pair if
+any difference escapes its declared controlled mutation paths.
+
+Run and reproduce the frozen report:
+
+```bash
+cargo run --manifest-path conformance/runner/Cargo.toml -- \
+  run-adversarial-benchmark .
+```
+
+This benchmark measures detection of the bounded semantic mutations in its manifest. It
+does not establish cryptographic receipt authenticity, truthfulness without independent
+producer facts, resistance to resource exhaustion, transport-decoder security, or behavior
+for semantics outside the candidate profile. Those exclusions are machine-readable in the
+benchmark document and must remain explicit in paper claims.
+
 Run the repository-owned checker from the repository root:
 
 ```bash
@@ -39,6 +67,9 @@ cargo run --manifest-path conformance/runner/Cargo.toml -- \
   check-requirements conformance/requirements.json
 
 cargo run --manifest-path conformance/runner/Cargo.toml -- run-suite .
+
+cargo run --manifest-path conformance/runner/Cargo.toml -- \
+  run-adversarial-benchmark .
 
 cargo run --manifest-path conformance/runner/Cargo.toml -- \
   compare-core-adapters conformance/cases/core-parser.json \
@@ -58,16 +89,23 @@ cargo run --manifest-path conformance/runner/Cargo.toml -- \
 
 The command emits the deterministic report stored in
 `conformance/reports/0.1.0-rc.1.json`. CI regenerates it and requires a byte-for-byte match.
+The adversarial command likewise regenerates
+`conformance/reports/trace-adversarial-0.1.0-rc.1.json` byte-for-byte.
+The suite job performs both snapshot checks on Linux and macOS so diagnostic and report
+stability is tested across operating systems and differing checkout paths.
 
 ## Layout
 
 - `profiles/` freezes the named scope and candidate semantic decisions.
+- `benchmarks/` defines scored threat classes and paired semantic mutations.
 - `families/` contains language-independent cases and expected diagnostics.
 - `fixtures/` contains reusable Trace and deterministic transcript inputs.
 - `cases/core-parser.json` is the single 101-case Core fixture consumed by both adapters.
 - `core-differential-input.schema.json` freezes the generator-to-adapter input shape.
 - `core-adapter-result.schema.json` freezes the normalized cross-language output shape.
 - `core-differential-report.schema.json` freezes the independent comparison report shape.
+- `adversarial-benchmark.schema.json` and `adversarial-report.schema.json` freeze the
+  benchmark and result contracts.
 - `cases/trace-producer.json` lists six valid and four rejection cases for real producers.
 - `trace-producer-input.schema.json` defines deterministic facts without expected output.
 - `trace-producer-cases.schema.json` freezes the external producer adapter protocol.

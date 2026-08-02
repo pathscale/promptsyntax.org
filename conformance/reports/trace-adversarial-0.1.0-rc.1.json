@@ -1,0 +1,562 @@
+{
+  "format_version": "0.1-draft",
+  "benchmark": {
+    "id": "trace-adversarial",
+    "version": "0.1.0-rc.1",
+    "status": "candidate"
+  },
+  "suite": {
+    "id": "promptsyntax-conformance",
+    "version": "0.1.0-rc.1",
+    "status": "candidate"
+  },
+  "profile": {
+    "id": "trace-user-0-3-draft",
+    "version": "0.1.0-rc.1",
+    "status": "candidate"
+  },
+  "conformant": true,
+  "summary": {
+    "threat_classes": 5,
+    "unique_controls": 10,
+    "controls_accepted": 10,
+    "mutations": 18,
+    "controlled_mutations": 18,
+    "exactly_detected": 18,
+    "rejected_with_unexpected_diagnostics": 0,
+    "escaped": 0,
+    "invalid_controls": 0,
+    "missing_mutations": 0
+  },
+  "rates": {
+    "control_acceptance": {
+      "numerator": 10,
+      "denominator": 10
+    },
+    "exact_mutation_detection": {
+      "numerator": 18,
+      "denominator": 18
+    }
+  },
+  "coverage": {
+    "eligible_mutants": 18,
+    "scored_mutants": 18,
+    "missing": [],
+    "extra": []
+  },
+  "controls": [
+    {
+      "case": "entity-authored-fallback-valid",
+      "accepted": true,
+      "actual_diagnostics": []
+    },
+    {
+      "case": "entity-kept-strict-valid",
+      "accepted": true,
+      "actual_diagnostics": []
+    },
+    {
+      "case": "entity-substituted-best-effort-valid",
+      "accepted": true,
+      "actual_diagnostics": []
+    },
+    {
+      "case": "producer-boundary-outcome-match",
+      "accepted": true,
+      "actual_diagnostics": []
+    },
+    {
+      "case": "producer-external-artifact-valid",
+      "accepted": true,
+      "actual_diagnostics": []
+    },
+    {
+      "case": "producer-request-and-bound-match",
+      "accepted": true,
+      "actual_diagnostics": []
+    },
+    {
+      "case": "r1-inline-segments-contiguous",
+      "accepted": true,
+      "actual_diagnostics": []
+    },
+    {
+      "case": "r2-injected-segment-step-valid",
+      "accepted": true,
+      "actual_diagnostics": []
+    },
+    {
+      "case": "r2-r3-injected-provenance-valid",
+      "accepted": true,
+      "actual_diagnostics": []
+    },
+    {
+      "case": "r5-oversight-materialized-valid",
+      "accepted": true,
+      "actual_diagnostics": []
+    }
+  ],
+  "threat_classes": [
+    {
+      "id": "assembly-provenance",
+      "description": "Mutations that make ordered prompt assembly or provenance pointers incomplete, ambiguous, or cyclic.",
+      "mutations": 4,
+      "exactly_detected": 4,
+      "rejected_with_unexpected_diagnostics": 0,
+      "escaped": 0,
+      "invalid_controls": 0,
+      "missing_mutations": 0,
+      "exact_detection_rate": {
+        "numerator": 4,
+        "denominator": 4
+      }
+    },
+    {
+      "id": "content-integrity",
+      "description": "Mutations that make materialized content disagree with its declared availability, digest, or UTF-8 byte length.",
+      "mutations": 3,
+      "exactly_detected": 3,
+      "rejected_with_unexpected_diagnostics": 0,
+      "escaped": 0,
+      "invalid_controls": 0,
+      "missing_mutations": 0,
+      "exact_detection_rate": {
+        "numerator": 3,
+        "denominator": 3
+      }
+    },
+    {
+      "id": "routing-resolution",
+      "description": "Mutations that conceal or contradict the requested, applied, fallback, or resolved entity.",
+      "mutations": 5,
+      "exactly_detected": 5,
+      "rejected_with_unexpected_diagnostics": 0,
+      "escaped": 0,
+      "invalid_controls": 0,
+      "missing_mutations": 0,
+      "exact_detection_rate": {
+        "numerator": 5,
+        "denominator": 5
+      }
+    },
+    {
+      "id": "event-boundary",
+      "description": "Mutations that make turn events or tool-boundary outcomes ambiguous or inconsistent.",
+      "mutations": 3,
+      "exactly_detected": 3,
+      "rejected_with_unexpected_diagnostics": 0,
+      "escaped": 0,
+      "invalid_controls": 0,
+      "missing_mutations": 0,
+      "exact_detection_rate": {
+        "numerator": 3,
+        "denominator": 3
+      }
+    },
+    {
+      "id": "independent-replay",
+      "description": "Mutations exposed only by comparing the Trace with independently observed request, routing, or artifact facts.",
+      "mutations": 3,
+      "exactly_detected": 3,
+      "rejected_with_unexpected_diagnostics": 0,
+      "escaped": 0,
+      "invalid_controls": 0,
+      "missing_mutations": 0,
+      "exact_detection_rate": {
+        "numerator": 3,
+        "denominator": 3
+      }
+    }
+  ],
+  "mutations": [
+    {
+      "id": "A001",
+      "threat_class": "assembly-provenance",
+      "operator": "field-replacement",
+      "baseline_case": "r1-inline-segments-contiguous",
+      "mutant_case": "r1-segment-index-gap",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/trace/events/0/segments/0/i"
+      ],
+      "observed_paths": [
+        "/trace/events/0/segments/0/i"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_R1_SEGMENT_INDEX_INVALID"
+      ],
+      "actual_diagnostics": [
+        "TRACE_R1_SEGMENT_INDEX_INVALID"
+      ]
+    },
+    {
+      "id": "A002",
+      "threat_class": "assembly-provenance",
+      "operator": "field-replacement",
+      "baseline_case": "r2-injected-segment-step-valid",
+      "mutant_case": "r2-dangling-segment-step",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/trace/events/0/segments/0/step"
+      ],
+      "observed_paths": [
+        "/trace/events/0/segments/0/step"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_R2_STEP_NOT_FOUND"
+      ],
+      "actual_diagnostics": [
+        "TRACE_R2_STEP_NOT_FOUND"
+      ]
+    },
+    {
+      "id": "A003",
+      "threat_class": "assembly-provenance",
+      "operator": "field-replacement",
+      "baseline_case": "r2-r3-injected-provenance-valid",
+      "mutant_case": "r3-provenance-cycle",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/trace/events/0/steps/0/parent"
+      ],
+      "observed_paths": [
+        "/trace/events/0/steps/0/parent"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_R3_STEP_CYCLE"
+      ],
+      "actual_diagnostics": [
+        "TRACE_R3_STEP_CYCLE"
+      ]
+    },
+    {
+      "id": "A004",
+      "threat_class": "assembly-provenance",
+      "operator": "duplication",
+      "baseline_case": "r1-inline-segments-contiguous",
+      "mutant_case": "tamper-duplicate-segment-id",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/trace/events/0/segments/1"
+      ],
+      "observed_paths": [
+        "/trace/events/0/segments/1"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_SEGMENT_ID_DUPLICATE"
+      ],
+      "actual_diagnostics": [
+        "TRACE_SEGMENT_ID_DUPLICATE"
+      ]
+    },
+    {
+      "id": "A005",
+      "threat_class": "content-integrity",
+      "operator": "field-omission",
+      "baseline_case": "r5-oversight-materialized-valid",
+      "mutant_case": "r5-oversight-materialization-missing",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/trace/events/0/segments/0/content/materialized"
+      ],
+      "observed_paths": [
+        "/trace/events/0/segments/0/content/materialized"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_R5_MATERIALIZATION_REQUIRED"
+      ],
+      "actual_diagnostics": [
+        "TRACE_R5_MATERIALIZATION_REQUIRED"
+      ]
+    },
+    {
+      "id": "A006",
+      "threat_class": "content-integrity",
+      "operator": "content-corruption",
+      "baseline_case": "r5-oversight-materialized-valid",
+      "mutant_case": "tamper-external-digest-mismatch",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/trace/events/0/segments/0/content/materialized/text"
+      ],
+      "observed_paths": [
+        "/trace/events/0/segments/0/content/materialized/text"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_CONTENT_DIGEST_MISMATCH"
+      ],
+      "actual_diagnostics": [
+        "TRACE_CONTENT_DIGEST_MISMATCH"
+      ]
+    },
+    {
+      "id": "A007",
+      "threat_class": "content-integrity",
+      "operator": "metadata-corruption",
+      "baseline_case": "r5-oversight-materialized-valid",
+      "mutant_case": "tamper-external-length-mismatch",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/trace/events/0/segments/0/content/length"
+      ],
+      "observed_paths": [
+        "/trace/events/0/segments/0/content/length"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_CONTENT_LENGTH_MISMATCH"
+      ],
+      "actual_diagnostics": [
+        "TRACE_CONTENT_LENGTH_MISMATCH"
+      ]
+    },
+    {
+      "id": "A008",
+      "threat_class": "routing-resolution",
+      "operator": "field-replacement",
+      "baseline_case": "entity-kept-strict-valid",
+      "mutant_case": "entity-kept-applied-mismatch",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/trace/events/0/routing/fill/0/applied"
+      ],
+      "observed_paths": [
+        "/trace/events/0/routing/fill/0/applied"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_ENTITY_KEPT_MISMATCH",
+        "TRACE_ROUTING_FILL_MISMATCH"
+      ],
+      "actual_diagnostics": [
+        "TRACE_ENTITY_KEPT_MISMATCH",
+        "TRACE_ROUTING_FILL_MISMATCH"
+      ]
+    },
+    {
+      "id": "A009",
+      "threat_class": "routing-resolution",
+      "operator": "policy-conflict",
+      "baseline_case": "entity-substituted-best-effort-valid",
+      "mutant_case": "entity-substituted-under-strict",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/trace/events/0/routing/attempts/0/ref",
+        "/trace/events/0/routing/fill/0/policy",
+        "/trace/events/0/routing/policy",
+        "/trace/events/0/routing/requested"
+      ],
+      "observed_paths": [
+        "/trace/events/0/routing/attempts/0/ref",
+        "/trace/events/0/routing/fill/0/policy",
+        "/trace/events/0/routing/policy",
+        "/trace/events/0/routing/requested"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_ENTITY_SUBSTITUTION_NOT_AUTHORIZED"
+      ],
+      "actual_diagnostics": [
+        "TRACE_ENTITY_SUBSTITUTION_NOT_AUTHORIZED"
+      ]
+    },
+    {
+      "id": "A010",
+      "threat_class": "routing-resolution",
+      "operator": "field-replacement",
+      "baseline_case": "entity-authored-fallback-valid",
+      "mutant_case": "entity-fallback-step-does-not-match",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/trace/events/0/routing/fill/0/route_step"
+      ],
+      "observed_paths": [
+        "/trace/events/0/routing/fill/0/route_step"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_ENTITY_FALLBACK_STEP_INVALID"
+      ],
+      "actual_diagnostics": [
+        "TRACE_ENTITY_FALLBACK_STEP_INVALID"
+      ]
+    },
+    {
+      "id": "A011",
+      "threat_class": "routing-resolution",
+      "operator": "field-replacement",
+      "baseline_case": "entity-kept-strict-valid",
+      "mutant_case": "routing-bound-disagrees-with-fill",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/trace/events/0/routing/bound"
+      ],
+      "observed_paths": [
+        "/trace/events/0/routing/bound"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_ROUTING_BOUND_MISMATCH",
+        "TRACE_ROUTING_FILL_MISMATCH"
+      ],
+      "actual_diagnostics": [
+        "TRACE_ROUTING_BOUND_MISMATCH",
+        "TRACE_ROUTING_FILL_MISMATCH"
+      ]
+    },
+    {
+      "id": "A012",
+      "threat_class": "routing-resolution",
+      "operator": "field-omission",
+      "baseline_case": "entity-kept-strict-valid",
+      "mutant_case": "resolution-missing-applied-binding",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/trace/events/0/resolution/bindings"
+      ],
+      "observed_paths": [
+        "/trace/events/0/resolution/bindings/0"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_RESOLUTION_BOUND_MISSING"
+      ],
+      "actual_diagnostics": [
+        "TRACE_RESOLUTION_BOUND_MISSING"
+      ]
+    },
+    {
+      "id": "A013",
+      "threat_class": "event-boundary",
+      "operator": "duplication",
+      "baseline_case": "r1-inline-segments-contiguous",
+      "mutant_case": "turn-event-identifiers-unique",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/trace/events/1"
+      ],
+      "observed_paths": [
+        "/trace/events/1"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_EVENT_ID_DUPLICATE"
+      ],
+      "actual_diagnostics": [
+        "TRACE_EVENT_ID_DUPLICATE"
+      ]
+    },
+    {
+      "id": "A014",
+      "threat_class": "event-boundary",
+      "operator": "cross-source-divergence",
+      "baseline_case": "producer-request-and-bound-match",
+      "mutant_case": "producer-turn-mismatch",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/transcript/turn"
+      ],
+      "observed_paths": [
+        "/transcript/turn"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_PRODUCER_TURN_MISMATCH"
+      ],
+      "actual_diagnostics": [
+        "TRACE_PRODUCER_TURN_MISMATCH"
+      ]
+    },
+    {
+      "id": "A015",
+      "threat_class": "event-boundary",
+      "operator": "cross-source-divergence",
+      "baseline_case": "producer-boundary-outcome-match",
+      "mutant_case": "producer-boundary-outcome-mismatch",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/transcript/boundaries/0/outcome"
+      ],
+      "observed_paths": [
+        "/transcript/boundaries/0/outcome"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_PRODUCER_BOUNDARY_MISMATCH"
+      ],
+      "actual_diagnostics": [
+        "TRACE_PRODUCER_BOUNDARY_MISMATCH"
+      ]
+    },
+    {
+      "id": "A016",
+      "threat_class": "independent-replay",
+      "operator": "cross-source-divergence",
+      "baseline_case": "producer-request-and-bound-match",
+      "mutant_case": "producer-request-bytes-mismatch",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/transcript/inferences/0/actual_request_utf8"
+      ],
+      "observed_paths": [
+        "/transcript/inferences/0/actual_request_utf8"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_R1_REQUEST_BYTES_MISMATCH"
+      ],
+      "actual_diagnostics": [
+        "TRACE_R1_REQUEST_BYTES_MISMATCH"
+      ]
+    },
+    {
+      "id": "A017",
+      "threat_class": "independent-replay",
+      "operator": "cross-source-divergence",
+      "baseline_case": "producer-request-and-bound-match",
+      "mutant_case": "producer-bound-entity-mismatch",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/transcript/inferences/0/routing/bound"
+      ],
+      "observed_paths": [
+        "/transcript/inferences/0/routing/bound"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_PRODUCER_BOUND_MISMATCH"
+      ],
+      "actual_diagnostics": [
+        "TRACE_PRODUCER_BOUND_MISMATCH"
+      ]
+    },
+    {
+      "id": "A018",
+      "threat_class": "independent-replay",
+      "operator": "content-corruption",
+      "baseline_case": "producer-external-artifact-valid",
+      "mutant_case": "producer-external-artifact-digest-tampered",
+      "controlled_change": true,
+      "controlled_paths": [
+        "/transcript/external_artifacts/0/content_utf8"
+      ],
+      "observed_paths": [
+        "/transcript/external_artifacts/0/content_utf8"
+      ],
+      "status": "exact-detection",
+      "intended_diagnostics": [
+        "TRACE_CONTENT_DIGEST_MISMATCH"
+      ],
+      "actual_diagnostics": [
+        "TRACE_CONTENT_DIGEST_MISMATCH"
+      ]
+    }
+  ],
+  "diagnostics": []
+}

@@ -1,0 +1,241 @@
+{
+  "format_version": "0.1-draft",
+  "id": "trace-adversarial",
+  "version": "0.1.0-rc.1",
+  "status": "candidate",
+  "suite": {
+    "id": "promptsyntax-conformance",
+    "version": "0.1.0-rc.1"
+  },
+  "profile": "trace-user-0-3-draft",
+  "evidence_unit": "paired-semantic-mutation",
+  "selection_rule": "all-negative-cases-with-trace-diagnostics",
+  "scoring": {
+    "control_acceptance": "baseline-must-pass-as-conformant",
+    "mutation_detection": "mutant-must-fail-with-exact-diagnostic-set",
+    "aggregation": "unweighted-case-count"
+  },
+  "scope": {
+    "claim": "Measures whether the candidate Trace validator accepts each valid control and detects a paired semantic mutation with the exact specification-owned diagnostic set.",
+    "attacker_capabilities": [
+      "Corrupt or omit fields in a stored Trace document",
+      "Duplicate identifiers or evidence records to create ambiguity",
+      "Present Trace claims that diverge from independently observed producer facts"
+    ],
+    "excluded": [
+      "Cryptographic authenticity, receipt veracity, and key compromise",
+      "Malformed transport encodings and filesystem attacks",
+      "Resource exhaustion and implementation-specific performance limits",
+      "Semantics not frozen by the candidate profile"
+    ]
+  },
+  "threat_classes": [
+    {
+      "id": "assembly-provenance",
+      "description": "Mutations that make ordered prompt assembly or provenance pointers incomplete, ambiguous, or cyclic."
+    },
+    {
+      "id": "content-integrity",
+      "description": "Mutations that make materialized content disagree with its declared availability, digest, or UTF-8 byte length."
+    },
+    {
+      "id": "routing-resolution",
+      "description": "Mutations that conceal or contradict the requested, applied, fallback, or resolved entity."
+    },
+    {
+      "id": "event-boundary",
+      "description": "Mutations that make turn events or tool-boundary outcomes ambiguous or inconsistent."
+    },
+    {
+      "id": "independent-replay",
+      "description": "Mutations exposed only by comparing the Trace with independently observed request, routing, or artifact facts."
+    }
+  ],
+  "mutations": [
+    {
+      "id": "A001",
+      "threat_class": "assembly-provenance",
+      "operator": "field-replacement",
+      "baseline_case": "r1-inline-segments-contiguous",
+      "mutant_case": "r1-segment-index-gap",
+      "controlled_paths": ["/trace/events/0/segments/0/i"],
+      "attack": "Change a segment index so the displayed order no longer proves byte-contiguous assembly.",
+      "intended_diagnostics": ["TRACE_R1_SEGMENT_INDEX_INVALID"]
+    },
+    {
+      "id": "A002",
+      "threat_class": "assembly-provenance",
+      "operator": "field-replacement",
+      "baseline_case": "r2-injected-segment-step-valid",
+      "mutant_case": "r2-dangling-segment-step",
+      "controlled_paths": ["/trace/events/0/segments/0/step"],
+      "attack": "Point an injected segment at a provenance step that does not exist in its inference.",
+      "intended_diagnostics": ["TRACE_R2_STEP_NOT_FOUND"]
+    },
+    {
+      "id": "A003",
+      "threat_class": "assembly-provenance",
+      "operator": "field-replacement",
+      "baseline_case": "r2-r3-injected-provenance-valid",
+      "mutant_case": "r3-provenance-cycle",
+      "controlled_paths": ["/trace/events/0/steps/0/parent"],
+      "attack": "Replace an acyclic provenance chain with mutually recursive parent pointers.",
+      "intended_diagnostics": ["TRACE_R3_STEP_CYCLE"]
+    },
+    {
+      "id": "A004",
+      "threat_class": "assembly-provenance",
+      "operator": "duplication",
+      "baseline_case": "r1-inline-segments-contiguous",
+      "mutant_case": "tamper-duplicate-segment-id",
+      "controlled_paths": ["/trace/events/0/segments/1"],
+      "attack": "Reuse a stable segment identifier for a second segment in one inference.",
+      "intended_diagnostics": ["TRACE_SEGMENT_ID_DUPLICATE"]
+    },
+    {
+      "id": "A005",
+      "threat_class": "content-integrity",
+      "operator": "field-omission",
+      "baseline_case": "r5-oversight-materialized-valid",
+      "mutant_case": "r5-oversight-materialization-missing",
+      "controlled_paths": ["/trace/events/0/segments/0/content/materialized"],
+      "attack": "Remove required materialized bytes while retaining an oversight materialized-export claim.",
+      "intended_diagnostics": ["TRACE_R5_MATERIALIZATION_REQUIRED"]
+    },
+    {
+      "id": "A006",
+      "threat_class": "content-integrity",
+      "operator": "content-corruption",
+      "baseline_case": "r5-oversight-materialized-valid",
+      "mutant_case": "tamper-external-digest-mismatch",
+      "controlled_paths": ["/trace/events/0/segments/0/content/materialized/text"],
+      "attack": "Change materialized content without updating its declared SHA-256 digest.",
+      "intended_diagnostics": ["TRACE_CONTENT_DIGEST_MISMATCH"]
+    },
+    {
+      "id": "A007",
+      "threat_class": "content-integrity",
+      "operator": "metadata-corruption",
+      "baseline_case": "r5-oversight-materialized-valid",
+      "mutant_case": "tamper-external-length-mismatch",
+      "controlled_paths": ["/trace/events/0/segments/0/content/length"],
+      "attack": "Change declared content length so it disagrees with the materialized UTF-8 bytes.",
+      "intended_diagnostics": ["TRACE_CONTENT_LENGTH_MISMATCH"]
+    },
+    {
+      "id": "A008",
+      "threat_class": "routing-resolution",
+      "operator": "field-replacement",
+      "baseline_case": "entity-kept-strict-valid",
+      "mutant_case": "entity-kept-applied-mismatch",
+      "controlled_paths": ["/trace/events/0/routing/fill/0/applied"],
+      "attack": "Label a different applied model as kept under an exact strict request.",
+      "intended_diagnostics": ["TRACE_ENTITY_KEPT_MISMATCH", "TRACE_ROUTING_FILL_MISMATCH"]
+    },
+    {
+      "id": "A009",
+      "threat_class": "routing-resolution",
+      "operator": "policy-conflict",
+      "baseline_case": "entity-substituted-best-effort-valid",
+      "mutant_case": "entity-substituted-under-strict",
+      "controlled_paths": [
+        "/trace/events/0/routing/attempts/0/ref",
+        "/trace/events/0/routing/fill/0/policy",
+        "/trace/events/0/routing/policy",
+        "/trace/events/0/routing/requested"
+      ],
+      "attack": "Report an out-of-route model substitution under a strict policy.",
+      "intended_diagnostics": ["TRACE_ENTITY_SUBSTITUTION_NOT_AUTHORIZED"]
+    },
+    {
+      "id": "A010",
+      "threat_class": "routing-resolution",
+      "operator": "field-replacement",
+      "baseline_case": "entity-authored-fallback-valid",
+      "mutant_case": "entity-fallback-step-does-not-match",
+      "controlled_paths": ["/trace/events/0/routing/fill/0/route_step"],
+      "attack": "Point fallback provenance at an attempt that was not the first successful legal route step.",
+      "intended_diagnostics": ["TRACE_ENTITY_FALLBACK_STEP_INVALID"]
+    },
+    {
+      "id": "A011",
+      "threat_class": "routing-resolution",
+      "operator": "field-replacement",
+      "baseline_case": "entity-kept-strict-valid",
+      "mutant_case": "routing-bound-disagrees-with-fill",
+      "controlled_paths": ["/trace/events/0/routing/bound"],
+      "attack": "Change the top-level bound model while leaving the successful attempt and fill unchanged.",
+      "intended_diagnostics": ["TRACE_ROUTING_BOUND_MISMATCH", "TRACE_ROUTING_FILL_MISMATCH"]
+    },
+    {
+      "id": "A012",
+      "threat_class": "routing-resolution",
+      "operator": "field-omission",
+      "baseline_case": "entity-kept-strict-valid",
+      "mutant_case": "resolution-missing-applied-binding",
+      "controlled_paths": ["/trace/events/0/resolution/bindings"],
+      "attack": "Remove the resolution binding for the entity reported as invoked.",
+      "intended_diagnostics": ["TRACE_RESOLUTION_BOUND_MISSING"]
+    },
+    {
+      "id": "A013",
+      "threat_class": "event-boundary",
+      "operator": "duplication",
+      "baseline_case": "r1-inline-segments-contiguous",
+      "mutant_case": "turn-event-identifiers-unique",
+      "controlled_paths": ["/trace/events/1"],
+      "attack": "Reuse an inference identifier for a later boundary event in the same turn.",
+      "intended_diagnostics": ["TRACE_EVENT_ID_DUPLICATE"]
+    },
+    {
+      "id": "A014",
+      "threat_class": "event-boundary",
+      "operator": "cross-source-divergence",
+      "baseline_case": "producer-request-and-bound-match",
+      "mutant_case": "producer-turn-mismatch",
+      "controlled_paths": ["/transcript/turn"],
+      "attack": "Pair a Trace with independently observed producer facts from another turn.",
+      "intended_diagnostics": ["TRACE_PRODUCER_TURN_MISMATCH"]
+    },
+    {
+      "id": "A015",
+      "threat_class": "event-boundary",
+      "operator": "cross-source-divergence",
+      "baseline_case": "producer-boundary-outcome-match",
+      "mutant_case": "producer-boundary-outcome-mismatch",
+      "controlled_paths": ["/transcript/boundaries/0/outcome"],
+      "attack": "Report a failed tool boundary when the independent producer fact records success.",
+      "intended_diagnostics": ["TRACE_PRODUCER_BOUNDARY_MISMATCH"]
+    },
+    {
+      "id": "A016",
+      "threat_class": "independent-replay",
+      "operator": "cross-source-divergence",
+      "baseline_case": "producer-request-and-bound-match",
+      "mutant_case": "producer-request-bytes-mismatch",
+      "controlled_paths": ["/transcript/inferences/0/actual_request_utf8"],
+      "attack": "Present assembled prompt bytes that differ from the request independently observed by the producer.",
+      "intended_diagnostics": ["TRACE_R1_REQUEST_BYTES_MISMATCH"]
+    },
+    {
+      "id": "A017",
+      "threat_class": "independent-replay",
+      "operator": "cross-source-divergence",
+      "baseline_case": "producer-request-and-bound-match",
+      "mutant_case": "producer-bound-entity-mismatch",
+      "controlled_paths": ["/transcript/inferences/0/routing/bound"],
+      "attack": "Claim that the requested model ran when the independent producer fact identifies another model.",
+      "intended_diagnostics": ["TRACE_PRODUCER_BOUND_MISMATCH"]
+    },
+    {
+      "id": "A018",
+      "threat_class": "independent-replay",
+      "operator": "content-corruption",
+      "baseline_case": "producer-external-artifact-valid",
+      "mutant_case": "producer-external-artifact-digest-tampered",
+      "controlled_paths": ["/transcript/external_artifacts/0/content_utf8"],
+      "attack": "Supply independent artifact bytes that no longer match the content digest referenced by the Trace.",
+      "intended_diagnostics": ["TRACE_CONTENT_DIGEST_MISMATCH"]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-use std::collections::{BTreeSet, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fs;
 use std::path::{Component, Path, PathBuf};
 
@@ -112,6 +112,10 @@ struct ManifestFiles {
     profile: String,
     profile_schema: String,
     report_schema: String,
+    adversarial_benchmark: String,
+    adversarial_benchmark_schema: String,
+    adversarial_report_schema: String,
+    adversarial_report: String,
     core_cases: String,
     core_cases_schema: String,
     core_differential_input_schema: String,
@@ -203,12 +207,66 @@ struct ProducerCorpusCase {
     expected: Value,
 }
 
+#[derive(Debug)]
+pub(crate) struct MaterializedCase {
+    pub trace: Value,
+    pub transcript: Option<Value>,
+}
+
 #[must_use]
 pub fn run_suite(root: &Path) -> SuiteReport {
     match run_suite_inner(root) {
         Ok(report) => report,
         Err(diagnostic) => failure_report(diagnostic),
     }
+}
+
+pub(crate) fn materialize_cases(
+    root: &Path,
+) -> Result<HashMap<String, MaterializedCase>, Diagnostic> {
+    let manifest_value = read_json(root, "conformance/manifest.json")?;
+    let manifest: Manifest = deserialize_value(manifest_value, "/conformance/manifest.json")?;
+    let mut materialized = HashMap::new();
+    for family_entry in &manifest.families {
+        let family_value = read_json(root, &family_entry.path)?;
+        let family: CaseFamily = deserialize_value(family_value, &family_entry.path)?;
+        for case in family.cases {
+            let mut trace = read_json(root, &case.trace)?;
+            apply_patch(&mut trace, &case.patch).map_err(|message| {
+                diagnostic(
+                    "CASE_PATCH_INVALID",
+                    &family_entry.path,
+                    format!("case {} trace patch failed: {message}", case.id),
+                )
+            })?;
+            let transcript = case
+                .transcript
+                .as_deref()
+                .map(|path| {
+                    let mut value = read_json(root, path)?;
+                    apply_patch(&mut value, &case.transcript_patch).map_err(|message| {
+                        diagnostic(
+                            "CASE_PATCH_INVALID",
+                            path,
+                            format!("case {} transcript patch failed: {message}", case.id),
+                        )
+                    })?;
+                    Ok(value)
+                })
+                .transpose()?;
+            if materialized
+                .insert(case.id.clone(), MaterializedCase { trace, transcript })
+                .is_some()
+            {
+                return Err(diagnostic(
+                    "SUITE_CASE_ID_DUPLICATE",
+                    &family_entry.path,
+                    format!("case id {} occurs more than once", case.id),
+                ));
+            }
+        }
+    }
+    Ok(materialized)
 }
 
 #[allow(clippy::too_many_lines)]
@@ -291,6 +349,10 @@ fn run_suite_inner(root: &Path) -> Result<SuiteReport, Diagnostic> {
         checked_schema(root, &manifest.files.trace_producer_cases_schema)?;
     let profile_schema = checked_schema(root, &manifest.files.profile_schema)?;
     let report_schema = checked_schema(root, &manifest.files.report_schema)?;
+    let adversarial_benchmark_schema =
+        checked_schema(root, &manifest.files.adversarial_benchmark_schema)?;
+    let adversarial_report_schema =
+        checked_schema(root, &manifest.files.adversarial_report_schema)?;
     let core_cases_schema = checked_schema(root, &manifest.files.core_cases_schema)?;
     let _core_differential_input_schema =
         checked_schema(root, &manifest.files.core_differential_input_schema)?;
@@ -327,6 +389,18 @@ fn run_suite_inner(root: &Path) -> Result<SuiteReport, Diagnostic> {
         &mut suite_diagnostics,
         validate_value(&report_schema, &candidate_report),
         &manifest.files.candidate_report,
+    );
+    let adversarial_benchmark = read_json(root, &manifest.files.adversarial_benchmark)?;
+    append_validation(
+        &mut suite_diagnostics,
+        validate_value(&adversarial_benchmark_schema, &adversarial_benchmark),
+        &manifest.files.adversarial_benchmark,
+    );
+    let adversarial_report = read_json(root, &manifest.files.adversarial_report)?;
+    append_validation(
+        &mut suite_diagnostics,
+        validate_value(&adversarial_report_schema, &adversarial_report),
+        &manifest.files.adversarial_report,
     );
     for report_path in [
         &manifest.files.core_differential_report,
@@ -824,7 +898,7 @@ fn registry_codes(value: &Value, diagnostics: &mut Vec<Diagnostic>) -> HashSet<S
     codes
 }
 
-fn checked_schema(root: &Path, relative: &str) -> Result<Value, Diagnostic> {
+pub(crate) fn checked_schema(root: &Path, relative: &str) -> Result<Value, Diagnostic> {
     let schema = read_json(root, relative)?;
     ensure_schema(&schema, relative)?;
     Ok(schema)
@@ -866,7 +940,7 @@ fn ensure_instance(schema: &Value, instance: &Value, pointer: &str) -> Result<()
     }
 }
 
-fn validate_value(schema: &Value, instance: &Value) -> crate::ValidationReport {
+pub(crate) fn validate_value(schema: &Value, instance: &Value) -> crate::ValidationReport {
     let schema_bytes = serde_json::to_vec(schema).unwrap_or_default();
     let instance_bytes = serde_json::to_vec(instance).unwrap_or_default();
     validate_instance_json(&schema_bytes, &instance_bytes)
@@ -891,7 +965,7 @@ fn deserialize_value<T: for<'de> Deserialize<'de>>(
         .map_err(|error| diagnostic("SUITE_JSON_INVALID", pointer, error.to_string()))
 }
 
-fn read_json(root: &Path, relative: &str) -> Result<Value, Diagnostic> {
+pub(crate) fn read_json(root: &Path, relative: &str) -> Result<Value, Diagnostic> {
     let path = resolve_path(root, relative)?;
     let bytes = fs::read(&path)
         .map_err(|error| diagnostic("SUITE_FILE_READ_FAILED", relative, error.to_string()))?;

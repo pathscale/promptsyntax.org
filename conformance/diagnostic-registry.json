@@ -2,6 +2,102 @@
   "format_version": "0.1-draft",
   "diagnostics": [
     {
+      "code": "ADVERSARIAL_BASELINE_INVALID",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "A mutation's paired control does not pass as conformant."
+    },
+    {
+      "code": "ADVERSARIAL_BENCHMARK_INVALID",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "The adversarial benchmark document is missing or violates its closed contract."
+    },
+    {
+      "code": "ADVERSARIAL_CASE_MISSING",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "A benchmark control or mutant case is absent from the active suite report."
+    },
+    {
+      "code": "ADVERSARIAL_FORMAT_UNSUPPORTED",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "The adversarial benchmark uses an unsupported format version."
+    },
+    {
+      "code": "ADVERSARIAL_METADATA_MISMATCH",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "Benchmark identity, version, status, or profile disagrees with the active suite."
+    },
+    {
+      "code": "ADVERSARIAL_MUTANT_CASE_DUPLICATE",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "The benchmark scores the same mutant suite case more than once."
+    },
+    {
+      "code": "ADVERSARIAL_MUTANT_COVERAGE_EXTRA",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "The benchmark scores a case outside its declared exhaustive selection rule."
+    },
+    {
+      "code": "ADVERSARIAL_MUTANT_COVERAGE_MISSING",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "A suite case eligible under the benchmark selection rule is not scored."
+    },
+    {
+      "code": "ADVERSARIAL_MUTANT_CONTRACT_INVALID",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "A mutant case does not declare the benchmark's exact expected diagnostic set."
+    },
+    {
+      "code": "ADVERSARIAL_MUTATION_ID_DUPLICATE",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "An adversarial mutation identifier occurs more than once."
+    },
+    {
+      "code": "ADVERSARIAL_MUTATION_SCOPE_MISMATCH",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "Observed differences between a control and mutant escape or fail to exercise the declared mutation paths."
+    },
+    {
+      "code": "ADVERSARIAL_REPORT_INVALID",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "The generated adversarial report violates its report contract."
+    },
+    {
+      "code": "ADVERSARIAL_SUITE_INVALID",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "The benchmark's underlying conformance suite did not pass."
+    },
+    {
+      "code": "ADVERSARIAL_THREAT_CLASS_DUPLICATE",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "An adversarial threat-class identifier occurs more than once."
+    },
+    {
+      "code": "ADVERSARIAL_THREAT_CLASS_EMPTY",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "A declared adversarial threat class contains no mutation."
+    },
+    {
+      "code": "ADVERSARIAL_THREAT_CLASS_UNKNOWN",
+      "phase": "benchmark",
+      "severity": "error",
+      "description": "A mutation cites an undeclared adversarial threat class."
+    },
+    {
       "code": "CORPUS_BLOCKED_WITHOUT_REASON",
       "phase": "corpus",
       "severity": "error",

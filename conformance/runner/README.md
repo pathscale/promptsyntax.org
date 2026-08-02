@@ -20,6 +20,9 @@ cargo run --manifest-path conformance/runner/Cargo.toml -- \
 cargo run --manifest-path conformance/runner/Cargo.toml -- run-suite .
 
 cargo run --manifest-path conformance/runner/Cargo.toml -- \
+  run-adversarial-benchmark .
+
+cargo run --manifest-path conformance/runner/Cargo.toml -- \
   compare-core-adapters conformance/cases/core-parser.json \
   /tmp/promptsyntax-rs-core.json /tmp/promptsyntax-ts-core.json
 
@@ -56,6 +59,12 @@ input before invoking the implementation, withholds the independent transcript f
 producer, then validates the emitted Trace against both the Trace schema and transcript.
 Expected producer rejections must use the registered JSON error envelope and exit status
 `1`.
+
+`run-adversarial-benchmark` scores specification-owned mutation cases against their paired
+valid controls. Detection requires an exact diagnostic-set match. The deterministic report
+separates exact detections, accepted escapes, unexpected diagnostics, invalid controls, and
+missing cases overall and by threat class. It also materializes each pair and verifies that
+every observed difference is covered by the mutation's declared JSON-pointer paths.
 
 The runner performs no network requests and needs no provider SDK, model credentials,
 Python, Node, or Bun. Producing the TypeScript adapter document separately requires Bun.

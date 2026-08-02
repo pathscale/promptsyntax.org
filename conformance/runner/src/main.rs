@@ -7,9 +7,9 @@ use std::process::ExitCode;
 
 use promptsyntax_conformance::{
     CheckReport, CoreDifferentialReport, ValidationReport, check_requirements_json,
-    check_schema_json, compare_core_adapter_streams, compare_core_adapters_json, run_suite,
-    run_trace_producer_adapter, validate_instance_json, validate_trace_producer_json,
-    write_generated_core_cases,
+    check_schema_json, compare_core_adapter_streams, compare_core_adapters_json,
+    run_adversarial_benchmark, run_suite, run_trace_producer_adapter, validate_instance_json,
+    validate_trace_producer_json, write_generated_core_cases,
 };
 use serde::Serialize;
 
@@ -194,6 +194,16 @@ fn main() -> ExitCode {
             let report = run_suite(std::path::Path::new(&root));
             emit_report(&report, report.conformant)
         }
+        Some("run-adversarial-benchmark") => {
+            let Some(root) = args.next() else {
+                return usage();
+            };
+            if args.next().is_some() {
+                return usage();
+            }
+            let report = run_adversarial_benchmark(std::path::Path::new(&root));
+            emit_report(&report, report.conformant)
+        }
         Some("run-trace-producer-adapter") => {
             let Some(root) = args.next() else {
                 return usage();
@@ -329,7 +339,7 @@ fn emit_report(report: &impl Serialize, conformant: bool) -> ExitCode {
 
 fn usage() -> ExitCode {
     eprintln!(
-        "usage:\n  ps-conformance generate-core-differential <case-count> <seed>\n  ps-conformance check-requirements <requirements.json>\n  ps-conformance check-schema <schema.json>\n  ps-conformance validate-instance <schema.json> <instance.json>\n  ps-conformance validate-trace-producer <trace-schema.json> <trace.json> <transcript-schema.json> <transcript.json>\n  ps-conformance run-suite <repository-root>\n  ps-conformance run-trace-producer-adapter <repository-root> <implementation-id> <version> <commit> <command> [args...]\n  ps-conformance compare-core-adapters <core-cases.json> <left.json> <right.json>\n  ps-conformance compare-core-streams <case-count> <seed> <left.jsonl> <right.jsonl>"
+        "usage:\n  ps-conformance generate-core-differential <case-count> <seed>\n  ps-conformance check-requirements <requirements.json>\n  ps-conformance check-schema <schema.json>\n  ps-conformance validate-instance <schema.json> <instance.json>\n  ps-conformance validate-trace-producer <trace-schema.json> <trace.json> <transcript-schema.json> <transcript.json>\n  ps-conformance run-suite <repository-root>\n  ps-conformance run-adversarial-benchmark <repository-root>\n  ps-conformance run-trace-producer-adapter <repository-root> <implementation-id> <version> <commit> <command> [args...]\n  ps-conformance compare-core-adapters <core-cases.json> <left.json> <right.json>\n  ps-conformance compare-core-streams <case-count> <seed> <left.jsonl> <right.jsonl>"
     );
     ExitCode::from(2)
 }

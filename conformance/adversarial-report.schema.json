@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptsyntax.org/conformance/adversarial-report/0.1-draft",
+  "title": "PromptSyntax Trace adversarial benchmark report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format_version",
+    "benchmark",
+    "suite",
+    "profile",
+    "conformant",
+    "summary",
+    "rates",
+    "coverage",
+    "controls",
+    "threat_classes",
+    "mutations",
+    "diagnostics"
+  ],
+  "properties": {
+    "format_version": { "const": "0.1-draft" },
+    "benchmark": { "$ref": "#/$defs/versioned_identity" },
+    "suite": { "$ref": "#/$defs/versioned_identity" },
+    "profile": { "$ref": "#/$defs/versioned_identity" },
+    "conformant": { "type": "boolean" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "threat_classes",
+        "unique_controls",
+        "controls_accepted",
+        "mutations",
+        "controlled_mutations",
+        "exactly_detected",
+        "rejected_with_unexpected_diagnostics",
+        "escaped",
+        "invalid_controls",
+        "missing_mutations"
+      ],
+      "properties": {
+        "threat_classes": { "$ref": "#/$defs/count" },
+        "unique_controls": { "$ref": "#/$defs/count" },
+        "controls_accepted": { "$ref": "#/$defs/count" },
+        "mutations": { "$ref": "#/$defs/count" },
+        "controlled_mutations": { "$ref": "#/$defs/count" },
+        "exactly_detected": { "$ref": "#/$defs/count" },
+        "rejected_with_unexpected_diagnostics": { "$ref": "#/$defs/count" },
+        "escaped": { "$ref": "#/$defs/count" },
+        "invalid_controls": { "$ref": "#/$defs/count" },
+        "missing_mutations": { "$ref": "#/$defs/count" }
+      }
+    },
+    "rates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["control_acceptance", "exact_mutation_detection"],
+      "properties": {
+        "control_acceptance": { "$ref": "#/$defs/ratio" },
+        "exact_mutation_detection": { "$ref": "#/$defs/ratio" }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eligible_mutants", "scored_mutants", "missing", "extra"],
+      "properties": {
+        "eligible_mutants": { "$ref": "#/$defs/count" },
+        "scored_mutants": { "$ref": "#/$defs/count" },
+        "missing": { "$ref": "#/$defs/string_set" },
+        "extra": { "$ref": "#/$defs/string_set" }
+      }
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["case", "accepted", "actual_diagnostics"],
+        "properties": {
+          "case": { "type": "string", "minLength": 1 },
+          "accepted": { "type": "boolean" },
+          "actual_diagnostics": { "$ref": "#/$defs/string_set" }
+        }
+      }
+    },
+    "threat_classes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "description",
+          "mutations",
+          "exactly_detected",
+          "rejected_with_unexpected_diagnostics",
+          "escaped",
+          "invalid_controls",
+          "missing_mutations",
+          "exact_detection_rate"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "mutations": { "$ref": "#/$defs/count" },
+          "exactly_detected": { "$ref": "#/$defs/count" },
+          "rejected_with_unexpected_diagnostics": { "$ref": "#/$defs/count" },
+          "escaped": { "$ref": "#/$defs/count" },
+          "invalid_controls": { "$ref": "#/$defs/count" },
+          "missing_mutations": { "$ref": "#/$defs/count" },
+          "exact_detection_rate": { "$ref": "#/$defs/ratio" }
+        }
+      }
+    },
+    "mutations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "threat_class",
+          "operator",
+          "baseline_case",
+          "mutant_case",
+          "controlled_change",
+          "controlled_paths",
+          "observed_paths",
+          "status",
+          "intended_diagnostics",
+          "actual_diagnostics"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "threat_class": { "type": "string", "minLength": 1 },
+          "operator": { "type": "string", "minLength": 1 },
+          "baseline_case": { "type": "string", "minLength": 1 },
+          "mutant_case": { "type": "string", "minLength": 1 },
+          "controlled_change": { "type": "boolean" },
+          "controlled_paths": { "$ref": "#/$defs/string_set" },
+          "observed_paths": { "$ref": "#/$defs/string_set" },
+          "status": {
+            "enum": [
+              "case-missing",
+              "escaped",
+              "exact-detection",
+              "invalid-control",
+              "unexpected-diagnostics"
+            ]
+          },
+          "intended_diagnostics": { "$ref": "#/$defs/string_set" },
+          "actual_diagnostics": { "$ref": "#/$defs/string_set" }
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    }
+  },
+  "$defs": {
+    "count": { "type": "integer", "minimum": 0 },
+    "ratio": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["numerator", "denominator"],
+      "properties": {
+        "numerator": { "$ref": "#/$defs/count" },
+        "denominator": { "$ref": "#/$defs/count" }
+      }
+    },
+    "versioned_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "status"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "minLength": 1 }
+      }
+    },
+    "string_set": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string" }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "pointer", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "pointer": { "type": "string" },
+        "message": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

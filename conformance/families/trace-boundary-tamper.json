@@ -87,6 +87,8 @@
       "requirements": ["PS-TRACE-CONTENT-001", "PS-TRACE-R1"],
       "trace": "conformance/fixtures/trace-user-kept.json",
       "patch": [
+        { "op": "replace", "path": "/tier", "value": "oversight" },
+        { "op": "replace", "path": "/content_mode", "value": "materialized" },
         {
           "op": "replace",
           "path": "/events/0/segments/0/content",
@@ -113,6 +115,8 @@
       "requirements": ["PS-TRACE-CONTENT-001", "PS-TRACE-R1"],
       "trace": "conformance/fixtures/trace-user-kept.json",
       "patch": [
+        { "op": "replace", "path": "/tier", "value": "oversight" },
+        { "op": "replace", "path": "/content_mode", "value": "materialized" },
         {
           "op": "replace",
           "path": "/events/0/segments/0/content",

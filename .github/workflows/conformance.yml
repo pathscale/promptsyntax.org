@@ -26,8 +26,12 @@ permissions:
 
 jobs:
   suite:
-    name: Trace suite
-    runs-on: ubuntu-latest
+    name: Trace suite (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout standard and corpus
         uses: actions/checkout@v4
@@ -51,6 +55,11 @@ jobs:
         run: |
           cargo run --quiet --locked --manifest-path conformance/runner/Cargo.toml -- run-suite . > /tmp/promptsyntax-conformance-report.json
           cmp conformance/reports/0.1.0-rc.1.json /tmp/promptsyntax-conformance-report.json
+
+      - name: Verify adversarial benchmark snapshot
+        run: |
+          cargo run --quiet --locked --manifest-path conformance/runner/Cargo.toml -- run-adversarial-benchmark . > /tmp/promptsyntax-trace-adversarial.json
+          cmp conformance/reports/trace-adversarial-0.1.0-rc.1.json /tmp/promptsyntax-trace-adversarial.json
 
   cross-language-core:
     name: Cross-language Core and Trace adapters

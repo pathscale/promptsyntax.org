@@ -17,7 +17,16 @@
         "properties": {
           "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]+$" },
           "phase": {
-            "enum": ["io", "corpus", "schema", "instance", "semantic", "producer", "adapter"]
+            "enum": [
+              "io",
+              "corpus",
+              "schema",
+              "instance",
+              "semantic",
+              "producer",
+              "adapter",
+              "benchmark"
+            ]
           },
           "severity": { "enum": ["error", "warning"] },
           "description": { "type": "string", "minLength": 1 }
