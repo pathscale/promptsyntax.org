@@ -7,6 +7,7 @@
       "commit": "c64072f618ffdb53cc389fc40dfe0370c4cf05be",
       "adapter": "tests/conformance.rs",
       "fixture": "tests/conformance.json",
+      "runtime": { "name": "rust", "version": "1.97.0" },
       "command": ["cargo", "test"]
     },
     {
@@ -15,6 +16,7 @@
       "commit": "b22acfac066c0ea6eec7d042d69040c695ef5422",
       "adapter": "test/parser.test.ts",
       "fixture": "test/conformance.json",
+      "runtime": { "name": "bun", "version": "1.3.14" },
       "command": ["bun", "test"]
     }
   ]
