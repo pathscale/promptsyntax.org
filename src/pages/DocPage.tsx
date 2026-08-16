@@ -1,4 +1,4 @@
-import { type Component, createSignal, For, onMount } from "solid-js";
+import { type Component, createEffect, createSignal, For } from "solid-js";
 
 type TocItem = { id: string; text: string; level: number };
 
@@ -12,25 +12,30 @@ const DocPage: Component<DocPageProps> = (props) => {
   let contentRef: HTMLDivElement | undefined;
   const [toc, setToc] = createSignal<TocItem[]>([]);
 
-  onMount(() => {
-    if (!contentRef) return;
-    const items: TocItem[] = [];
-    for (const heading of contentRef.querySelectorAll("h2[id], h3[id]")) {
-      items.push({
-        id: heading.id,
-        text: heading.textContent?.replace(/\s+/g, " ").trim() ?? "",
-        level: heading.tagName === "H2" ? 2 : 3,
-      });
-    }
-    setToc(items);
+  // Runs once the content div is attached. Solid 2 replaces `onMount` with the
+  // two-argument `createEffect`: the first function tracks, the second acts.
+  createEffect(
+    () => props.html,
+    () => {
+      if (!contentRef) return;
+      const items: TocItem[] = [];
+      for (const heading of contentRef.querySelectorAll("h2[id], h3[id]")) {
+        items.push({
+          id: heading.id,
+          text: heading.textContent?.replace(/\s+/g, " ").trim() ?? "",
+          level: heading.tagName === "H2" ? 2 : 3,
+        });
+      }
+      setToc(items);
 
-    if (window.location.hash) {
-      const id = window.location.hash.slice(1);
-      scrollToHeading(id, "instant");
-      // Re-anchor once the full document has laid out (large tables shift heights).
-      setTimeout(() => scrollToHeading(id, "instant"), 300);
-    }
-  });
+      if (window.location.hash) {
+        const id = window.location.hash.slice(1);
+        scrollToHeading(id, "instant");
+        // Re-anchor once the full document has laid out (large tables shift heights).
+        setTimeout(() => scrollToHeading(id, "instant"), 300);
+      }
+    },
+  );
 
   // Leave `behavior` to CSS (html { scroll-behavior: smooth }) unless overridden.
   const scrollToHeading = (id: string, behavior?: ScrollBehavior) => {

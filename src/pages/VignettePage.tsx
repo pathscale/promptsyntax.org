@@ -1,5 +1,6 @@
 import { Button } from "@pathscale/ui";
-import { createMemo, createSignal, For, type JSX, Show } from "solid-js";
+import type { JSX } from "@solidjs/web";
+import { createMemo, createSignal, For, Show } from "solid-js";
 import { compileVignette, MINI_MODEL, PRECISE_MODEL, VIGNETTE_PARSER } from "~/lib/vignette";
 
 const INITIAL_PROMPT = "Summarize the attached Q3 report. Keep it concise.";
@@ -210,7 +211,7 @@ function VignettePage(): JSX.Element {
           </section>
 
           <div class="vignette-actions">
-            <Button type="button" variant="primary" onClick={check}>
+            <Button type="button" variant="solid" flavor="primary" onClick={check}>
               Check my answer
             </Button>
             <Show when={attempts() >= 3 && !compiled().passed && result() === null}>
@@ -238,7 +239,7 @@ function VignettePage(): JSX.Element {
                 <div>
                   <input
                     id="completion-code"
-                    readOnly
+                    readonly
                     value={completionCode(payload())}
                     onFocus={(event) => event.currentTarget.select()}
                   />

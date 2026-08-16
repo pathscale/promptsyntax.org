@@ -14,15 +14,15 @@ export const ThemeToggle: Component = () => {
       type="button"
       variant="ghost"
       size="sm"
-      isIconOnly
+      width="square"
       onClick={toggleTheme}
       aria-label={label()}
       title={label()}
     >
       {theme() === "light" ? (
-        <Icon name="icon-[lucide--moon]" width={16} height={16} />
+        <Icon src="icon-[lucide--moon]" width={16} height={16} />
       ) : (
-        <Icon name="icon-[lucide--sun]" width={16} height={16} />
+        <Icon src="icon-[lucide--sun]" width={16} height={16} />
       )}
     </Button>
   );

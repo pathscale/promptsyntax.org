@@ -1,4 +1,4 @@
-import { Route, Router } from "@solidjs/router";
+import { createRouter } from "@solidjs/router";
 import type { ParentComponent } from "solid-js";
 
 import Footer from "~/components/Footer";
@@ -17,16 +17,21 @@ const Shell: ParentComponent = (props) => (
   </div>
 );
 
-const App = () => {
-  return (
-    <Router root={Shell}>
-      <Route path={ROUTES.HOME} component={HomePage} />
-      <Route path={ROUTES.SPEC} component={SpecPage} />
-      <Route path={ROUTES.SYNTAX} component={SyntaxPage} />
-      <Route path={ROUTES.VIGNETTE} component={VignettePage} />
-      <Route path="*" component={HomePage} />
-    </Router>
-  );
-};
+const Router = createRouter({
+  routes: [
+    {
+      component: Shell,
+      children: [
+        { path: ROUTES.HOME, component: HomePage },
+        { path: ROUTES.SPEC, component: SpecPage },
+        { path: ROUTES.SYNTAX, component: SyntaxPage },
+        { path: ROUTES.VIGNETTE, component: VignettePage },
+        { path: "*", component: HomePage },
+      ],
+    },
+  ],
+});
+
+const App = () => <Router />;
 
 export default App;

@@ -1,5 +1,5 @@
 import { Navbar } from "@pathscale/ui";
-import { A, useLocation } from "@solidjs/router";
+import { useLocation } from "@solidjs/router";
 import clsx from "clsx";
 import type { Component } from "solid-js";
 import Logo from "~/components/Logo";
@@ -23,16 +23,16 @@ const SiteNavbar: Component = () => {
       <Navbar.Row bordered class="site-nav" padded={false}>
         <div class="page-container flex min-h-14 items-center justify-between gap-4">
           <Navbar.Start>
-            <A href={ROUTES.HOME} class="mr-4 no-underline">
+            <a href={ROUTES.HOME} class="mr-4 no-underline">
               <Logo class="text-base" />
-            </A>
+            </a>
             <nav class="hidden items-center gap-1 sm:flex">
-              <A href={ROUTES.SPEC} class={navLinkClass(ROUTES.SPEC)}>
+              <a href={ROUTES.SPEC} class={navLinkClass(ROUTES.SPEC)}>
                 Specification
-              </A>
-              <A href={ROUTES.SYNTAX} class={navLinkClass(ROUTES.SYNTAX)}>
+              </a>
+              <a href={ROUTES.SYNTAX} class={navLinkClass(ROUTES.SYNTAX)}>
                 Syntax reference
-              </A>
+              </a>
             </nav>
           </Navbar.Start>
           <Navbar.End>

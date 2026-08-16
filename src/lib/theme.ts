@@ -22,12 +22,15 @@ if (typeof window !== "undefined") {
   document.documentElement.setAttribute("data-theme", initialTheme);
 }
 
-createEffect(() => {
-  const current = theme();
-  if (typeof window !== "undefined") {
+// Solid 2 splits `createEffect` in two: the first function tracks and returns a
+// value, the second receives it and does the side effect.
+createEffect(
+  () => theme(),
+  (current) => {
+    if (typeof window === "undefined") return;
     document.documentElement.setAttribute("data-theme", current);
     localStorage.setItem("theme", current);
-  }
-});
+  },
+);
 
 export { setTheme, theme };

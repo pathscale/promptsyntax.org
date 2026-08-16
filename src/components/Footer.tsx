@@ -1,5 +1,4 @@
 import { Footer as LibFooter, Link } from "@pathscale/ui";
-import { A } from "@solidjs/router";
 import type { Component } from "solid-js";
 import { CONTACT_EMAIL, GITHUB_URL, ROUTES } from "~/config/routes";
 
@@ -10,12 +9,12 @@ export const Footer: Component = () => (
         PromptSyntax · a vendor-neutral specification proposal · Draft v0.2.1 · CC BY 4.0 (proposed)
       </div>
       <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <A class="text-base-content/55 text-xs hover:text-base-content" href={ROUTES.SPEC}>
+        <a class="text-base-content/55 text-xs hover:text-base-content" href={ROUTES.SPEC}>
           Spec
-        </A>
-        <A class="text-base-content/55 text-xs hover:text-base-content" href={ROUTES.SYNTAX}>
+        </a>
+        <a class="text-base-content/55 text-xs hover:text-base-content" href={ROUTES.SYNTAX}>
           Syntax reference
-        </A>
+        </a>
         <Link
           class="text-base-content/55 text-xs"
           href={GITHUB_URL}

@@ -1,5 +1,4 @@
 import { Button } from "@pathscale/ui";
-import { A } from "@solidjs/router";
 import type { Component } from "solid-js";
 import LensTabs from "~/components/LensTabs";
 import { GITHUB_URL, ROUTES } from "~/config/routes";
@@ -20,11 +19,11 @@ const HomePage: Component = () => (
           PromptSyntax is a vendor-neutral proposal to fix that, at the layer where you type.
         </p>
         <div class="flex flex-wrap gap-3">
-          <A href={ROUTES.SPEC}>
-            <Button variant="primary" type="button">
+          <a href={ROUTES.SPEC}>
+            <Button variant="solid" flavor="primary" type="button">
               Read the specification
             </Button>
-          </A>
+          </a>
           <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
             <Button variant="outline" type="button">
               View on GitHub
@@ -174,11 +173,11 @@ const HomePage: Component = () => (
           </li>
         </ul>
         <p class="mt-7">
-          <A href={ROUTES.SPEC}>
-            <Button variant="primary" type="button">
+          <a href={ROUTES.SPEC}>
+            <Button variant="solid" flavor="primary" type="button">
               Read the full specification →
             </Button>
-          </A>
+          </a>
         </p>
       </div>
     </section>
