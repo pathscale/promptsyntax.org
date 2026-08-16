@@ -56,7 +56,7 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
     return value;
   });
 
-  const rows = createMemo(() => receiptRows(compiled(), model()));
+  const rows = createMemo(() => receiptRows(compiled(), model(), forceModel()));
   const solved = () => solvedAt() !== null;
 
   const inputMethod = (): InputMethod => {
@@ -142,16 +142,16 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
       </Show>
 
       <div class="vignette-card">
-        <p class="vignette-behavior">
-          You have important work and the service is busy. The model is already selected below, but
-          without asking you the service may silently switch to a smaller model that could degrade
-          the work.
-        </p>
+        <ul class="vignette-behavior study-bullets">
+          <li>You have important work and the service is busy.</li>
+          <li>The model is already selected below.</li>
+          <li>Without asking, the service may silently switch to a smaller model.</li>
+        </ul>
 
-        <p class="vignette-goal">
-          Your goal: change the prompt so the precise model (Atlas-4) answers. If Atlas-4 cannot
-          answer, the request must fail instead of switching.
-        </p>
+        <ul class="vignette-goal study-bullets">
+          <li>Your goal: change the prompt so Atlas-4 answers.</li>
+          <li>If Atlas-4 cannot answer, the request must fail instead of switching.</li>
+        </ul>
 
         <section aria-labelledby="editor-title">
           <div class="vignette-section-heading">

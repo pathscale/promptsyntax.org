@@ -17,6 +17,8 @@ export type PillMenuProps<T extends string> = {
   onChange: (value: T) => void;
   /** `filled` sits on a card; `outline` is the composer's secondary pill. */
   variant?: "filled" | "outline";
+  /** Decorative glyph before the label, as the model pill carries. */
+  icon?: string;
   label: string;
 };
 
@@ -33,6 +35,13 @@ export function PillMenu<T extends string>(props: PillMenuProps<T>): JSX.Element
   return (
     <Dropdown placement="top">
       <Dropdown.Trigger aria-label={props.label} class="composer-pill">
+        <Show when={props.icon}>
+          {(glyph) => (
+            <span aria-hidden="true" class="composer-spark">
+              {glyph()}
+            </span>
+          )}
+        </Show>
         <Show when={props.prefix}>
           <span class="composer-pill-prefix">{props.prefix}</span>
         </Show>

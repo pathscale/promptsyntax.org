@@ -75,6 +75,7 @@ function PromptComposer(props: PromptComposerProps): JSX.Element {
           }}
           class="composer-input"
           aria-label="Prompt"
+          placeholder="Write a message…"
           spellcheck={false}
           rows={4}
           value={props.value}
@@ -83,34 +84,57 @@ function PromptComposer(props: PromptComposerProps): JSX.Element {
         />
       </div>
 
+      {/*
+        Posture controls left, model controls and send right, the way the
+        product this imitates arranges them. The row may wrap on a narrow
+        window: the right cluster drops whole rather than splitting.
+      */}
       <div class="composer-toolbar">
-        <button
-          type="button"
-          class={props.forceModel ? "composer-toggle is-on" : "composer-toggle"}
-          aria-pressed={props.forceModel ? "true" : "false"}
-          onClick={() => props.onForceModelChange(!props.forceModel)}
-        >
-          <span aria-hidden="true">◆</span>
-          Force this Model
-        </button>
+        <div class="composer-cluster">
+          <button
+            type="button"
+            class={props.forceModel ? "composer-toggle is-on" : "composer-toggle"}
+            aria-pressed={props.forceModel ? "true" : "false"}
+            onClick={() => props.onForceModelChange(!props.forceModel)}
+          >
+            Force this Model
+          </button>
 
-        <PillMenu
-          label="Model"
-          variant="outline"
-          value={props.model}
-          options={MODEL_OPTIONS}
-          onChange={props.onModelChange}
-        />
+          <button type="button" class="composer-icon" aria-label="Attach a file">
+            <span aria-hidden="true">+</span>
+          </button>
 
-        <button
-          type="button"
-          class={props.concise ? "composer-toggle is-on" : "composer-toggle"}
-          aria-pressed={props.concise ? "true" : "false"}
-          onClick={() => props.onConciseChange(!props.concise)}
-        >
-          <span aria-hidden="true">≡</span>
-          Concise
-        </button>
+          <button type="button" class="composer-icon" aria-label="Add from a folder">
+            <span aria-hidden="true">⊞</span>
+          </button>
+        </div>
+
+        <div class="composer-cluster composer-cluster-end">
+          <button
+            type="button"
+            class={props.concise ? "composer-toggle is-on" : "composer-toggle"}
+            aria-pressed={props.concise ? "true" : "false"}
+            onClick={() => props.onConciseChange(!props.concise)}
+          >
+            <span aria-hidden="true" class="composer-spark">
+              ✦
+            </span>
+            Concise
+          </button>
+
+          <PillMenu
+            label="Model"
+            variant="outline"
+            icon="✦"
+            value={props.model}
+            options={MODEL_OPTIONS}
+            onChange={props.onModelChange}
+          />
+
+          <button type="button" class="composer-icon" aria-label="Dictate">
+            <span aria-hidden="true">⌗</span>
+          </button>
+        </div>
       </div>
     </div>
   );

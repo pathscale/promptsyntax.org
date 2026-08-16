@@ -21,7 +21,11 @@ const GLYPH: Record<RowTone, string> = { ok: "✓", warn: "!", bad: "✗" };
  * is deliberately no second opinion about the prompt here. `dropdown` only
  * chooses the wording of the unbound case, never a verdict.
  */
-export function receiptRows(compiled: Compilation, dropdown: ComposerModel): ReceiptRow[] {
+export function receiptRows(
+  compiled: Compilation,
+  dropdown: ComposerModel,
+  forceModel = false,
+): ReceiptRow[] {
   const bound = compiled.steps[0]?.canonical;
 
   const model: ReceiptRow =
@@ -43,11 +47,18 @@ export function receiptRows(compiled: Compilation, dropdown: ComposerModel): Rec
           }
         : {
             label: "Model",
-            detail:
-              dropdown === "atlas-mini"
+            // The toggle is a setting on this screen, not part of the request,
+            // so it changes what the row can honestly claim and nothing else.
+            // Saying so is the whole lesson: the switch looks like a guarantee
+            // and the receipt is where you find out it was not one.
+            detail: forceModel
+              ? dropdown === "atlas-mini"
+                ? "the setting asks for Atlas Mini, but the request does not pin it"
+                : "the setting asks for Atlas-4, but the request does not pin it"
+              : dropdown === "atlas-mini"
                 ? "dropdown asks for Atlas Mini, service may still switch under load"
                 : "dropdown asks for Atlas-4, service may still switch under load",
-            verdict: "WOULD SWITCH",
+            verdict: forceModel ? "SETTING ONLY" : "WOULD SWITCH",
             tone: "warn",
             glyph: GLYPH.warn,
           };
