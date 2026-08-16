@@ -3,6 +3,8 @@ export const ROUTES = {
   SPEC: "/spec",
   SYNTAX: "/syntax",
   VIGNETTE: "/vignette",
+  /** Unlisted. Deliberately absent from navigation, sitemap.xml and the README. */
+  STUDY: "/study",
 } as const;
 
 export const GITHUB_URL = "https://github.com/pathscale/promptsyntax.org";
