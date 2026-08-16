@@ -43,24 +43,6 @@ success.
 **Always paste the full PR URL** (`https://github.com/pathscale/promptsyntax.org/pull/<n>`), not just the number, so it's
 clickable.
 
-<!-- DORMANT — CI-green gating. Do not follow this rule yet; re-enable it as its own project.
-
-Why it's off: CI here does not reliably attach checks to pull requests, so
-`statusCheckRollup` comes back empty and "wait for green" would teach an agent to wait on
-nothing. Verify per repo before switching this on.
-
-To enable: ensure the workflow runs on `pull_request:`, confirm checks attach to a PR, then
-uncomment the rule below.
-
-    After any push or PR, **check CI and don't call it done until it's green**:
-
-    ```bash
-    gh pr view <number> --repo pathscale/promptsyntax.org --json statusCheckRollup
-    ```
-
-    CI running → wait and recheck. CI failed → read the logs, fix, push, wait for green.
--->
-
 ## Keeping docs honest
 
 Hit a factual error here — a stale path, a wrong command, a moved status? Fix it in the same
@@ -79,6 +61,31 @@ to every agent and human; private memory dies with your machine.
   `--force-with-lease` so you don't clobber someone else's push.
 - **Never force-push the default branch** (`main`/`master`). That is the history
   everyone else builds on, and it is protected server-side for a reason.
+- **Never create merge commits — this is a hard ban.** Not locally, not to refresh a
+  branch, not to land a pull request. If your branch
+  has fallen behind, **rebase** it onto the moved base (`git rebase origin/master`, then
+  `--force-with-lease`). `git merge master` into a feature branch is not an acceptable
+  shortcut: it adds a commit whose only content is the fact that you were behind, and it
+  turns a readable line of work into a diamond. Merge commits are disabled server-side on
+  these repositories — that is a backstop, not a licence to rely on it.
+- **Rebase is the default everywhere** — refreshing a branch, and landing a pull request.
+  Individual commits carry information: what was tried, in what order, and why. A rebase
+  merge keeps that granularity on the base branch, so write commits worth keeping and land
+  them intact.
+- **Landing a pull request means rebase, then fast-forward.** `git rebase origin/master`
+  on the branch, then `git merge --ff-only <branch>` on the base, then push. Plain
+  `gh pr merge` is wrong here: its default creates a merge commit, so don't reach for it.
+  If you use it at all it must be `gh pr merge --rebase`. Rebasing rewrites the commit
+  SHAs, so GitHub cannot always detect that a branch landed — close such pull requests
+  explicitly and say why.
+- **Don't delete remote branches by hand.** Once the work is on `master` the branch is
+  reaped automatically. Deleting your own local copy is fine.
+- **Squash is acceptable** where it genuinely makes things easier or is the more
+  appropriate shape for the branch — one logical change scattered across fixup commits, or
+  a long branch whose intermediate states aren't worth preserving. It is a judgement call,
+  not a violation. Merging is the only thing that is never allowed.
+- **Delete what is deprecated.** A superseded file, flag, branch or code path gets removed
+  in the change that supersedes it, not left behind with a deprecation note.
 
 ## Guardrails
 
