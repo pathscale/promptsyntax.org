@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web";
 import { createSignal, For, Show } from "solid-js";
 import VignetteTask, { type TaskResult } from "~/components/VignetteTask";
 
-const STUDY_VERSION = "micro-1";
+const STUDY_VERSION = "micro-2";
 
 type Step = "consent" | "background" | "instructions" | "task" | "done";
 
@@ -67,30 +67,27 @@ function StudyPage(): JSX.Element {
         <Show when={step() === "consent"}>
           <div class="vignette-card">
             <section aria-labelledby="consent-title">
-              <h2 id="consent-title">A 5 minute research task</h2>
-              <p>
-                This is a short study run by an independent researcher about how people write
-                requests to AI services. You will answer two background questions, then do one
-                hands-on editing task in your browser. It takes about 5 minutes and there is no time
-                limit.
-              </p>
-              <p>
-                What is recorded: your two answers, whether the task was solved, the number of
-                attempts, the time taken, and the final text you wrote. No name, email, or account
-                is collected, and nothing is sent anywhere by this page: at the end you get a
-                completion code, and the study only receives what you choose to send back.
-              </p>
-              <p>
-                Taking part is voluntary. You can close this tab at any point and nothing is
-                recorded. After you finish, you will be told what the study is about.
-              </p>
+              <h2 id="consent-title">5 Minute Research Survey</h2>
+              <ul class="study-bullets">
+                <li>One hands-on editing task in your browser, about 5 minutes, no time limit.</li>
+                <li>
+                  Recorded: your two answers, task outcome, attempts, time, and the final text you
+                  write.
+                </li>
+                <li>No name, email, or account. Nothing is sent anywhere by this page.</li>
+                <li>
+                  You get a completion code at the end; only what you send back reaches the study.
+                </li>
+                <li>Voluntary. Close the tab any time and nothing is recorded.</li>
+                <li>You will be told what the study is about after you finish.</li>
+              </ul>
               <label class="study-consent">
                 <input
                   type="checkbox"
                   checked={consented()}
                   onChange={(event) => setConsented(event.currentTarget.checked)}
                 />
-                <span>I have read the above and agree to take part.</span>
+                <span>I agree to take part.</span>
               </label>
             </section>
             <div class="vignette-actions">
@@ -110,7 +107,7 @@ function StudyPage(): JSX.Element {
         <Show when={step() === "background"}>
           <div class="vignette-card">
             <fieldset class="study-question">
-              <legend>How often do you use AI chat or coding assistants?</legend>
+              <legend>How often do you use AI?</legend>
               <For each={USAGE_OPTIONS}>
                 {(option) => (
                   <label class="study-option">
@@ -165,16 +162,10 @@ function StudyPage(): JSX.Element {
           <div class="vignette-card">
             <section aria-labelledby="instructions-title">
               <h2 id="instructions-title">The hands-on task</h2>
-              <p>
-                On the next screen you will see a request someone typed to an AI service, and a live
-                preview showing what the service would actually do with it. Your job is to change
-                the request so it does exactly what is asked. There is no time limit. Read each
-                screen carefully.
-              </p>
-              <ul class="study-legend">
-                <li>Highlighted text in the editor is a control the service recognizes.</li>
-                <li>The validation line reports whether the request currently compiles.</li>
-                <li>The preview rows show what would run, in words as well as status labels.</li>
+              <ul class="study-bullets">
+                <li>Please read carefully.</li>
+                <li>Change the request so it does exactly what is asked.</li>
+                <li>No time limit.</li>
               </ul>
             </section>
             <div class="vignette-actions">
@@ -199,10 +190,11 @@ function StudyPage(): JSX.Element {
             <div class="vignette-card">
               <section class="vignette-complete" aria-live="polite">
                 <h2>Task complete</h2>
-                <p>
-                  Copy this completion code and send it back in the same chat where you were
-                  invited. That is the last step. Thank you.
-                </p>
+                <ul class="study-bullets">
+                  <li>Copy the completion code below.</li>
+                  <li>Send it back in the same chat where you were invited.</li>
+                  <li>That is the last step. Thank you.</li>
+                </ul>
                 <label for="study-completion-code">Completion code</label>
                 <div>
                   <input

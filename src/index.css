@@ -157,17 +157,50 @@
   font-size: 0.75rem;
 }
 
-.vignette-editor-wrap {
-  position: relative;
-  min-height: 10.5rem;
-  overflow: hidden;
+/* Composer facade: the surface a real assistant presents. */
+.composer {
   border: 1px solid var(--color-base-300);
-  border-radius: 0.8rem;
+  border-radius: 1rem;
   background: var(--color-base-100);
+  padding: 0.7rem 0.75rem 0.55rem;
 }
 
-.vignette-editor,
-.vignette-highlight {
+.composer-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.55rem;
+}
+
+.composer-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid color-mix(in oklab, var(--color-primary) 35%, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-primary) 15%, transparent);
+  padding: 0.2rem 0.55rem;
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.72rem;
+}
+
+.composer-chip-remove {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.composer-field {
+  position: relative;
+  min-height: 6.5rem;
+}
+
+.composer-highlight,
+.composer-input {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -175,11 +208,11 @@
   margin: 0;
   overflow: auto;
   border: 0;
-  padding: 1rem;
+  padding: 0.35rem 0.25rem;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   font:
-    500 0.93rem / 1.65 "SFMono-Regular",
+    500 0.93rem / 1.6 "SFMono-Regular",
     ui-monospace,
     Menlo,
     Consolas,
@@ -187,19 +220,19 @@
   tab-size: 2;
 }
 
-.vignette-highlight {
+.composer-highlight {
   pointer-events: none;
   color: var(--color-base-content);
 }
 
-.vignette-highlight mark {
+.composer-highlight mark {
   border-radius: 0.25rem;
   background: color-mix(in oklab, var(--color-primary) 22%, transparent);
   color: var(--isl-model);
   box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--color-primary) 65%, transparent);
 }
 
-.vignette-editor {
+.composer-input {
   resize: none;
   background: transparent;
   color: transparent;
@@ -207,22 +240,169 @@
   outline: none;
 }
 
-.vignette-editor::selection {
+.composer-input::selection {
   background: color-mix(in oklab, var(--color-primary) 32%, transparent);
   color: transparent;
 }
 
-.vignette-editor:focus-visible {
-  box-shadow: inset 0 0 0 2px var(--color-primary);
+.composer-input:focus-visible {
+  box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--color-primary) 45%, transparent);
+  border-radius: 0.5rem;
+}
+
+.composer-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+
+.composer-toggle,
+.composer-pill {
+  display: inline-flex;
+  height: 1.65rem;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--color-base-300);
+  border-radius: 999px;
+  background: transparent;
+  padding-inline: 0.6rem;
+  color: color-mix(in oklab, var(--color-base-content) 64%, transparent);
+  font-weight: 600;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background-color 0.15s;
+}
+
+.composer-toggle:hover,
+.composer-pill:hover {
+  border-color: color-mix(in oklab, var(--color-primary) 45%, transparent);
+  color: var(--color-base-content);
+}
+
+.composer-toggle.is-on {
+  border-color: color-mix(in oklab, var(--color-primary) 35%, transparent);
+  background: color-mix(in oklab, var(--color-primary) 15%, transparent);
+  color: var(--color-primary);
+}
+
+.composer-pill-prefix {
+  font-weight: 700;
+  color: var(--color-base-content);
+}
+
+.composer-pill-value {
+  color: var(--color-base-content);
+}
+
+.composer-pill-caret {
+  font-size: 0.6rem;
+  opacity: 0.6;
+}
+
+.composer-pill-menu {
+  min-width: 12rem;
+  border: 1px solid var(--color-base-300);
+  border-radius: 0.75rem;
+  background: var(--color-base-100);
+  padding: 0.25rem;
+  box-shadow: 0 18px 40px color-mix(in oklab, var(--color-base-content) 18%, transparent);
+}
+
+.composer-pill-item {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.composer-pill-item:hover {
+  background: color-mix(in oklab, var(--color-base-content) 6%, transparent);
+}
+
+.composer-pill-item.is-current {
+  color: var(--color-primary);
+}
+
+.composer-pill-item-label {
+  font-size: 0.8rem;
+}
+
+.composer-pill-item-hint {
+  color: color-mix(in oklab, var(--color-base-content) 55%, transparent);
+  font-size: 0.72rem;
+}
+
+.vignette-chips-caption {
+  margin-top: 0.45rem !important;
+  color: color-mix(in oklab, var(--color-base-content) 55%, transparent);
+  font-size: 0.75rem;
+}
+
+.study-bullets {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  line-height: 1.5;
+}
+
+.vignette-attempts {
+  color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+  font-size: 0.78rem;
+}
+
+.vignette-banner {
+  border-radius: 0.6rem;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.85rem;
+}
+
+.vignette-banner.is-warn {
+  border: 1px solid color-mix(in oklab, var(--color-warning) 45%, var(--color-base-300));
+  background: color-mix(in oklab, var(--color-warning) 8%, transparent);
+  color: var(--color-warning);
+}
+
+.vignette-banner.is-ok {
+  border: 1px solid color-mix(in oklab, var(--color-success) 45%, var(--color-base-300));
+  background: color-mix(in oklab, var(--color-success) 8%, transparent);
+  color: var(--color-success);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .vignette-validation {
-  display: grid;
-  gap: 0.2rem;
   min-height: 1.45rem;
   padding-top: 0.45rem;
-  color: var(--color-error);
   font-size: 0.78rem;
+}
+
+.vignette-validation.is-neutral {
+  color: color-mix(in oklab, var(--color-base-content) 58%, transparent);
+}
+
+.vignette-validation.is-error {
+  color: var(--color-error);
 }
 
 .vignette-chips {
@@ -274,9 +454,26 @@
 }
 
 .vignette-receipt-row b {
-  color: var(--color-primary);
   font-size: 0.68rem;
   letter-spacing: 0.06em;
+}
+
+.vignette-receipt-row.is-ok b {
+  color: var(--color-success);
+}
+
+.vignette-receipt-row.is-warn b {
+  color: var(--color-warning);
+}
+
+.vignette-receipt-row.is-bad b {
+  color: var(--color-error);
+}
+
+.vignette-receipt-row.is-flagged {
+  border-radius: 0.4rem;
+  background: color-mix(in oklab, var(--color-warning) 9%, transparent);
+  box-shadow: inset 2px 0 0 var(--color-warning);
 }
 
 .vignette-actions {
