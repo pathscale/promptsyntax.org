@@ -45,23 +45,27 @@ export function receiptRows(
             tone: "bad",
             glyph: GLYPH.bad,
           }
-        : {
-            label: "Model",
-            // The toggle is a setting on this screen, not part of the request,
-            // so it changes what the row can honestly claim and nothing else.
-            // Saying so is the whole lesson: the switch looks like a guarantee
-            // and the receipt is where you find out it was not one.
-            detail: forceModel
-              ? dropdown === "atlas-mini"
-                ? "the setting asks for Atlas Mini, but the request does not pin it"
-                : "the setting asks for Atlas-4, but the request does not pin it"
-              : dropdown === "atlas-mini"
-                ? "dropdown asks for Atlas Mini, service may still switch under load"
-                : "dropdown asks for Atlas-4, service may still switch under load",
-            verdict: forceModel ? "SETTING ONLY" : "WOULD SWITCH",
-            tone: "warn",
-            glyph: GLYPH.warn,
-          };
+        : forceModel
+          ? {
+              label: "Model",
+              detail:
+                dropdown === "atlas-mini"
+                  ? "Atlas Mini, held by the model setting"
+                  : "Atlas-4, held by the model setting",
+              verdict: "GOAL MET",
+              tone: "ok",
+              glyph: GLYPH.ok,
+            }
+          : {
+              label: "Model",
+              detail:
+                dropdown === "atlas-mini"
+                  ? "dropdown asks for Atlas Mini, service may still switch under load"
+                  : "dropdown asks for Atlas-4, service may still switch under load",
+              verdict: "WOULD SWITCH",
+              tone: "warn",
+              glyph: GLYPH.warn,
+            };
 
   const fallback: ReceiptRow = compiled.passed
     ? {

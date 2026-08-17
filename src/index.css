@@ -252,10 +252,63 @@
 
 .composer-toolbar {
   display: flex;
+  min-height: 1.75rem;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
   margin-top: 0.55rem;
+}
+
+/*
+  Two groups on one line: posture controls left, model controls right. Neither
+  carries `min-width: 0`, so when the row runs out of width the parent moves a
+  whole group down instead of letting one break inside itself, which is what
+  puts a pill on its own line and leaves the row looking scattered.
+*/
+.composer-cluster {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.composer-cluster-end {
+  margin-left: auto;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
+.composer-icon {
+  display: inline-flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-base-300);
+  border-radius: 999px;
+  background: transparent;
+  color: color-mix(in oklab, var(--color-base-content) 58%, transparent);
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.composer-icon:hover {
+  border-color: color-mix(in oklab, var(--color-primary) 45%, transparent);
+  color: var(--color-base-content);
+}
+
+.composer-spark {
+  color: var(--color-primary);
+  font-size: 0.85em;
+}
+
+.composer-input::placeholder {
+  color: color-mix(in oklab, var(--color-base-content) 42%, transparent);
 }
 
 .composer-toggle,
