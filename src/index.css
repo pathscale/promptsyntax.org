@@ -629,6 +629,179 @@
   font-size: 0.86rem;
 }
 
+/* Part A: the chat screenshot, built in-page */
+.study-mock {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.study-mock-composer {
+  border: 1px solid var(--color-base-300);
+  border-radius: 0.9rem;
+  background: var(--color-base-100);
+  padding: 0.9rem 1rem 0.7rem;
+}
+
+.study-mock-prompt {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.study-mock-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.8rem;
+}
+
+.study-mock-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--color-base-300);
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.76rem;
+}
+
+.study-mock-caret {
+  opacity: 0.6;
+}
+
+.study-mock-response {
+  display: grid;
+  gap: 0.5rem;
+  border-radius: 0.9rem;
+  background: color-mix(in oklab, var(--color-base-200) 70%, transparent);
+  padding: 0.9rem 1rem;
+}
+
+.study-mock-response p {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+.study-mock-receipt {
+  display: grid;
+  gap: 0.35rem;
+  border: 1px solid var(--color-base-300);
+  border-radius: 0.7rem;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.78rem;
+}
+
+.study-mock-receipt p {
+  margin: 0;
+}
+
+/* Part B: scenario, read-only composer, machine record */
+.study-scenario,
+.study-goal {
+  margin: 0;
+  border-radius: 0.7rem;
+  padding: 0.8rem 0.95rem;
+  font-size: 0.88rem;
+}
+
+.study-scenario {
+  background: color-mix(in oklab, var(--color-base-200) 70%, transparent);
+}
+
+.study-goal {
+  border: 1px solid color-mix(in oklab, var(--color-primary) 45%, var(--color-base-300));
+  background: color-mix(in oklab, var(--color-primary) 6%, transparent);
+  font-weight: 600;
+}
+
+.study-composer {
+  border: 1px solid var(--color-base-300);
+  border-radius: 0.9rem;
+  background: var(--color-base-100);
+  padding: 0.9rem 1rem 0.7rem;
+}
+
+.study-composer-prompt {
+  margin: 0;
+  color: color-mix(in oklab, var(--color-base-content) 85%, transparent);
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+}
+
+.study-composer-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+
+.study-composer-model {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+}
+
+.study-composer-model select {
+  border: 1px solid var(--color-base-300);
+  border-radius: 0.5rem;
+  background: var(--color-base-100);
+  padding: 0.3rem 0.55rem;
+  color: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.study-composer-toggle {
+  border: 1px solid var(--color-base-300);
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.study-composer-toggle.is-on {
+  border-color: var(--color-primary);
+  background: color-mix(in oklab, var(--color-primary) 14%, transparent);
+  font-weight: 600;
+}
+
+.study-composer-send {
+  margin-left: auto;
+  border: 1px solid var(--color-base-300);
+  border-radius: 999px;
+  width: 1.9rem;
+  height: 1.9rem;
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.study-record {
+  border: 1px solid var(--color-base-300);
+  border-radius: 0.8rem;
+  padding: 0.9rem 1rem;
+}
+
+.study-record h2 {
+  margin: 0 0 0.6rem;
+  font-size: 0.9rem;
+}
+
+.study-record-body {
+  overflow-x: auto;
+  margin: 0;
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--color-base-200) 70%, transparent);
+  padding: 0.7rem 0.8rem;
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.74rem;
+  white-space: pre-wrap;
+}
+
+.study-record-empty {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
 @media (max-width: 620px) {
   .vignette-receipt-row {
     grid-template-columns: 1fr auto;
