@@ -781,6 +781,23 @@
   gap: 0.6rem;
 }
 
+/* Kept out of the way: only the rare participant who is asked opens it. */
+.study-fallback {
+  font-size: 0.85rem;
+}
+
+.study-fallback summary {
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+  cursor: pointer;
+}
+
+.study-fallback .study-code {
+  margin-top: 0.5rem;
+}
+
 .study-code input {
   width: 100%;
   min-height: 3rem;

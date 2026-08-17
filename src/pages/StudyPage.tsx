@@ -40,6 +40,34 @@ type StudyPayload = {
   study_version: typeof STUDY_VERSION;
 };
 
+/**
+ * Where the finished code goes.
+ *
+ * The Forms REST API cannot create responses and needs an OAuth credential, so
+ * it is no use to a static page. The form's own response endpoint takes an
+ * ordinary cross origin POST with no auth, which is what a browser submitting
+ * the real form does.
+ */
+const FORM_ENDPOINT =
+  "https://docs.google.com/forms/d/e/1FAIpQLSfsq_AW9-un1Vtzs2KwShlF_mG6iwsa9H-e95oQ83suJDptpg/formResponse";
+const FORM_CODE_FIELD = "entry.1893891965";
+
+type SubmitState = "idle" | "sending" | "sent" | "failed";
+
+/**
+ * Post the code to the form.
+ *
+ * Google sends no CORS headers on this endpoint, so the request goes out in
+ * `no-cors` mode and the reply is opaque: a resolved promise means the request
+ * left the browser, not that Google accepted it. Nothing here can tell the
+ * difference, which is why the code stays on screen as a fallback.
+ */
+async function submitCode(code: string): Promise<void> {
+  const body = new FormData();
+  body.append(FORM_CODE_FIELD, code);
+  await fetch(FORM_ENDPOINT, { method: "POST", mode: "no-cors", body });
+}
+
 function completionCode(payload: StudyPayload): string {
   const bytes = new TextEncoder().encode(JSON.stringify(payload));
   let binary = "";
@@ -144,6 +172,7 @@ function StudyPage(): JSX.Element {
   const [wouldWrite, setWouldWrite] = createSignal<WouldWriteAnswer | null>(null);
 
   const [payload, setPayload] = createSignal<StudyPayload | null>(null);
+  const [submitState, setSubmitState] = createSignal<SubmitState>("idle");
   const [copied, setCopied] = createSignal(false);
 
   // The two screenshot answers are stored by position, then read back by
@@ -153,7 +182,14 @@ function StudyPage(): JSX.Element {
 
   const consentReady = (): boolean => consented() && usage() !== null && heard() !== null;
 
-  const finish = (): void => {
+  /**
+   * Build the record, send it, and move on either way.
+   *
+   * The participant reaches the last screen whether or not the send worked:
+   * their part is finished, and the screen itself reports what happened.
+   */
+  const submit = async (): Promise<void> => {
+    if (submitState() === "sending") return;
     const plain = plainAnswer();
     const receipt = receiptAnswer();
     const usageAnswer = usage();
@@ -162,7 +198,8 @@ function StudyPage(): JSX.Element {
     const wouldWriteAnswer = wouldWrite();
     if (!plain || !receipt || !usageAnswer || !heardAnswer) return;
     if (!preferenceAnswer || !wouldWriteAnswer) return;
-    setPayload({
+
+    const record: StudyPayload = {
       consent: true,
       q1_usage: usageAnswer,
       q2_heard_of_notation: heardAnswer,
@@ -173,7 +210,17 @@ function StudyPage(): JSX.Element {
       answer_would_write: wouldWriteAnswer,
       ms_elapsed_total: Math.round(performance.now() - startedAt),
       study_version: STUDY_VERSION,
-    });
+    };
+    setPayload(record);
+    setSubmitState("sending");
+    try {
+      await submitCode(completionCode(record));
+      setSubmitState("sent");
+    } catch {
+      // Offline, blocked, or the request never left. The code is still on the
+      // last screen, so the participant can send it by hand instead.
+      setSubmitState("failed");
+    }
     setPage("done");
   };
 
@@ -239,8 +286,7 @@ function StudyPage(): JSX.Element {
               <li>No name, no email, nothing typed.</li>
               <li>Voluntary.</li>
               <li>Close the tab any time.</li>
-              <li>You get a code at the end.</li>
-              <li>Send it back where you were invited.</li>
+              <li>Your answers are sent when you press Submit at the end.</li>
             </ul>
 
             <label class={consented() ? "study-consent is-picked" : "study-consent"}>
@@ -326,10 +372,14 @@ function StudyPage(): JSX.Element {
               variant="solid"
               flavor="primary"
               class="study-next"
-              state={preference() === null || wouldWrite() === null ? "disabled" : "default"}
-              onClick={finish}
+              state={
+                preference() === null || wouldWrite() === null || submitState() === "sending"
+                  ? "disabled"
+                  : "default"
+              }
+              onClick={() => void submit()}
             >
-              Finish
+              {submitState() === "sending" ? "Sending..." : "Submit"}
             </Button>
           </div>
         </Show>
@@ -337,23 +387,55 @@ function StudyPage(): JSX.Element {
         <Show when={page() === "done" ? payload() : null} keyed>
           {(current) => (
             <div class="study-card" aria-live="polite">
-              <h1 class="study-title">Done. Thank you.</h1>
-              <ul class="study-bullets">
-                <li>Copy the code below.</li>
-                <li>Send it back in the same chat where you were invited.</li>
-              </ul>
+              <Show
+                when={submitState() === "sent"}
+                fallback={
+                  <>
+                    <h1 class="study-title">Almost there.</h1>
+                    <ul class="study-bullets">
+                      <li>Your answers could not be sent automatically.</li>
+                      <li>Copy the code below and send it back where you were invited.</li>
+                    </ul>
+                    <div class="study-code">
+                      <input
+                        id="study-code"
+                        readonly
+                        value={completionCode(current)}
+                        onFocus={(event) => event.currentTarget.select()}
+                      />
+                      <button type="button" class="study-copy" onClick={() => void copyCode()}>
+                        {copied() ? "Copied" : "Copy"}
+                      </button>
+                    </div>
+                  </>
+                }
+              >
+                <h1 class="study-title">Done. Thank you.</h1>
+                <ul class="study-bullets">
+                  <li>Your answers have been submitted.</li>
+                  <li>Nothing else is needed. You can close this tab.</li>
+                </ul>
 
-              <div class="study-code">
-                <input
-                  id="study-code"
-                  readonly
-                  value={completionCode(current)}
-                  onFocus={(event) => event.currentTarget.select()}
-                />
-                <button type="button" class="study-copy" onClick={() => void copyCode()}>
-                  {copied() ? "Copied" : "Copy"}
-                </button>
-              </div>
+                {/*
+                  The send is opaque by design, so a failure can look like a
+                  success. The code stays available, quietly, for the one
+                  participant who is asked for it.
+                */}
+                <details class="study-fallback">
+                  <summary>Asked for a code?</summary>
+                  <div class="study-code">
+                    <input
+                      id="study-code"
+                      readonly
+                      value={completionCode(current)}
+                      onFocus={(event) => event.currentTarget.select()}
+                    />
+                    <button type="button" class="study-copy" onClick={() => void copyCode()}>
+                      {copied() ? "Copied" : "Copy"}
+                    </button>
+                  </div>
+                </details>
+              </Show>
             </div>
           )}
         </Show>
