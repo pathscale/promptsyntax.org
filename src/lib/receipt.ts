@@ -14,26 +14,35 @@ export type ReceiptRow = {
 const GLYPH: Record<RowTone, string> = { ok: "✓", warn: "!", bad: "✗" };
 
 /**
- * The receipt, read off the same compilation the scorer grades.
+ * The two goals, one row each, and each row has two ways to satisfy it.
  *
- * Deriving both rows from `compiled` is the point: if these rows agreed with
- * the goal while the scorer disagreed, the task would be unwinnable, so there
- * is deliberately no second opinion about the prompt here. `dropdown` only
- * chooses the wording of the unbound case, never a verdict.
+ * The composer settles it directly: the model dropdown answers which model
+ * runs, and the enforce toggle answers what happens when that model cannot.
+ * Writing the same thing into the prompt answers it too, which is the point of
+ * the task, since the settings and the request are two routes to one outcome.
  */
-export function receiptRows(
+export type ReceiptState = {
+  rows: ReceiptRow[];
+  /** True when both goals are met, by either route. */
+  passed: boolean;
+};
+
+export function receiptState(
   compiled: Compilation,
   dropdown: ComposerModel,
-  forceModel = false,
-): ReceiptRow[] {
+  forceModel: boolean,
+): ReceiptState {
   const bound = compiled.steps[0]?.canonical;
+
+  // Goal one: Atlas-4 is the model that answers.
+  const modelMet = bound === PRECISE_MODEL || (dropdown === "atlas-4" && bound !== MINI_MODEL);
 
   const model: ReceiptRow =
     bound === PRECISE_MODEL
       ? {
           label: "Model",
           detail: "Atlas-4, pinned in the prompt",
-          verdict: "EXACTLY AS ASKED",
+          verdict: "GOAL MET",
           tone: "ok",
           glyph: GLYPH.ok,
         }
@@ -45,44 +54,40 @@ export function receiptRows(
             tone: "bad",
             glyph: GLYPH.bad,
           }
-        : // Both halves are needed: naming the model without holding it leaves
-          // the service free to switch, and holding an unnamed default holds
-          // nothing in particular.
-          forceModel && dropdown === "atlas-4"
+        : dropdown === "atlas-4"
           ? {
               label: "Model",
-              detail: "Atlas-4, held by the model setting",
+              detail: "Atlas-4, selected for this request",
               verdict: "GOAL MET",
               tone: "ok",
               glyph: GLYPH.ok,
             }
-          : forceModel && dropdown === "atlas-mini"
+          : dropdown === "atlas-mini"
             ? {
                 label: "Model",
-                detail: "Atlas Mini, held by the model setting",
+                detail: "Atlas Mini, selected for this request",
                 verdict: "NOT WHAT THE GOAL ASKS",
                 tone: "bad",
                 glyph: GLYPH.bad,
               }
             : {
                 label: "Model",
-                detail: forceModel
-                  ? "the setting holds no particular model"
-                  : dropdown === "atlas-4"
-                    ? "dropdown asks for Atlas-4, service may still switch under load"
-                    : dropdown === "atlas-mini"
-                      ? "dropdown asks for Atlas Mini, service may still switch under load"
-                      : "no model chosen, the service picks under load",
+                detail: "no model chosen, the service picks under load",
                 verdict: "WOULD SWITCH",
                 tone: "warn",
                 glyph: GLYPH.warn,
               };
 
-  const fallback: ReceiptRow = compiled.passed
+  // Goal two: rather than substitute, the request fails.
+  const fallbackMet = compiled.passed || forceModel;
+
+  const fallback: ReceiptRow = fallbackMet
     ? {
         label: "If Atlas-4 is unavailable",
-        detail: "the request fails, no substitute",
-        verdict: "FAILS INSTEAD OF SWITCHING",
+        detail: compiled.passed
+          ? "the request fails, no substitute"
+          : "the request fails, the model choice is enforced",
+        verdict: "GOAL MET",
         tone: "ok",
         glyph: GLYPH.ok,
       }
@@ -94,5 +99,5 @@ export function receiptRows(
         glyph: GLYPH.bad,
       };
 
-  return [model, fallback];
+  return { rows: [model, fallback], passed: modelMet && fallbackMet };
 }

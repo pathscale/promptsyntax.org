@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web";
 import { createSignal, For, Show } from "solid-js";
 import VignetteTask, { type TaskResult } from "~/components/VignetteTask";
 
-const STUDY_VERSION = "micro-2";
+const STUDY_VERSION = "micro-3";
 
 type Step = "consent" | "background" | "instructions" | "task" | "done";
 

@@ -2,23 +2,29 @@ import { Button } from "@pathscale/ui";
 import type { JSX } from "@solidjs/web";
 import { createMemo, createSignal, For, Show } from "solid-js";
 import PromptComposer, { type ComposerModel } from "~/components/PromptComposer";
-import { receiptRows } from "~/lib/receipt";
+import { receiptState } from "~/lib/receipt";
 import { compileVignette } from "~/lib/vignette";
 
 export const INITIAL_PROMPT = "Summarize the attached Q3 report. Keep it concise.";
 
-export type InputMethod = "chips" | "typed" | "mixed";
+/**
+ * How the two goals were satisfied. Either route is a pass, and which one a
+ * participant reached for is the interesting part of the result.
+ */
+export type SolvedVia = "settings" | "prompt" | "both" | "unsolved";
 
 /** Result of one run of the task, independent of the surrounding flow. */
 export type TaskResult = {
   passed: boolean;
   attempts: number;
   ms_elapsed: number;
-  input_method: InputMethod;
+  solved_via: SolvedVia;
   final_text: string;
   canonical_form: string;
   errors_seen_count: number;
+  /** The composer's state at completion. Both decide a goal. */
   dropdown_final: ComposerModel;
+  force_model_final: boolean;
 };
 
 type VignetteTaskProps = {
@@ -31,9 +37,9 @@ type VignetteTaskProps = {
 /**
  * The hands-on task: scenario, composer, receipt and check button.
  *
- * Scoring is delegated entirely to `compileVignette`, which reads the prompt
- * text and nothing else. The composer's model pill and toggles are ordinary
- * controls that do not reach it.
+ * Two goals, one receipt row each, and two routes to each: set it in the
+ * composer, or write it into the request. The check agrees with the receipt by
+ * construction, since both read the same state.
  */
 function VignetteTask(props: VignetteTaskProps): JSX.Element {
   const startedAt = performance.now();
@@ -53,8 +59,20 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
     return value;
   });
 
-  const rows = createMemo(() => receiptRows(compiled(), model(), forceModel()));
+  const receipt = createMemo(() => receiptState(compiled(), model(), forceModel()));
+  const rows = () => receipt().rows;
   const solved = () => solvedAt() !== null;
+
+  // The prompt alone passes when the compiler says so; the settings alone pass
+  // when both widgets are set. Recording which route was taken is the point of
+  // the field: a pass by settings and a pass by syntax are different results.
+  const solvedVia = (): SolvedVia => {
+    if (!solved()) return "unsolved";
+    const byPrompt = compiled().passed;
+    const bySettings = model() === "atlas-4" && forceModel();
+    if (byPrompt && bySettings) return "both";
+    return byPrompt ? "prompt" : "settings";
+  };
 
   const emit = (passed: boolean): void => {
     if (done()) return;
@@ -65,11 +83,12 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
       // Measured to the passing check, so the time reflects solving the task
       // rather than how long the completion screen sat on someone's monitor.
       ms_elapsed: Math.round((solvedAt() ?? performance.now()) - startedAt),
-      input_method: "typed",
+      solved_via: solvedVia(),
       final_text: text(),
       canonical_form: compiled().canonicalForm,
       errors_seen_count: errorsSeen.size,
       dropdown_final: model(),
+      force_model_final: forceModel(),
     });
   };
 
@@ -81,7 +100,7 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
     setAttempts((count) => count + 1);
     queueMicrotask(() => {
       setChecked(true);
-      if (compiled().passed) setSolvedAt(performance.now());
+      if (receipt().passed) setSolvedAt(performance.now());
     });
   };
 
@@ -140,7 +159,7 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
                 class={[
                   "vignette-receipt-row",
                   `is-${row.tone}`,
-                  checked() && !compiled().passed && row.tone !== "ok" ? "is-flagged" : "",
+                  checked() && !receipt().passed && row.tone !== "ok" ? "is-flagged" : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
@@ -150,7 +169,7 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
                 <b>
                   <span aria-hidden="true">{row.glyph}</span> {row.verdict}
                 </b>
-                <Show when={checked() && !compiled().passed && row.tone !== "ok"}>
+                <Show when={checked() && !receipt().passed && row.tone !== "ok"}>
                   <span class="sr-only">This row does not match the goal.</span>
                 </Show>
               </div>
