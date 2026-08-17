@@ -233,10 +233,14 @@ function StudyPage(): JSX.Element {
           <div class="study-card">
             <h1 class="study-title">2 Minute Research Survey</h1>
             <ul class="study-bullets">
-              <li>Look at two screenshots, answer one question about each.</li>
-              <li>Recorded: your taps only. No name, no email, nothing typed.</li>
-              <li>Voluntary. Close the tab any time.</li>
-              <li>You get a code at the end; send it back where you were invited.</li>
+              <li>Look at two example screens from an AI app.</li>
+              <li>Answer a few quick questions.</li>
+              <li>Recorded: your selected choices only.</li>
+              <li>No name, no email, nothing typed.</li>
+              <li>Voluntary.</li>
+              <li>Close the tab any time.</li>
+              <li>You get a code at the end.</li>
+              <li>Send it back where you were invited.</li>
             </ul>
 
             <label class={consented() ? "study-consent is-picked" : "study-consent"}>
