@@ -55,63 +55,32 @@ const FORM_CODE_FIELD = "entry.1893891965";
 type SubmitState = "idle" | "sending" | "sent" | "failed";
 
 /**
- * Post the code to the form, the way a browser posts a form.
+ * Post the code to the form.
  *
- * `fetch` was the obvious choice and the wrong one: even in `no-cors` mode it
- * rejects when an extension or a privacy list blocks the request, which is a
- * common enough setup that participants were landing on the failure screen with
- * a working connection. A real form submission targeting a hidden iframe is
- * ordinary top level navigation inside that frame, so it goes through where the
- * background request does not.
+ * The site's own policy decides which of these can run, which is why there are
+ * two. A `connect-src` allowance for the form host makes the `fetch` work; a
+ * policy that permits framing and form posts instead would suit a hidden form,
+ * and one that permits neither blocks the send entirely, whatever the code
+ * does. `fetch` is the narrower requirement of the two, so it is the one worth
+ * having a policy for.
  *
- * The reply is still unreadable across origins, so this resolves once the frame
- * has loaded, meaning the post was delivered rather than accepted. The code
- * stays reachable on the last screen because of that gap.
+ * Google sends no CORS headers here, so the request goes out in `no-cors` mode
+ * and the reply is opaque: resolving means the request left the browser, not
+ * that Google recorded it. The code stays reachable on the last screen because
+ * of that gap.
  */
-function submitCode(code: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const frame = document.createElement("iframe");
-    frame.name = `study-sink-${Date.now()}`;
-    frame.style.display = "none";
-
-    const form = document.createElement("form");
-    form.action = FORM_ENDPOINT;
-    form.method = "POST";
-    form.target = frame.name;
-    form.style.display = "none";
-
-    const field = document.createElement("input");
-    field.type = "hidden";
-    field.name = FORM_CODE_FIELD;
-    field.value = code;
-    form.append(field);
-
-    const cleanup = (): void => {
-      window.clearTimeout(timer);
-      frame.remove();
-      form.remove();
-    };
-
-    // A blocked frame never fires `load`, so the wait is bounded rather than
-    // leaving the participant on a spinner.
-    const timer = window.setTimeout(() => {
-      cleanup();
-      reject(new Error("Timed out submitting the response."));
-    }, 8000);
-
-    // The frame reports `load` as soon as the confirmation page paints. Tearing
-    // it down in that same tick has cancelled the request in the past, so the
-    // teardown waits a beat.
-    frame.addEventListener("load", () => {
-      window.setTimeout(() => {
-        cleanup();
-        resolve();
-      }, 400);
-    });
-
-    document.body.append(frame, form);
-    form.submit();
-  });
+async function submitCode(code: string): Promise<void> {
+  const body = new FormData();
+  body.append(FORM_CODE_FIELD, code);
+  try {
+    await fetch(FORM_ENDPOINT, { method: "POST", mode: "no-cors", body });
+  } catch (error) {
+    // `sendBeacon` is a different path through the network stack and is not
+    // governed by `connect-src`, so it sometimes lands when `fetch` is refused.
+    // It reports only whether the send was queued.
+    if (navigator.sendBeacon?.(FORM_ENDPOINT, body)) return;
+    throw error;
+  }
 }
 
 function completionCode(payload: StudyPayload): string {
