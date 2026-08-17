@@ -1,23 +1,42 @@
 import { Button } from "@pathscale/ui";
 import type { JSX } from "@solidjs/web";
-import { createSignal, For, Show } from "solid-js";
-import VignetteTask, { type TaskResult } from "~/components/VignetteTask";
+import { createSignal, For, onCleanup, Show } from "solid-js";
 
-const STUDY_VERSION = "micro-3";
+const STUDY_VERSION = "micro-5";
 
-type Step = "consent" | "background" | "instructions" | "task" | "done";
+/** Four pages, one question each. `done` reveals the code. */
+type Page = "consent" | "shot_first" | "shot_second" | "closing" | "done";
 
 type UsageAnswer = "Most days" | "Most weeks" | "Less often" | "Never";
-type NotationAnswer = "Yes" | "No" | "Not sure";
+type HeardAnswer = "Yes" | "No" | "Not sure";
+type ModelAnswer = "Atlas-4" | "Atlas Mini" | "I can't tell";
+type PreferenceAnswer = "Yes" | "No" | "Don't care";
+type WouldWriteAnswer = "Yes" | "No" | "I don't know";
+type Order = "plain_first" | "receipt_first";
 
 const USAGE_OPTIONS: UsageAnswer[] = ["Most days", "Most weeks", "Less often", "Never"];
-const NOTATION_OPTIONS: NotationAnswer[] = ["Yes", "No", "Not sure"];
+const HEARD_OPTIONS: HeardAnswer[] = ["Yes", "No", "Not sure"];
+const MODEL_OPTIONS: ModelAnswer[] = ["Atlas-4", "Atlas Mini", "I can't tell"];
+const PREFERENCE_OPTIONS: PreferenceAnswer[] = ["Yes", "No", "Don't care"];
+const WOULD_WRITE_OPTIONS: WouldWriteAnswer[] = ["Yes", "No", "I don't know"];
 
-/** The task result plus the study-only fields, encoded into the completion code. */
-type StudyPayload = TaskResult & {
-  q1_usage: UsageAnswer;
-  q2_heard_of_notation: NotationAnswer;
+const USER_MESSAGE = "Summarize the attached Q3 report. Keep it concise.";
+const ASSISTANT_LINES = [
+  "Q3 revenue rose 12% quarter over quarter, led by renewals in the enterprise tier.",
+  "Support costs fell slightly, while headcount and infrastructure spend stayed flat.",
+];
+
+/** Exactly the fields the completion code carries. */
+type StudyPayload = {
   consent: true;
+  q1_usage: UsageAnswer;
+  q2_heard_of_notation: HeardAnswer;
+  order: Order;
+  answer_plain: ModelAnswer;
+  answer_receipt: ModelAnswer;
+  answer_preference: PreferenceAnswer;
+  answer_would_write: WouldWriteAnswer;
+  ms_elapsed_total: number;
   study_version: typeof STUDY_VERSION;
 };
 
@@ -28,36 +47,142 @@ function completionCode(payload: StudyPayload): string {
   return btoa(binary);
 }
 
+/** One coin flip per participant, decided on load and recorded with the answers. */
+function coinFlip(): Order {
+  return Math.random() < 0.5 ? "plain_first" : "receipt_first";
+}
+
+/**
+ * The chat mock: a picture made of DOM, nothing interactive.
+ *
+ * The plain variant is this and nothing else, so the participant has no way to
+ * know which model answered. The receipt variant adds one card under the
+ * assistant bubble, which is the entire difference being measured.
+ */
+function ChatMock(props: { withReceipt: boolean }): JSX.Element {
+  return (
+    <div class="shot">
+      <div class="shot-bubble shot-bubble-user">{USER_MESSAGE}</div>
+
+      <div class="shot-composer">
+        <span class="shot-composer-text">Message Atlas</span>
+        <span class="shot-composer-model">
+          Atlas-4 <span aria-hidden="true">▾</span>
+        </span>
+      </div>
+
+      <div class="shot-bubble shot-bubble-assistant">
+        <p>{ASSISTANT_LINES[0]}</p>
+        <p>{ASSISTANT_LINES[1]}</p>
+      </div>
+
+      <Show when={props.withReceipt}>
+        <div class="shot-receipt">
+          <p class="shot-receipt-title">Execution receipt</p>
+          <p>Requested: Atlas-4</p>
+          <p>Ran: Atlas Mini (capacity)</p>
+        </div>
+      </Show>
+    </div>
+  );
+}
+
+/** A question with big tap targets. One per page. */
+function Choice<T extends string>(props: {
+  legend: string;
+  name: string;
+  options: readonly T[];
+  value: T | null;
+  onSelect: (value: T) => void;
+}): JSX.Element {
+  return (
+    <fieldset class="ask">
+      <legend class="ask-legend">{props.legend}</legend>
+      <div class="ask-options">
+        <For each={props.options}>
+          {(option) => (
+            <label class={props.value === option ? "ask-option is-picked" : "ask-option"}>
+              <input
+                type="radio"
+                name={props.name}
+                value={option}
+                checked={props.value === option}
+                onChange={() => props.onSelect(option)}
+              />
+              <span>{option}</span>
+            </label>
+          )}
+        </For>
+      </div>
+    </fieldset>
+  );
+}
+
 function StudyPage(): JSX.Element {
-  const [step, setStep] = createSignal<Step>("consent");
+  const startedAt = performance.now();
+
+  // The site wide tab title names the project, which a participant would read
+  // in the browser tab. Neutral while the study is open, restored on the way
+  // out so no other page is affected.
+  const siteTitle = document.title;
+  document.title = "Research survey";
+  onCleanup(() => {
+    document.title = siteTitle;
+  });
+
+  const [page, setPage] = createSignal<Page>("consent");
   const [consented, setConsented] = createSignal(false);
   const [usage, setUsage] = createSignal<UsageAnswer | null>(null);
-  const [notation, setNotation] = createSignal<NotationAnswer | null>(null);
+  const [heard, setHeard] = createSignal<HeardAnswer | null>(null);
+
+  const order = coinFlip();
+  const firstIsPlain = order === "plain_first";
+  const [firstAnswer, setFirstAnswer] = createSignal<ModelAnswer | null>(null);
+  const [secondAnswer, setSecondAnswer] = createSignal<ModelAnswer | null>(null);
+
+  const [preference, setPreference] = createSignal<PreferenceAnswer | null>(null);
+  const [wouldWrite, setWouldWrite] = createSignal<WouldWriteAnswer | null>(null);
+
   const [payload, setPayload] = createSignal<StudyPayload | null>(null);
   const [copied, setCopied] = createSignal(false);
 
-  const complete = (result: TaskResult): void => {
-    const answered = usage();
-    const heard = notation();
-    if (!answered || !heard) return;
+  // The two screenshot answers are stored by position, then read back by
+  // variant, so a flipped order never mislabels which condition was answered.
+  const plainAnswer = (): ModelAnswer | null => (firstIsPlain ? firstAnswer() : secondAnswer());
+  const receiptAnswer = (): ModelAnswer | null => (firstIsPlain ? secondAnswer() : firstAnswer());
+
+  const consentReady = (): boolean => consented() && usage() !== null && heard() !== null;
+
+  const finish = (): void => {
+    const plain = plainAnswer();
+    const receipt = receiptAnswer();
+    const usageAnswer = usage();
+    const heardAnswer = heard();
+    const preferenceAnswer = preference();
+    const wouldWriteAnswer = wouldWrite();
+    if (!plain || !receipt || !usageAnswer || !heardAnswer) return;
+    if (!preferenceAnswer || !wouldWriteAnswer) return;
     setPayload({
-      ...result,
-      q1_usage: answered,
-      q2_heard_of_notation: heard,
       consent: true,
+      q1_usage: usageAnswer,
+      q2_heard_of_notation: heardAnswer,
+      order,
+      answer_plain: plain,
+      answer_receipt: receipt,
+      answer_preference: preferenceAnswer,
+      answer_would_write: wouldWriteAnswer,
+      ms_elapsed_total: Math.round(performance.now() - startedAt),
       study_version: STUDY_VERSION,
     });
-    setStep("done");
+    setPage("done");
   };
 
   /**
    * Copy the code, and say so even when the clipboard refuses.
    *
    * `navigator.clipboard` is unavailable without a secure context and can
-   * reject on a permission prompt. Awaiting it before confirming meant a
-   * rejection left the button with neither label, so the participant lost the
-   * one instruction on the screen. Selecting the field always works, so the
-   * fallback leaves the code ready for a manual copy.
+   * reject on a permission prompt. Confirming first means a rejection still
+   * leaves the button labelled, and the field is selected for a manual copy.
    */
   const copyCode = async (): Promise<void> => {
     const current = payload();
@@ -67,166 +192,168 @@ function StudyPage(): JSX.Element {
     try {
       await navigator.clipboard?.writeText(code);
     } catch {
-      const field = document.querySelector<HTMLInputElement>("#study-completion-code");
+      const field = document.querySelector<HTMLInputElement>("#study-code");
       field?.select();
     }
   };
 
+  const shotPage = (
+    withReceipt: boolean,
+    value: () => ModelAnswer | null,
+    onSelect: (answer: ModelAnswer) => void,
+    name: string,
+    onNext: () => void,
+  ): JSX.Element => (
+    <div class="study-card">
+      <ChatMock withReceipt={withReceipt} />
+      <Choice
+        legend="Which model wrote this answer?"
+        name={name}
+        options={MODEL_OPTIONS}
+        value={value()}
+        onSelect={onSelect}
+      />
+      <Button
+        type="button"
+        variant="solid"
+        flavor="primary"
+        class="study-next"
+        state={value() === null ? "disabled" : "default"}
+        onClick={onNext}
+      >
+        Next
+      </Button>
+    </div>
+  );
+
   return (
-    <div class="vignette-page">
-      <section class="vignette-shell" aria-labelledby="study-title">
-        <header class="vignette-header">
-          <h1 id="study-title">Research study</h1>
-        </header>
+    <div class="study-page">
+      <div class="study-shell">
+        <Show when={page() === "consent"}>
+          <div class="study-card">
+            <h1 class="study-title">2 Minute Research Survey</h1>
+            <ul class="study-bullets">
+              <li>Look at two screenshots, answer one question about each.</li>
+              <li>Recorded: your taps only. No name, no email, nothing typed.</li>
+              <li>Voluntary. Close the tab any time.</li>
+              <li>You get a code at the end; send it back where you were invited.</li>
+            </ul>
 
-        <Show when={step() === "consent"}>
-          <div class="vignette-card">
-            <section aria-labelledby="consent-title">
-              <h2 id="consent-title">5 Minute Research Survey</h2>
-              <ul class="study-bullets">
-                <li>One hands-on editing task in your browser, about 5 minutes, no time limit.</li>
-                <li>
-                  Recorded: your two answers, task outcome, attempts, time, and the final text you
-                  write.
-                </li>
-                <li>No name, email, or account. Nothing is sent anywhere by this page.</li>
-                <li>
-                  You get a completion code at the end; only what you send back reaches the study.
-                </li>
-                <li>Voluntary. Close the tab any time and nothing is recorded.</li>
-                <li>You will be told what the study is about after you finish.</li>
-              </ul>
-              <label class="study-consent">
-                <input
-                  type="checkbox"
-                  checked={consented()}
-                  onChange={(event) => setConsented(event.currentTarget.checked)}
-                />
-                <span>I agree to take part.</span>
-              </label>
-            </section>
-            <div class="vignette-actions">
-              <Button
-                type="button"
-                variant="solid"
-                flavor="primary"
-                state={consented() ? "default" : "disabled"}
-                onClick={() => setStep("background")}
-              >
-                Begin
-              </Button>
-            </div>
+            <label class={consented() ? "study-consent is-picked" : "study-consent"}>
+              <input
+                type="checkbox"
+                checked={consented()}
+                onChange={(event) => setConsented(event.currentTarget.checked)}
+              />
+              <span>I agree to take part.</span>
+            </label>
+
+            <Choice
+              legend="How often do you use AI?"
+              name="q1_usage"
+              options={USAGE_OPTIONS}
+              value={usage()}
+              onSelect={setUsage}
+            />
+
+            <Choice
+              legend="Had you heard of structured prompt notations before today?"
+              name="q2_heard"
+              options={HEARD_OPTIONS}
+              value={heard()}
+              onSelect={setHeard}
+            />
+
+            <Button
+              type="button"
+              variant="solid"
+              flavor="primary"
+              class="study-next"
+              state={consentReady() ? "default" : "disabled"}
+              onClick={() => setPage("shot_first")}
+            >
+              Start
+            </Button>
           </div>
         </Show>
 
-        <Show when={step() === "background"}>
-          <div class="vignette-card">
-            <fieldset class="study-question">
-              <legend>How often do you use AI?</legend>
-              <For each={USAGE_OPTIONS}>
-                {(option) => (
-                  <label class="study-option">
-                    <input
-                      type="radio"
-                      name="q1_usage"
-                      value={option}
-                      checked={usage() === option}
-                      onChange={() => setUsage(option)}
-                    />
-                    <span>{option}</span>
-                  </label>
-                )}
-              </For>
-            </fieldset>
+        <Show when={page() === "shot_first"}>
+          {shotPage(!firstIsPlain, firstAnswer, setFirstAnswer, "shot_first", () =>
+            setPage("shot_second"),
+          )}
+        </Show>
 
-            <fieldset class="study-question">
-              <legend>
-                Before today, had you used or read about a structured prompt notation?
-              </legend>
-              <For each={NOTATION_OPTIONS}>
-                {(option) => (
-                  <label class="study-option">
-                    <input
-                      type="radio"
-                      name="q2_heard_of_notation"
-                      value={option}
-                      checked={notation() === option}
-                      onChange={() => setNotation(option)}
-                    />
-                    <span>{option}</span>
-                  </label>
-                )}
-              </For>
-            </fieldset>
+        <Show when={page() === "shot_second"}>
+          {shotPage(firstIsPlain, secondAnswer, setSecondAnswer, "shot_second", () =>
+            setPage("closing"),
+          )}
+        </Show>
 
-            <div class="vignette-actions">
-              <Button
-                type="button"
-                variant="solid"
-                flavor="primary"
-                state={usage() === null || notation() === null ? "disabled" : "default"}
-                onClick={() => setStep("instructions")}
-              >
-                Continue
-              </Button>
+        <Show when={page() === "closing"}>
+          <div class="study-card">
+            <Choice
+              legend="Should AI apps show you this kind of receipt?"
+              name="preference"
+              options={PREFERENCE_OPTIONS}
+              value={preference()}
+              onSelect={setPreference}
+            />
+
+            {/*
+              The only notation in the whole flow, and it appears here only,
+              after both screenshot answers are locked, so seeing it cannot
+              colour what the participant already answered.
+            */}
+            <div class="study-imagine">
+              <p>Imagine typing this in your message gave you exact control over the AI:</p>
+              <pre class="study-snippet">&lt;ps&gt;@atlas-4 else fail&lt;/ps&gt;</pre>
             </div>
+
+            <Choice
+              legend="Would you ever write something like that yourself?"
+              name="would_write"
+              options={WOULD_WRITE_OPTIONS}
+              value={wouldWrite()}
+              onSelect={setWouldWrite}
+            />
+
+            <Button
+              type="button"
+              variant="solid"
+              flavor="primary"
+              class="study-next"
+              state={preference() === null || wouldWrite() === null ? "disabled" : "default"}
+              onClick={finish}
+            >
+              Finish
+            </Button>
           </div>
         </Show>
 
-        <Show when={step() === "instructions"}>
-          <div class="vignette-card">
-            <section aria-labelledby="instructions-title">
-              <h2 id="instructions-title">The hands-on task</h2>
-              <ul class="study-bullets">
-                <li>Please read carefully.</li>
-                <li>Change the request so it does exactly what is asked.</li>
-                <li>No time limit.</li>
-              </ul>
-            </section>
-            <div class="vignette-actions">
-              <Button
-                type="button"
-                variant="solid"
-                flavor="primary"
-                onClick={() => setStep("task")}
-              >
-                Start the task
-              </Button>
-            </div>
-          </div>
-        </Show>
-
-        <Show when={step() === "task"}>
-          <VignetteTask onComplete={complete} hideHeader />
-        </Show>
-
-        <Show when={step() === "done" ? payload() : null} keyed>
+        <Show when={page() === "done" ? payload() : null} keyed>
           {(current) => (
-            <div class="vignette-card">
-              <section class="vignette-complete" aria-live="polite">
-                <h2>Task complete</h2>
-                <ul class="study-bullets">
-                  <li>Copy the completion code below.</li>
-                  <li>Send it back in the same chat where you were invited.</li>
-                  <li>That is the last step. Thank you.</li>
-                </ul>
-                <label for="study-completion-code">Completion code</label>
-                <div>
-                  <input
-                    id="study-completion-code"
-                    readonly
-                    value={completionCode(current)}
-                    onFocus={(event) => event.currentTarget.select()}
-                  />
-                  <button type="button" onClick={() => void copyCode()}>
-                    {copied() ? "Copied" : "Copy"}
-                  </button>
-                </div>
-              </section>
+            <div class="study-card" aria-live="polite">
+              <h1 class="study-title">Done. Thank you.</h1>
+              <ul class="study-bullets">
+                <li>Copy the code below.</li>
+                <li>Send it back in the same chat where you were invited.</li>
+              </ul>
+
+              <div class="study-code">
+                <input
+                  id="study-code"
+                  readonly
+                  value={completionCode(current)}
+                  onFocus={(event) => event.currentTarget.select()}
+                />
+                <button type="button" class="study-copy" onClick={() => void copyCode()}>
+                  {copied() ? "Copied" : "Copy"}
+                </button>
+              </div>
             </div>
           )}
         </Show>
-      </section>
+      </div>
     </div>
   );
 }
