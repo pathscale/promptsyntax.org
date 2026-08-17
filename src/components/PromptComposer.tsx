@@ -3,9 +3,10 @@ import { For, Show } from "solid-js";
 import PillMenu from "~/components/PillMenu";
 import { VIGNETTE_PARSER } from "~/lib/vignette";
 
-export type ComposerModel = "atlas-4" | "atlas-mini";
+export type ComposerModel = "default" | "atlas-4" | "atlas-mini";
 
 const MODEL_OPTIONS = [
+  { value: "default" as const, label: "Default", hint: "The service decides" },
   { value: "atlas-4" as const, label: "Atlas-4", hint: "The precise model" },
   { value: "atlas-mini" as const, label: "Atlas Mini", hint: "Smaller and faster" },
 ];
@@ -20,7 +21,6 @@ type PromptComposerProps = {
   onForceModelChange: (on: boolean) => void;
   concise: boolean;
   onConciseChange: (on: boolean) => void;
-  editorRef: (element: HTMLTextAreaElement) => void;
 };
 
 /**
@@ -71,7 +71,6 @@ function PromptComposer(props: PromptComposerProps): JSX.Element {
         <textarea
           ref={(element: HTMLTextAreaElement) => {
             editor = element;
-            props.editorRef(element);
           }}
           class="composer-input"
           aria-label="Prompt"
@@ -93,11 +92,14 @@ function PromptComposer(props: PromptComposerProps): JSX.Element {
         <div class="composer-cluster">
           <button
             type="button"
-            class={props.forceModel ? "composer-toggle is-on" : "composer-toggle"}
-            aria-pressed={props.forceModel ? "true" : "false"}
-            onClick={() => props.onForceModelChange(!props.forceModel)}
+            class={props.concise ? "composer-toggle is-on" : "composer-toggle"}
+            aria-pressed={props.concise ? "true" : "false"}
+            onClick={() => props.onConciseChange(!props.concise)}
           >
-            Force this Model
+            <span aria-hidden="true" class="composer-spark">
+              ✦
+            </span>
+            Concise
           </button>
 
           <button type="button" class="composer-icon" aria-label="Attach a file">
@@ -112,14 +114,11 @@ function PromptComposer(props: PromptComposerProps): JSX.Element {
         <div class="composer-cluster composer-cluster-end">
           <button
             type="button"
-            class={props.concise ? "composer-toggle is-on" : "composer-toggle"}
-            aria-pressed={props.concise ? "true" : "false"}
-            onClick={() => props.onConciseChange(!props.concise)}
+            class={props.forceModel ? "composer-toggle is-on" : "composer-toggle"}
+            aria-pressed={props.forceModel ? "true" : "false"}
+            onClick={() => props.onForceModelChange(!props.forceModel)}
           >
-            <span aria-hidden="true" class="composer-spark">
-              ✦
-            </span>
-            Concise
+            Force this Model
           </button>
 
           <PillMenu

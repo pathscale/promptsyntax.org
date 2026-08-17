@@ -39,16 +39,13 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
   const startedAt = performance.now();
   const [text, setText] = createSignal(INITIAL_PROMPT);
   const [attempts, setAttempts] = createSignal(0);
-  const [typed, setTyped] = createSignal(false);
-  const [usedChip, setUsedChip] = createSignal(false);
   const [done, setDone] = createSignal(false);
   const [checked, setChecked] = createSignal(false);
   const [solvedAt, setSolvedAt] = createSignal<number | null>(null);
-  const [model, setModel] = createSignal<ComposerModel>("atlas-4");
+  const [model, setModel] = createSignal<ComposerModel>("default");
   const [forceModel, setForceModel] = createSignal(false);
   const [concise, setConcise] = createSignal(true);
   const errorsSeen = new Set<string>();
-  let editor!: HTMLTextAreaElement;
 
   const compiled = createMemo(() => {
     const value = compileVignette(text());
@@ -59,11 +56,6 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
   const rows = createMemo(() => receiptRows(compiled(), model(), forceModel()));
   const solved = () => solvedAt() !== null;
 
-  const inputMethod = (): InputMethod => {
-    if (typed() && usedChip()) return "mixed";
-    return usedChip() ? "chips" : "typed";
-  };
-
   const emit = (passed: boolean): void => {
     if (done()) return;
     setDone(true);
@@ -73,7 +65,7 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
       // Measured to the passing check, so the time reflects solving the task
       // rather than how long the completion screen sat on someone's monitor.
       ms_elapsed: Math.round((solvedAt() ?? performance.now()) - startedAt),
-      input_method: inputMethod(),
+      input_method: "typed",
       final_text: text(),
       canonical_form: compiled().canonicalForm,
       errors_seen_count: errorsSeen.size,
@@ -99,38 +91,6 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
     setSolvedAt(null);
   };
 
-  const insertAtCursor = (syntax: string): void => {
-    const start = editor.selectionStart;
-    const end = editor.selectionEnd;
-    const before = text().slice(0, start);
-    const after = text().slice(end);
-    const leading = before.length > 0 && !/\s$/u.test(before) ? " " : "";
-    const trailing = after.length > 0 && !/^\s/u.test(after) ? " " : "";
-    const inserted = `${leading}${syntax}${trailing}`;
-    editText(`${before}${inserted}${after}`);
-    setUsedChip(true);
-    queueMicrotask(() => {
-      const cursor = start + inserted.length;
-      editor.focus();
-      editor.setSelectionRange(cursor, cursor);
-    });
-  };
-
-  const validation = (): { tone: "neutral" | "error"; text: string } => {
-    // A prompt that pins nothing is not malformed, it is just unfinished, and
-    // the compiler says so through the same channel as a real syntax error.
-    // The receipt is where that case is answered, so this line stays neutral.
-    if (compiled().steps.length === 0) {
-      const real = compiled().errors.filter((error) => !error.startsWith("No model is fixed"));
-      if (real.length > 0) return { tone: "error", text: real.join(" ") };
-      return { tone: "neutral", text: "No routing instructions recognized yet." };
-    }
-    if (compiled().errors.length > 0) {
-      return { tone: "error", text: compiled().errors.join(" ") };
-    }
-    return { tone: "neutral", text: "Recognized. Check the receipt." };
-  };
-
   return (
     <>
       <Show when={!props.hideHeader}>
@@ -144,7 +104,7 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
       <div class="vignette-card">
         <ul class="vignette-behavior study-bullets">
           <li>You have important work and the service is busy.</li>
-          <li>The model is already selected below.</li>
+          <li>The default model is selected below.</li>
           <li>Without asking, the service may silently switch to a smaller model.</li>
         </ul>
 
@@ -160,39 +120,14 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
 
           <PromptComposer
             value={text()}
-            onValueChange={(next) => {
-              editText(next);
-              setTyped(true);
-            }}
+            onValueChange={editText}
             model={model()}
             onModelChange={setModel}
             forceModel={forceModel()}
             onForceModelChange={setForceModel}
             concise={concise()}
             onConciseChange={setConcise}
-            editorRef={(element) => {
-              editor = element;
-            }}
           />
-
-          <div class={`vignette-validation is-${validation().tone}`} aria-live="polite">
-            {validation().text}
-          </div>
-
-          <fieldset class="vignette-chips" aria-label="Insert prompt controls">
-            <button type="button" onClick={() => insertAtCursor("@atlas-4!")}>
-              Use the precise model
-            </button>
-            <button type="button" onClick={() => insertAtCursor("else fail")}>
-              Fail instead of switching
-            </button>
-            <button type="button" onClick={() => insertAtCursor("else @atlas-mini")}>
-              Add a fallback model
-            </button>
-          </fieldset>
-          <p class="vignette-chips-caption">
-            Shortcuts insert the syntax for you. Typing works too.
-          </p>
         </section>
 
         <section class="vignette-receipt" aria-labelledby="receipt-title">

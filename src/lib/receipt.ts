@@ -45,27 +45,38 @@ export function receiptRows(
             tone: "bad",
             glyph: GLYPH.bad,
           }
-        : forceModel
+        : // Both halves are needed: naming the model without holding it leaves
+          // the service free to switch, and holding an unnamed default holds
+          // nothing in particular.
+          forceModel && dropdown === "atlas-4"
           ? {
               label: "Model",
-              detail:
-                dropdown === "atlas-mini"
-                  ? "Atlas Mini, held by the model setting"
-                  : "Atlas-4, held by the model setting",
+              detail: "Atlas-4, held by the model setting",
               verdict: "GOAL MET",
               tone: "ok",
               glyph: GLYPH.ok,
             }
-          : {
-              label: "Model",
-              detail:
-                dropdown === "atlas-mini"
-                  ? "dropdown asks for Atlas Mini, service may still switch under load"
-                  : "dropdown asks for Atlas-4, service may still switch under load",
-              verdict: "WOULD SWITCH",
-              tone: "warn",
-              glyph: GLYPH.warn,
-            };
+          : forceModel && dropdown === "atlas-mini"
+            ? {
+                label: "Model",
+                detail: "Atlas Mini, held by the model setting",
+                verdict: "NOT WHAT THE GOAL ASKS",
+                tone: "bad",
+                glyph: GLYPH.bad,
+              }
+            : {
+                label: "Model",
+                detail: forceModel
+                  ? "the setting holds no particular model"
+                  : dropdown === "atlas-4"
+                    ? "dropdown asks for Atlas-4, service may still switch under load"
+                    : dropdown === "atlas-mini"
+                      ? "dropdown asks for Atlas Mini, service may still switch under load"
+                      : "no model chosen, the service picks under load",
+                verdict: "WOULD SWITCH",
+                tone: "warn",
+                glyph: GLYPH.warn,
+              };
 
   const fallback: ReceiptRow = compiled.passed
     ? {
