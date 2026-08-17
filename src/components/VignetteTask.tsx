@@ -93,10 +93,7 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
   };
 
   const check = (): void => {
-    if (solved()) {
-      emit(true);
-      return;
-    }
+    if (solved()) return;
     setAttempts((count) => count + 1);
     queueMicrotask(() => {
       setChecked(true);
@@ -179,7 +176,7 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
 
         <div class="vignette-actions">
           <Button type="button" variant="solid" flavor="primary" onClick={check}>
-            {solved() ? "Continue" : "Check my answer"}
+            Check my answer
           </Button>
 
           <Show when={attempts() > 0}>
@@ -202,6 +199,11 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
           <p class="vignette-banner is-ok" role="status">
             That does it. The receipt now matches the goal exactly.
           </p>
+          <div class="vignette-actions">
+            <Button type="button" variant="solid" flavor="primary" onClick={() => emit(true)}>
+              Continue
+            </Button>
+          </div>
         </Show>
       </div>
     </>

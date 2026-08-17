@@ -18,11 +18,18 @@ function VignettePage(): JSX.Element {
     window.parent.postMessage({ type: "ps-vignette-result", payload }, "*");
   };
 
+  /** Confirms first: a clipboard rejection must not leave the button blank. */
   const copyCode = async (): Promise<void> => {
     const payload = result();
     if (!payload) return;
-    await navigator.clipboard.writeText(completionCode(payload));
+    const code = completionCode(payload);
     setCopied(true);
+    try {
+      await navigator.clipboard?.writeText(code);
+    } catch {
+      const field = document.querySelector<HTMLInputElement>("#completion-code");
+      field?.select();
+    }
   };
 
   return (

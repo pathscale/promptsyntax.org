@@ -50,11 +50,26 @@ function StudyPage(): JSX.Element {
     setStep("done");
   };
 
+  /**
+   * Copy the code, and say so even when the clipboard refuses.
+   *
+   * `navigator.clipboard` is unavailable without a secure context and can
+   * reject on a permission prompt. Awaiting it before confirming meant a
+   * rejection left the button with neither label, so the participant lost the
+   * one instruction on the screen. Selecting the field always works, so the
+   * fallback leaves the code ready for a manual copy.
+   */
   const copyCode = async (): Promise<void> => {
     const current = payload();
     if (!current) return;
-    await navigator.clipboard.writeText(completionCode(current));
+    const code = completionCode(current);
     setCopied(true);
+    try {
+      await navigator.clipboard?.writeText(code);
+    } catch {
+      const field = document.querySelector<HTMLInputElement>("#study-completion-code");
+      field?.select();
+    }
   };
 
   return (
