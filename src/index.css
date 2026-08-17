@@ -582,14 +582,251 @@
   font-size: 0.72rem;
 }
 
+/*
+  Unlisted 4 page survey. Mobile first: sized for a 390px phone, with tap
+  targets a thumb can hit, and it only grows from there. Self contained, so the
+  older vignette rules below are untouched.
+*/
+.study-page {
+  min-height: 100%;
+  padding: 1.25rem 1rem 3rem;
+  background: var(--color-base-100);
+}
+
+.study-shell {
+  width: min(560px, 100%);
+  margin-inline: auto;
+}
+
+.study-card {
+  display: grid;
+  gap: 1.5rem;
+  border: 1px solid var(--color-base-300);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--color-base-200) 55%, var(--color-base-100));
+  padding: 1.25rem 1.1rem 1.4rem;
+}
+
+.study-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+/* A question and its options. */
+.ask {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.ask-legend {
+  padding: 0;
+  margin-bottom: 0.75rem;
+  font-weight: 650;
+  font-size: 1.02rem;
+  line-height: 1.35;
+}
+
+.ask-options {
+  display: grid;
+  gap: 0.55rem;
+}
+
+/*
+  Whole row is the tap target, not just the dot. 3rem clears the usual 44px
+  minimum with room to spare on a phone.
+*/
+.ask-option {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  gap: 0.7rem;
+  border: 1px solid var(--color-base-300);
+  border-radius: 0.7rem;
+  background: var(--color-base-100);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.98rem;
+  cursor: pointer;
+}
+
+.ask-option.is-picked {
+  border-color: var(--color-primary);
+  background: color-mix(in oklab, var(--color-primary) 10%, transparent);
+  font-weight: 600;
+}
+
+.ask-option input {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.study-next {
+  width: 100%;
+  min-height: 3rem;
+}
+
+/* The chat mock: a picture made of DOM. */
+.shot {
+  display: grid;
+  gap: 0.6rem;
+  border: 1px solid var(--color-base-300);
+  border-radius: 0.9rem;
+  background: var(--color-base-100);
+  padding: 0.85rem 0.8rem;
+}
+
+.shot-bubble {
+  border-radius: 0.9rem;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.shot-bubble-user {
+  justify-self: end;
+  max-width: 85%;
+  background: color-mix(in oklab, var(--color-primary) 15%, transparent);
+  border-bottom-right-radius: 0.25rem;
+}
+
+.shot-bubble-assistant {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 92%;
+  background: color-mix(in oklab, var(--color-base-200) 85%, transparent);
+  border-bottom-left-radius: 0.25rem;
+}
+
+.shot-bubble-assistant p {
+  margin: 0;
+}
+
+.shot-composer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  border: 1px solid var(--color-base-300);
+  border-radius: 999px;
+  padding: 0.45rem 0.5rem 0.45rem 0.9rem;
+}
+
+.shot-composer-text {
+  color: color-mix(in oklab, var(--color-base-content) 45%, transparent);
+  font-size: 0.85rem;
+}
+
+.shot-composer-model {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  border: 1px solid var(--color-base-300);
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+.shot-receipt {
+  display: grid;
+  gap: 0.25rem;
+  border: 1px solid color-mix(in oklab, var(--color-base-content) 30%, transparent);
+  border-radius: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  font-size: 0.82rem;
+}
+
+.shot-receipt p {
+  margin: 0;
+}
+
+.shot-receipt-title {
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+/* Page 4: the one snippet in the whole flow. */
+.study-imagine {
+  display: grid;
+  gap: 0.6rem;
+  font-size: 0.98rem;
+  line-height: 1.45;
+}
+
+.study-imagine p {
+  margin: 0;
+}
+
+.study-snippet {
+  overflow-x: auto;
+  margin: 0;
+  border: 1px solid var(--color-base-300);
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--color-base-200) 80%, transparent);
+  padding: 0.65rem 0.75rem;
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+}
+
+.study-code {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.study-code input {
+  width: 100%;
+  min-height: 3rem;
+  border: 1px solid var(--color-base-300);
+  border-radius: 0.6rem;
+  background: var(--color-base-100);
+  padding: 0.6rem 0.75rem;
+  color: var(--color-base-content);
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+}
+
+.study-copy {
+  min-height: 3rem;
+  border: 1px solid var(--color-primary);
+  border-radius: 0.6rem;
+  background: color-mix(in oklab, var(--color-primary) 12%, transparent);
+  color: var(--color-base-content);
+  font-weight: 650;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
 /* Unlisted study flow */
 .study-consent {
   display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  margin-top: 1.1rem;
+  min-height: 3rem;
+  align-items: center;
+  gap: 0.7rem;
+  border: 1px solid var(--color-base-300);
+  border-radius: 0.7rem;
+  background: var(--color-base-100);
+  padding: 0.6rem 0.9rem;
   cursor: pointer;
   font-weight: 600;
+}
+
+.study-consent.is-picked {
+  border-color: var(--color-primary);
+  background: color-mix(in oklab, var(--color-primary) 10%, transparent);
+}
+
+.study-consent input {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
 }
 
 .study-consent input,
