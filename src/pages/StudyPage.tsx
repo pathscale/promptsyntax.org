@@ -2,7 +2,7 @@ import { Button } from "@pathscale/ui";
 import type { JSX } from "@solidjs/web";
 import { createSignal, For, onCleanup, Show } from "solid-js";
 
-const STUDY_VERSION = "micro-5";
+const STUDY_VERSION = "micro-6";
 
 /** Four pages, one question each. `done` reveals the code. */
 type Page = "consent" | "shot_first" | "shot_second" | "closing" | "done";
@@ -36,9 +36,22 @@ type StudyPayload = {
   answer_receipt: ModelAnswer;
   answer_preference: PreferenceAnswer;
   answer_would_write: WouldWriteAnswer;
+  source: string;
   ms_elapsed_total: number;
   study_version: typeof STUDY_VERSION;
 };
+
+/**
+ * Recruitment channel tag from the invite link (?s=dm, ?s=li, ?s=yt).
+ *
+ * Sanitized to a short slug so nothing personal can ride in on the URL, and
+ * "unknown" when absent, so the field is always present and never identifying.
+ */
+function sourceTag(): string {
+  const raw = new URLSearchParams(window.location.search).get("s") ?? "";
+  const slug = raw.replace(/[^a-z0-9_-]/gi, "").slice(0, 16);
+  return slug === "" ? "unknown" : slug.toLowerCase();
+}
 
 /**
  * Where the finished code goes.
@@ -223,6 +236,7 @@ function StudyPage(): JSX.Element {
       answer_receipt: receipt,
       answer_preference: preferenceAnswer,
       answer_would_write: wouldWriteAnswer,
+      source: sourceTag(),
       ms_elapsed_total: Math.round(performance.now() - startedAt),
       study_version: STUDY_VERSION,
     };
