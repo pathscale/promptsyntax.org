@@ -21,6 +21,7 @@
         "noConsole": "warn"
       },
       "style": {
+        "useImportType": "off",
         "noNonNullAssertion": "off",
         "useConsistentArrayType": {
           "level": "error",
