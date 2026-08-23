@@ -51,7 +51,7 @@ anything.
 | [`schemas/`](./schemas/) | Normative JSON Schema for the Prompt Trace |
 | [`examples/`](./examples/) | Machine-validated example trace |
 | [`decisions/`](./decisions/) | Design decision records (with rejected alternatives) |
-| [`profiles/`](./profiles/) | Externalized mappings: vendor, oversight, policy bindings |
+| [`profiles/`](./profiles/) | Externalized mappings: vendor, oversight, policy bindings, trace transports |
 | [`conformance/`](./conformance/) | Language-independent requirements, vectors, schemas, reports, and Rust runner |
 
 ## Status

@@ -15,5 +15,6 @@
 | 11 | Policy systems | PEP/PDP seam + external bindings | Policy language in core | SPEC §10.4 |
 | 12 | Standing promotion (proposed) | Versioned, origin-bound declared authoring surfaces | Parse-all output; delimiter-only promotion; envelope widening | SPEC §13.2 |
 | 13 | Conformance baseline (proposed) | Spec-owned vectors, Rust tooling, explicit entity outcomes | Implementation-defined oracle; generic requested/applied mismatch | SPEC §4, §8, §12 |
+| 14 | Trace transports (proposed) | JSON information model + named transport profiles (first: TOON); integrity over canonical JSON | TOON as normative format; bespoke compact encoding; hashing transport bytes | SPEC §4, §12; profiles/transport/ |
 
 Full rationale: the spec's decision-record notes and the project's design documents.
