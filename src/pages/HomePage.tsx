@@ -182,6 +182,104 @@ const HomePage: Component = () => (
       </div>
     </section>
 
+    <section class="border-base-300 border-b">
+      <div class="py-16 content-container">
+        <span class="mb-4 inline-block rounded-full border border-base-300 px-3 py-1 text-secondary text-xs tracking-wide">
+          NEW PROPOSAL · DECISION 14
+        </span>
+        <h2 class="mb-2 font-bold text-[clamp(23px,3vw,30px)] tracking-tight">
+          A TOON transport for receipts
+        </h2>
+        <p class="mb-7 max-w-[760px] text-base-content/60 text-sm">
+          Receipts are read by models as much as by people: an agent running a loop re-reads its
+          receipts at every step, so their token cost is a recurring tax. The proposed transport
+          profile encodes the same receipt in{" "}
+          <a
+            class="underline decoration-base-content/30 hover:decoration-base-content"
+            href="https://github.com/toon-format/toon"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            TOON
+          </a>
+          , a compact, lossless serialization of JSON built for LLM contexts. Same receipt, fewer
+          tokens, nothing new to trust.
+        </p>
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="overflow-hidden rounded-2xl border border-base-300 bg-base-200">
+            <div class="border-base-300 border-b bg-base-300/60 px-4 py-2 font-semibold text-base-content/60 text-xs uppercase tracking-wider">
+              JSON · the normative model
+            </div>
+            <pre class="m-0 overflow-x-auto p-5 font-mono text-[13px] leading-[1.6]">
+              {`"bindings": [
+  { "ref": "@opus",
+    "bound": "model:vendor/opus-4-5@2026-05-01",
+    "rule": "namespace-search",
+    "ambiguity_surfaced": false },
+  { "ref": "@file:q3-report.md",
+    "bound": "file:ws/q3-report.md@v3",
+    "rule": "qualified-name",
+    "ambiguity_surfaced": false }
+]`}
+            </pre>
+          </div>
+          <div class="overflow-hidden rounded-2xl border border-base-300 bg-base-200">
+            <div class="border-base-300 border-b bg-base-300/60 px-4 py-2 font-semibold text-base-content/60 text-xs uppercase tracking-wider">
+              TOON · the proposed transport
+            </div>
+            <pre class="m-0 overflow-x-auto p-5 font-mono text-[13px] leading-[1.6]">
+              {`bindings[2]{ref,bound,rule,ambiguity_surfaced}:
+  "@opus","model:vendor/opus-4-5@2026-05-01","namespace-search",false
+  "@file:q3-report.md","file:ws/q3-report.md@v3","qualified-name",false`}
+            </pre>
+          </div>
+        </div>
+        <p class="mt-4 max-w-[760px] text-base-content/60 text-sm">
+          Uniform rows carry their field names once, in a header, instead of once per row. Published
+          TOON benchmarks report on the order of 40% fewer tokens than JSON on data shaped like
+          this; receipts and event stores are shaped like this. (Fragments illustrative; the
+          conformance fixtures define exact bytes.)
+        </p>
+        <ul class="m-0 mt-4 list-none p-0">
+          <li class="relative border-base-300 border-b py-2.5 pl-7 text-[15.5px] text-base-content/70 before:absolute before:left-0 before:text-primary before:content-['→']">
+            <b class="text-base-content">JSON stays the normative model.</b> A TOON receipt is
+            conformant only if it decodes to a schema-valid JSON receipt. No TOON-only fields, no
+            TOON-only meanings.
+          </li>
+          <li class="relative border-base-300 border-b py-2.5 pl-7 text-[15.5px] text-base-content/70 before:absolute before:left-0 before:text-primary before:content-['→']">
+            <b class="text-base-content">Integrity survives re-encoding.</b> Hashes and signatures
+            bind to canonical JSON bytes, never to transport bytes, so evidence does not depend on
+            which encoding carried it.
+          </li>
+          <li class="relative py-2.5 pl-7 text-[15.5px] text-base-content/70 before:absolute before:left-0 before:text-primary before:content-['→']">
+            <b class="text-base-content">Lossless, pinned, differential-tested.</b> One pinned TOON
+            version and encoder settings; the TypeScript and Rust encoders must agree byte-for-byte
+            on the golden fixtures.
+          </li>
+        </ul>
+        <div class="mt-7 flex flex-wrap gap-3">
+          <a
+            href={`${GITHUB_URL}/blob/master/profiles/transport/toon.md`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button variant="solid" flavor="primary" type="button">
+              Read the transport profile
+            </Button>
+          </a>
+          <a
+            href={`${GITHUB_URL}/blob/master/decisions/2026-08-23-toon-transport-profile-proposal.md`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button variant="outline" type="button">
+              Decision record
+            </Button>
+          </a>
+        </div>
+      </div>
+    </section>
+
     <section>
       <div class="py-16 content-container">
         <h2 class="mb-2 font-bold text-[clamp(23px,3vw,30px)] tracking-tight">
