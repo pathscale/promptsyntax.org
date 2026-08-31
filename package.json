@@ -19,15 +19,16 @@
   },
   "license": "CC-BY-4.0",
   "dependencies": {
-    "@pathscale/ui": "2.6.2",
+    "@pathscale/ui": "^2.11.9",
     "@solidjs/router": "2.0.0-next.16",
+    "@solidjs/web": "2.0.0-rc.4",
     "@standard-schema/spec": "^1.0.0",
     "clsx": "^2.1.1",
     "glob": "^11.0.3",
     "popmotion": "^11.0.5",
     "promptsyntax": "^0.1.0",
-    "solid-js": "2.0.0-rc.0",
-    "solid-layouts": "0.2.0",
+    "solid-js": "2.0.0-rc.4",
+    "solid-layouts": "^0.2.1",
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
@@ -37,13 +38,16 @@
     "@rsbuild/plugin-babel": "^1.0.5",
     "@tailwindcss/postcss": "^4.1.7",
     "@types/node": "^22.15.17",
-    "babel-preset-solid": "2.0.0-rc.0",
+    "babel-preset-solid": "^2.0.0-rc.0",
     "class-variance-authority": "^0.7.1",
     "compression-webpack-plugin": "^11.1.0",
     "cssnano": "^7.0.7",
     "fork-ts-checker-webpack-plugin": "^9.1.0",
-    "rsbuild-plugin-solid-layouts": "0.2.1",
+    "rsbuild-plugin-solid-layouts": "^0.2.1",
     "tailwindcss": "^4.0.7",
     "typescript": "^5.7.2"
+  },
+  "overrides": {
+    "babel-preset-solid": "^2.0.0-rc.0"
   }
 }
