@@ -1,6 +1,5 @@
-import { Navbar } from "@pathscale/ui";
+import { Button, Navbar } from "@pathscale/ui";
 import { useLocation } from "@solidjs/router";
-import clsx from "clsx";
 import type { Component } from "solid-js";
 import Logo from "~/components/Logo";
 import { GITHUB_URL, ROUTES } from "~/config/routes";
@@ -12,12 +11,6 @@ const SiteNavbar: Component = () => {
   const isActive = (path: string) =>
     path === ROUTES.HOME ? location.pathname === path : location.pathname.startsWith(path);
 
-  const navLinkClass = (path: string) =>
-    clsx("rounded px-3 py-1.5 font-medium text-sm transition-colors", {
-      "bg-base-200 text-base-content": isActive(path),
-      "text-base-content/70 hover:bg-base-200/60 hover:text-base-content": !isActive(path),
-    });
-
   return (
     <Navbar.Stack sticky class="top-0 z-20">
       <Navbar.Row bordered class="site-nav" padded={false}>
@@ -27,24 +20,33 @@ const SiteNavbar: Component = () => {
               <Logo class="text-base" />
             </a>
             <nav class="hidden items-center gap-1 sm:flex">
-              <a href={ROUTES.SPEC} class={navLinkClass(ROUTES.SPEC)}>
+              <Button
+                href={ROUTES.SPEC}
+                size="sm"
+                variant={isActive(ROUTES.SPEC) ? "soft" : "ghost"}
+              >
                 Specification
-              </a>
-              <a href={ROUTES.SYNTAX} class={navLinkClass(ROUTES.SYNTAX)}>
+              </Button>
+              <Button
+                href={ROUTES.SYNTAX}
+                size="sm"
+                variant={isActive(ROUTES.SYNTAX) ? "soft" : "ghost"}
+              >
                 Syntax reference
-              </a>
+              </Button>
             </nav>
           </Navbar.Start>
           <Navbar.End>
             <div class="flex items-center gap-1">
-              <a
+              <Button
                 href={GITHUB_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="rounded px-3 py-1.5 font-medium text-base-content/70 text-sm transition-colors hover:bg-base-200/60 hover:text-base-content"
+                size="sm"
+                variant="ghost"
               >
                 GitHub
-              </a>
+              </Button>
               <ThemeToggle />
             </div>
           </Navbar.End>

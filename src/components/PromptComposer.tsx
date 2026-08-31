@@ -1,3 +1,4 @@
+import { Button, Chip } from "@pathscale/ui";
 import type { JSX } from "@solidjs/web";
 import { For, Show } from "solid-js";
 import PillMenu from "~/components/PillMenu";
@@ -45,18 +46,15 @@ function PromptComposer(props: PromptComposerProps): JSX.Element {
     <div class="composer">
       <Show when={props.forceModel}>
         <div class="composer-attachments">
-          <span class="composer-chip">
-            <span aria-hidden="true">◆</span>
+          <Chip
+            variant="bordered"
+            size="sm"
+            startIcon={<span aria-hidden="true">◆</span>}
+            removeButtonLabel="Remove the enforced model choice"
+            onRemove={() => props.onForceModelChange(false)}
+          >
             Model choice enforced
-            <button
-              type="button"
-              class="composer-chip-remove"
-              aria-label="Remove the enforced model choice"
-              onClick={() => props.onForceModelChange(false)}
-            >
-              ×
-            </button>
-          </span>
+          </Chip>
         </div>
       </Show>
 
@@ -90,9 +88,12 @@ function PromptComposer(props: PromptComposerProps): JSX.Element {
       */}
       <div class="composer-toolbar">
         <div class="composer-cluster">
-          <button
+          <Button
             type="button"
-            class={props.concise ? "composer-toggle is-on" : "composer-toggle"}
+            variant={props.concise ? "soft" : "outline"}
+            flavor="primary"
+            size="sm"
+            radius="full"
             aria-pressed={props.concise ? "true" : "false"}
             onClick={() => props.onConciseChange(!props.concise)}
           >
@@ -100,26 +101,43 @@ function PromptComposer(props: PromptComposerProps): JSX.Element {
               ✦
             </span>
             Concise
-          </button>
+          </Button>
 
-          <button type="button" class="composer-icon" aria-label="Attach a file">
+          <Button
+            type="button"
+            variant="outline"
+            size="xs"
+            width="square"
+            radius="full"
+            aria-label="Attach a file"
+          >
             <span aria-hidden="true">+</span>
-          </button>
+          </Button>
 
-          <button type="button" class="composer-icon" aria-label="Add from a folder">
+          <Button
+            type="button"
+            variant="outline"
+            size="xs"
+            width="square"
+            radius="full"
+            aria-label="Add from a folder"
+          >
             <span aria-hidden="true">⊞</span>
-          </button>
+          </Button>
         </div>
 
         <div class="composer-cluster composer-cluster-end">
-          <button
+          <Button
             type="button"
-            class={props.forceModel ? "composer-toggle is-on" : "composer-toggle"}
+            variant={props.forceModel ? "soft" : "outline"}
+            flavor="primary"
+            size="sm"
+            radius="full"
             aria-pressed={props.forceModel ? "true" : "false"}
             onClick={() => props.onForceModelChange(!props.forceModel)}
           >
             Force this Model
-          </button>
+          </Button>
 
           <PillMenu
             label="Model"
@@ -130,9 +148,16 @@ function PromptComposer(props: PromptComposerProps): JSX.Element {
             onChange={props.onModelChange}
           />
 
-          <button type="button" class="composer-icon" aria-label="Dictate">
+          <Button
+            type="button"
+            variant="outline"
+            size="xs"
+            width="square"
+            radius="full"
+            aria-label="Dictate"
+          >
             <span aria-hidden="true">⌗</span>
-          </button>
+          </Button>
         </div>
       </div>
     </div>

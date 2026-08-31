@@ -1,4 +1,4 @@
-import { Button } from "@pathscale/ui";
+import { Button, Checkbox, Input, Radio, RadioGroup } from "@pathscale/ui";
 import type { JSX } from "@solidjs/web";
 import { createSignal, For, onCleanup, Show } from "solid-js";
 
@@ -152,25 +152,15 @@ function Choice<T extends string>(props: {
   onSelect: (value: T) => void;
 }): JSX.Element {
   return (
-    <fieldset class="ask">
-      <legend class="ask-legend">{props.legend}</legend>
-      <div class="ask-options">
-        <For each={props.options}>
-          {(option) => (
-            <label class={props.value === option ? "ask-option is-picked" : "ask-option"}>
-              <input
-                type="radio"
-                name={props.name}
-                value={option}
-                checked={props.value === option}
-                onChange={() => props.onSelect(option)}
-              />
-              <span>{option}</span>
-            </label>
-          )}
-        </For>
-      </div>
-    </fieldset>
+    <RadioGroup
+      class="ask"
+      label={props.legend}
+      name={props.name}
+      value={props.value ?? undefined}
+      onChange={(value) => props.onSelect(value as T)}
+    >
+      <For each={props.options}>{(option) => <Radio value={option}>{option}</Radio>}</For>
+    </RadioGroup>
   );
 }
 
@@ -318,14 +308,13 @@ function StudyPage(): JSX.Element {
               <li>Your answers are sent when you press Submit at the end.</li>
             </ul>
 
-            <label class={consented() ? "study-consent is-picked" : "study-consent"}>
-              <input
-                type="checkbox"
-                checked={consented()}
-                onChange={(event) => setConsented(event.currentTarget.checked)}
-              />
-              <span>I agree to take part.</span>
-            </label>
+            <Checkbox
+              class="study-consent"
+              checked={consented()}
+              onChange={(event) => setConsented(event.currentTarget.checked)}
+            >
+              I agree to take part.
+            </Checkbox>
 
             <Choice
               legend="How often do you use AI?"
@@ -426,15 +415,20 @@ function StudyPage(): JSX.Element {
                       <li>Copy the code below and send it back where you were invited.</li>
                     </ul>
                     <div class="study-code">
-                      <input
+                      <Input
                         id="study-code"
                         readonly
                         value={completionCode(current)}
                         onFocus={(event) => event.currentTarget.select()}
                       />
-                      <button type="button" class="study-copy" onClick={() => void copyCode()}>
+                      <Button
+                        type="button"
+                        variant="soft"
+                        flavor="primary"
+                        onClick={() => void copyCode()}
+                      >
                         {copied() ? "Copied" : "Copy"}
-                      </button>
+                      </Button>
                     </div>
                   </>
                 }
@@ -453,15 +447,20 @@ function StudyPage(): JSX.Element {
                 <details class="study-fallback">
                   <summary>Asked for a code?</summary>
                   <div class="study-code">
-                    <input
+                    <Input
                       id="study-code"
                       readonly
                       value={completionCode(current)}
                       onFocus={(event) => event.currentTarget.select()}
                     />
-                    <button type="button" class="study-copy" onClick={() => void copyCode()}>
+                    <Button
+                      type="button"
+                      variant="soft"
+                      flavor="primary"
+                      onClick={() => void copyCode()}
+                    >
                       {copied() ? "Copied" : "Copy"}
-                    </button>
+                    </Button>
                   </div>
                 </details>
               </Show>

@@ -172,28 +172,6 @@
   margin-bottom: 0.55rem;
 }
 
-.composer-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  border: 1px solid color-mix(in oklab, var(--color-primary) 35%, transparent);
-  border-radius: 999px;
-  background: color-mix(in oklab, var(--color-primary) 15%, transparent);
-  padding: 0.2rem 0.55rem;
-  color: var(--color-primary);
-  font-weight: 600;
-  font-size: 0.72rem;
-}
-
-.composer-chip-remove {
-  border: 0;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  font-size: 0.9rem;
-  line-height: 1;
-}
-
 .composer-field {
   position: relative;
   min-height: 6.5rem;
@@ -278,30 +256,6 @@
   justify-content: flex-end;
 }
 
-.composer-icon {
-  display: inline-flex;
-  width: 1.75rem;
-  height: 1.75rem;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--color-base-300);
-  border-radius: 999px;
-  background: transparent;
-  color: color-mix(in oklab, var(--color-base-content) 58%, transparent);
-  font-size: 0.9rem;
-  line-height: 1;
-  cursor: pointer;
-  transition:
-    color 0.15s,
-    border-color 0.15s;
-}
-
-.composer-icon:hover {
-  border-color: color-mix(in oklab, var(--color-primary) 45%, transparent);
-  color: var(--color-base-content);
-}
-
 .composer-spark {
   color: var(--color-primary);
   font-size: 0.85em;
@@ -311,7 +265,6 @@
   color: color-mix(in oklab, var(--color-base-content) 42%, transparent);
 }
 
-.composer-toggle,
 .composer-pill {
   display: inline-flex;
   height: 1.65rem;
@@ -331,16 +284,9 @@
     background-color 0.15s;
 }
 
-.composer-toggle:hover,
 .composer-pill:hover {
   border-color: color-mix(in oklab, var(--color-primary) 45%, transparent);
   color: var(--color-base-content);
-}
-
-.composer-toggle.is-on {
-  border-color: color-mix(in oklab, var(--color-primary) 35%, transparent);
-  background: color-mix(in oklab, var(--color-primary) 15%, transparent);
-  color: var(--color-primary);
 }
 
 .composer-pill-prefix {
@@ -615,32 +561,24 @@
   line-height: 1.2;
 }
 
-/* A question and its options. */
-.ask {
-  border: 0;
-  margin: 0;
-  padding: 0;
-}
-
-.ask-legend {
-  padding: 0;
+/*
+  A question and its options, drawn on @pathscale/ui's RadioGroup.
+  Whole row is the tap target, not just the dot. 3rem clears the usual 44px
+  minimum with room to spare on a phone, which the library's default inline
+  radio does not, so the row treatment stays here rather than in the library.
+*/
+.ask .radio-group__label {
   margin-bottom: 0.75rem;
   font-weight: 650;
   font-size: 1.02rem;
   line-height: 1.35;
 }
 
-.ask-options {
-  display: grid;
+.ask .radio-group__items {
   gap: 0.55rem;
 }
 
-/*
-  Whole row is the tap target, not just the dot. 3rem clears the usual 44px
-  minimum with room to spare on a phone.
-*/
-.ask-option {
-  display: flex;
+.ask .radio {
   min-height: 3rem;
   align-items: center;
   gap: 0.7rem;
@@ -649,21 +587,12 @@
   background: var(--color-base-100);
   padding: 0.6rem 0.9rem;
   font-size: 0.98rem;
-  cursor: pointer;
 }
 
-.ask-option.is-picked {
+.ask .radio:has(:checked) {
   border-color: var(--color-primary);
   background: color-mix(in oklab, var(--color-primary) 10%, transparent);
   font-weight: 600;
-}
-
-.ask-option input {
-  width: 1.15rem;
-  height: 1.15rem;
-  flex-shrink: 0;
-  accent-color: var(--color-primary);
-  cursor: pointer;
 }
 
 .study-next {
@@ -810,20 +739,8 @@
   font-size: 0.8rem;
 }
 
-.study-copy {
-  min-height: 3rem;
-  border: 1px solid var(--color-primary);
-  border-radius: 0.6rem;
-  background: color-mix(in oklab, var(--color-primary) 12%, transparent);
-  color: var(--color-base-content);
-  font-weight: 650;
-  font-size: 0.95rem;
-  cursor: pointer;
-}
-
 /* Unlisted study flow */
 .study-consent {
-  display: flex;
   min-height: 3rem;
   align-items: center;
   gap: 0.7rem;
@@ -831,22 +748,14 @@
   border-radius: 0.7rem;
   background: var(--color-base-100);
   padding: 0.6rem 0.9rem;
-  cursor: pointer;
   font-weight: 600;
 }
 
-.study-consent.is-picked {
+.study-consent:has(:checked) {
   border-color: var(--color-primary);
   background: color-mix(in oklab, var(--color-primary) 10%, transparent);
 }
 
-.study-consent input {
-  width: 1.15rem;
-  height: 1.15rem;
-  flex-shrink: 0;
-}
-
-.study-consent input,
 .study-option input {
   margin-top: 0.15rem;
   width: 1rem;

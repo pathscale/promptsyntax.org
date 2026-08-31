@@ -184,9 +184,15 @@ function VignetteTask(props: VignetteTaskProps): JSX.Element {
           </Show>
 
           <Show when={attempts() >= 3 && !solved()}>
-            <button type="button" class="vignette-give-up" onClick={() => emit(false)}>
+            <Button
+              type="button"
+              variant="plain"
+              size="sm"
+              class="vignette-give-up"
+              onClick={() => emit(false)}
+            >
               I want to stop here
-            </button>
+            </Button>
           </Show>
         </div>
 

@@ -1,3 +1,4 @@
+import { Button, Flex, Input } from "@pathscale/ui";
 import type { JSX } from "@solidjs/web";
 import { createSignal, Show } from "solid-js";
 import VignetteTask, { type TaskResult } from "~/components/VignetteTask";
@@ -46,18 +47,24 @@ function VignettePage(): JSX.Element {
                   ? "Your compiled prompt keeps the precise model and fails closed."
                   : "Your response has been recorded."}
               </p>
-              <label for="completion-code">Completion code</label>
-              <div>
-                <input
+              <Flex gap="sm" align="end">
+                <Input
                   id="completion-code"
+                  label="Completion code"
                   readonly
+                  fullWidth
                   value={completionCode(payload())}
                   onFocus={(event) => event.currentTarget.select()}
                 />
-                <button type="button" onClick={() => void copyCode()}>
+                <Button
+                  type="button"
+                  variant="soft"
+                  flavor="primary"
+                  onClick={() => void copyCode()}
+                >
                   {copied() ? "Copied" : "Copy"}
-                </button>
-              </div>
+                </Button>
+              </Flex>
             </section>
           )}
         </Show>
