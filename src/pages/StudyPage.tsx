@@ -311,7 +311,7 @@ function StudyPage(): JSX.Element {
             <Checkbox
               class="study-consent"
               checked={consented()}
-              onChange={(event) => setConsented(event.currentTarget.checked)}
+              onChange={(checked) => setConsented(checked)}
             >
               I agree to take part.
             </Checkbox>
