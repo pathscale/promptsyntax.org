@@ -8,23 +8,36 @@ const isProd = process.env.NODE_ENV === "production";
 
 export default defineConfig({
   plugins: [
+    // Compiles `@pathscale/ui`'s layout recipes and resolves `solid-layouts`
+    // to its Solid 2 backend, which lives behind a `/solid-2` subpath while
+    // the default entry stays on Solid 1.
+    //
+    // It must run *before* Babel lowers JSX. The compiler resolves an element
+    // such as `<Button>` against the package's Layout manifest, and once the
+    // Solid transform has run there is no `<Button>` left to resolve, only a
+    // `_$createComponent` call. A missing package, manifest, export, compiler
+    // or runtime is a hard error here; there is no graceful fallback.
+    pluginSolid2LayoutsApplication({
+      layouts: ["@pathscale/ui"],
+    }),
     // `@rsbuild/plugin-solid` is deliberately not used: it pins
     // `babel-preset-solid@^1.9.12`, the Solid 1 compiler, which emits helpers
     // (`use`) and a runtime specifier (`solid-js/web`) that Solid 2 dropped.
     // Driving the Solid 2 preset through Babel directly compiles JSX against
     // the runtime that actually exists.
+    //
+    // `moduleName` is the other half of that: Solid 2 dropped the
+    // `solid-js/web` subpath, so the transform has to emit `@solidjs/web`,
+    // which is the specifier the SWC pass below is already pointed at.
     pluginBabel({
       include: /\.(?:jsx|tsx|ts)$/,
       babelLoaderOptions: (config) => {
         config.presets ??= [];
-        config.presets.push(["babel-preset-solid", {}]);
+        config.presets.push([
+          "babel-preset-solid",
+          { moduleName: "@solidjs/web", generate: "dom" },
+        ]);
       },
-    }),
-    // Compiles `@pathscale/ui`'s layout recipes and resolves `solid-layouts`
-    // to its Solid 2 backend, which lives behind a `/solid-2` subpath while
-    // the default entry stays on Solid 1.
-    pluginSolid2LayoutsApplication({
-      layouts: ["@pathscale/ui"],
     }),
   ],
   resolve: {
