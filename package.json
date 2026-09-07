@@ -19,7 +19,7 @@
   },
   "license": "CC-BY-4.0",
   "dependencies": {
-    "@pathscale/ui": "^4.0.0",
+    "@pathscale/ui": "^3.1.0",
     "@solidjs/router": "2.0.0-next.16",
     "@solidjs/web": "2.0.0-rc.4",
     "@standard-schema/spec": "^1.0.0",
