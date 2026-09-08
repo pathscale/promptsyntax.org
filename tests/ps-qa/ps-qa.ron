@@ -1,5 +1,39 @@
 // What the harness has to be told about this application.
+//
+// `inventory` walks the surfaces named here, so a surface that is missing is a
+// page whose controls are never counted. Home is named for that reason even
+// though it is where the site opens.
+//
+// A marker has to be absent from the page being left, not merely present on
+// the page being reached: "Specification" is in the navigation of every page,
+// so it proves nothing about having arrived at the specification.
 AppProfile(
-    navigation_controls: ["Specification", "Syntax reference", "GitHub"],
+    surfaces: [
+        (name: "home", opener: "PromptSyntax", marker: Some("PromptSyntax Edge")),
+        (
+            name: "spec",
+            opener: "Specification",
+            marker: Some("Specification Draft"),
+        ),
+        (
+            name: "syntax",
+            opener: "Syntax reference",
+            marker: Some("Syntax Reference"),
+        ),
+    ],
+    navigation_controls: ["PromptSyntax", "Specification", "Syntax reference"],
     home_opener: Some("PromptSyntax"),
+    // The repository. A headless browser will follow an ordinary anchor, and
+    // following these would make a run depend on github.com being up and
+    // unchanged rather than on this site.
+    manual_controls: [
+        (label: "GitHub", command: "github.com/pathscale/promptsyntax.org"),
+        (label: "View on GitHub", command: "github.com/pathscale/promptsyntax.org"),
+        (label: "Contribute on GitHub", command: "github.com/pathscale/promptsyntax.org"),
+        (label: "TOON", command: "the TOON project"),
+        (label: "Contact", command: "mailto: hello@promptsyntax.org"),
+        (label: "Read the transport profile", command: "github.com, the TOON profile"),
+        (label: "Decision record", command: "github.com, the decision record"),
+        (label: "Read the full specification", command: "SPEC.pdf"),
+    ],
 )
