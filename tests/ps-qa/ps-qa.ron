@@ -1,0 +1,5 @@
+// What the harness has to be told about this application.
+AppProfile(
+    navigation_controls: ["Specification", "Syntax reference", "GitHub"],
+    home_opener: Some("PromptSyntax"),
+)

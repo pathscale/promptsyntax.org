@@ -1,0 +1,52 @@
+// The site, driven against its built output through a headless browser.
+//
+// The defect: a `localStorage` read outside a try killed the whole page where
+// storage is unavailable -- a private window, a browser with site data
+// blocked, an embedded webview. The symptom was a blank page, because the read
+// happened during startup and threw before anything rendered.
+//
+// So "the page renders at all" is the guard, and it is not a trivial one: this
+// is the assertion the defect failed. The rest of the group is the shape of
+// the page around it, so a partial render cannot pass as a whole one.
+[
+    (
+        id: "the-page-renders",
+        group: "page",
+        what: "the site paints its heading rather than dying during startup",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:PromptSyntax Edge",
+        expect: Present,
+    ),
+    (
+        id: "the-navigation-is-there",
+        group: "page",
+        what: "the specification is reachable from the home page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:Specification",
+        expect: Paints,
+    ),
+    (
+        id: "the-call-to-action-paints",
+        group: "page",
+        what: "the primary action is drawn with a box a person could press",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Read the specification",
+        expect: Paints,
+    ),
+    (
+        id: "the-page-is-more-than-a-header",
+        group: "page",
+        what: "the body below the header rendered too",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:PromptSyntax Impact",
+        expect: Present,
+    ),
+]

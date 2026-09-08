@@ -1,0 +1,57 @@
+# What the site does, checked against a real browser engine.
+#
+# The defect this guards: a `localStorage` read outside a try killed the whole
+# page where storage is unavailable -- a private window, a browser with site
+# data blocked, an embedded webview. The symptom was a blank page.
+#
+# It is not jsdom. `chuzz-headless` loads the built site through the same
+# loader, the same web-API shim and the same engine a tab uses, and `ps-qa`
+# drives it over a socket without linking any of it.
+name: QA
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  rendered-outcomes:
+    runs-on: ubicloud-standard-4
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # The checks drive the built site, not the dev server: what ships is what
+      # is asked about.
+      - name: Build
+        run: bun run build
+
+      - name: Headless browser host
+        id: qa
+        uses: pathscale/chuzz/.github/actions/headless-host@master
+        with:
+          token: ${{ secrets.SIBLING_REPOS_TOKEN }}
+
+      - name: Rendered outcomes
+        env:
+          # A shared runner is slower than a laptop for outcomes that pass
+          # locally well inside the budget. This widens scheduling deadlines
+          # only; every declared transition is still required.
+          QA_TIMEOUT_SCALE: 2
+        run: |
+          for GROUP in page; do
+            echo "::group::$GROUP"
+            ps-qa --app tests/ps-qa/ps-qa.ron \
+              qa-hosted "$GROUP" \
+              --host "${{ steps.qa.outputs.host }}" \
+              --page dist \
+              --checks tests/ps-qa/checks
+            echo "::endgroup::"
+          done
