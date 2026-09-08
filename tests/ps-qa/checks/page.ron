@@ -49,4 +49,35 @@
         subject: "heading:PromptSyntax Impact",
         expect: Present,
     ),
+    // Nothing above this line presses anything, and a page that only paints
+    // cannot tell you whether the application is alive. Solid 2 halts the
+    // reactive system permanently when an error escapes every boundary, and a
+    // halted page still paints: it renders once, then answers nothing. Two
+    // sites in this fleet were shipping in exactly that state and every
+    // render-only check passed over them.
+    //
+    // The theme control is the cheapest detector there is. Its own label is
+    // derived from state, so pressing it and reading the label back asks
+    // whether state still moves, with no knowledge of what the page is for.
+    (
+        id: "pressing-the-theme-toggle-changes-the-theme",
+        group: "page",
+        what: "the control offers the opposite theme once it has been used",
+        open: None,
+        hover: None,
+        click: Some("Switch to light mode"),
+        subject: "button:Switch to dark mode",
+        expect: Present,
+        outcome_timeout_ms: 8000,
+    ),
+    (
+        id: "and-the-old-label-is-gone",
+        group: "page",
+        what: "the toggle re-rendered rather than gaining a second label",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Switch to light mode",
+        expect: Absent,
+    ),
 ]
