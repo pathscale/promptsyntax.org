@@ -1,0 +1,221 @@
+// The landing page, section by section.
+//
+// `chrome.ron` proves the bundle reached the page and the shell is drawn.
+// This group asks the different question: whether the page a visitor actually
+// reads is all there. A partial render passes a "the heading is drawn" check
+// trivially, and this site's argument is made across six sections -- the
+// proposition, the worked example with its receipt, the before-and-after, the
+// summary of the mechanism, the TOON transport proposal, and the honest
+// statement of scope. A page missing any of them still looks like a page.
+//
+// Only headings, links and buttons are addressable: the engine names a node
+// from its role and its accessible name, and ordinary prose in a `div` or a
+// `p` has neither. So the paragraphs are covered by the headings that own
+// them, plus the rendered order between the controls those sections end in --
+// a section that has collapsed into another keeps its heading and loses its
+// position, and a heading is the one thing that cannot carry a position on the
+// fontless host CI builds, because it is laid out with a height of zero there.
+//
+// The group stays on the landing page and presses nothing that leaves it;
+// `navigation.ron` owns the routes.
+[
+    (
+        id: "the-landing-hero-names-the-proposal",
+        group: "home",
+        what: "the page opens on what PromptSyntax is for",
+        open: Some("PromptSyntax"),
+        hover: None,
+        click: None,
+        subject: "heading:PromptSyntax Edge: Control + Proof",
+        expect: Present,
+    ),
+    (
+        id: "the-hero-offers-the-specification",
+        group: "home",
+        what: "the primary action is drawn with a box a person could press",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Read the specification",
+        expect: PaintsNamed,
+    ),
+    (
+        id: "the-hero-offers-the-repository",
+        group: "home",
+        what: "the secondary action is drawn beside it rather than stacked or missing",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:View on GitHub",
+        expect: RightOf,
+        compare: Some("button:Read the specification"),
+    ),
+    // The worked example: an annotated prompt, then the receipt that says what
+    // it did. This is the whole argument of the site in one section.
+    (
+        id: "the-worked-example-has-a-section",
+        group: "home",
+        what: "the page explains what the notation is before arguing for it",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:What it is",
+        expect: Present,
+    ),
+    (
+        id: "and-the-execution-receipt-is-drawn-under-it",
+        group: "home",
+        what: "the receipt block rendered, so the example is not a prompt with no answer",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:Execution receipt: what actually ran",
+        expect: Present,
+    ),
+    // The before-and-after. Two columns, and both have to be there: half of
+    // this section is an argument with no counterpart.
+    (
+        id: "the-case-for-it-has-a-section",
+        group: "home",
+        what: "the page argues why the problem matters",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:Why it matters",
+        expect: Present,
+    ),
+    (
+        id: "and-the-today-column-is-drawn",
+        group: "home",
+        what: "the first half of the comparison rendered",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:Today",
+        expect: Present,
+    ),
+    (
+        id: "and-the-with-promptsyntax-column-is-drawn",
+        group: "home",
+        what: "the second half of the comparison rendered",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:With PromptSyntax",
+        expect: Present,
+    ),
+    // The mechanism, in five bullets and a second call to action.
+    (
+        id: "the-mechanism-has-a-section",
+        group: "home",
+        what: "the page summarises how the thing works",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:How it works, briefly",
+        expect: Present,
+    ),
+    (
+        id: "and-it-ends-in-a-call-to-action",
+        group: "home",
+        what: "the summary hands off to the document it is a summary of",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Read the full specification",
+        expect: PaintsNamed,
+    ),
+    // The TOON transport proposal. The newest section, and the one whose two
+    // code panels are the point: the same receipt in both encodings, beside
+    // each other, so the saving can be read rather than asserted.
+    (
+        id: "the-transport-proposal-has-a-section",
+        group: "home",
+        what: "the TOON transport proposal is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:A TOON transport for receipts",
+        expect: Present,
+    ),
+    (
+        id: "and-it-links-the-transport-profile",
+        group: "home",
+        what: "the profile the section describes can be reached from it",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Read the transport profile",
+        expect: PaintsNamed,
+    ),
+    (
+        id: "and-it-links-the-decision-record",
+        group: "home",
+        what: "the decision behind the proposal is reachable beside it",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Decision record",
+        expect: RightOf,
+        compare: Some("button:Read the transport profile"),
+    ),
+    // Scope. The section that says what the proposal does not claim, which is
+    // the one a reader checks before taking any of the rest seriously.
+    (
+        id: "the-scope-section-is-drawn",
+        group: "home",
+        what: "the page states what it is not",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:Status & scope",
+        expect: Present,
+    ),
+    (
+        id: "and-it-invites-contribution",
+        group: "home",
+        what: "the page ends on the action it wants, and the button is pressable",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Contribute on GitHub",
+        expect: PaintsNamed,
+    ),
+    // The authored order of the page, read off the boxes the renderer produced
+    // rather than off the source. Each pair names the control its section ends
+    // in, because a control has a box on a host with no fonts and a heading
+    // does not.
+    (
+        id: "the-hero-comes-before-the-mechanism",
+        group: "home",
+        what: "the page opens with the proposition, not with the summary",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Read the specification",
+        expect: Above,
+        compare: Some("button:Read the full specification"),
+    ),
+    (
+        id: "and-the-mechanism-comes-before-the-transport-proposal",
+        group: "home",
+        what: "the newest section was appended rather than inserted",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Read the full specification",
+        expect: Above,
+        compare: Some("button:Read the transport profile"),
+    ),
+    (
+        id: "and-scope-is-the-last-section",
+        group: "home",
+        what: "the honest statement of scope is where a reader finishes",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Read the transport profile",
+        expect: Above,
+        compare: Some("button:Contribute on GitHub"),
+    ),
+]
