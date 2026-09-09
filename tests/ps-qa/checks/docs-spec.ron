@@ -1,0 +1,513 @@
+// The specification page.
+//
+// This is the document the whole site exists to publish, and it reaches the
+// page by a route nothing else on the site uses. `src/content/spec.html` is
+// imported with `?raw`, which is a build rule rather than a language feature:
+// rsbuild is told in `rsbuild.config.ts` to treat a `?raw` resource query as
+// `asset/source`. Lose that rule and the import still resolves, still
+// typechecks and still builds -- it just yields a URL string, and the page
+// renders a path where the specification should be. Nothing but driving the
+// built bundle catches that, which is why the assertions below are about
+// sections deep inside the document rather than about the page's own frame.
+//
+// The sidebar is the second thing worth pinning. It is not authored: a
+// `createEffect` walks `h2[id], h3[id]` out of the rendered article once the
+// content div is attached and builds the entries from what it finds. Solid 2
+// takes two functions there, the first tracking and the second acting, and an
+// effect written the old way throws at run time while typechecking clean. A
+// sidebar that is present but empty is exactly what that failure looks like,
+// and it is invisible to any check that only asks whether the page rendered.
+//
+// # Not covered
+//
+// Pressing a table-of-contents entry scrolls the document, and *where* the
+// document ends up is the one observable ps-qa has no expectation for:
+// `Paints` asks whether a node was laid out with a box, not whether it is
+// inside the viewport, so a working anchor and a dead one look the same to
+// this harness. The entries are pressed anyway, further down, for what that
+// does prove -- see the comment there.
+//
+// `Download PDF` is declared manual in the profile. It leaves the site for a
+// 300KB PDF, and following it would measure the engine's PDF handling rather
+// than anything about this page.
+//
+// The document's tables render as a row of columns rather than a stack of
+// rows, because `.doc-prose table` carries `display: block` for horizontal
+// scrolling and the engine does not generate the anonymous table boxes that
+// puts its `thead` and `tbody` children back inside. `and-the-tables-rendered`
+// therefore asserts only that the tables have a box; the row geometry is an
+// engine defect and is reported rather than pinned to its broken shape.
+[
+    (
+        id: "the-specification-is-reachable",
+        group: "docs-spec",
+        what: "the navigation reaches the specification rather than falling back to home",
+        open: Some("Specification"),
+        hover: None,
+        click: None,
+        subject: "heading:Specification Draft",
+        expect: Present,
+        outcome_timeout_ms: 8000,
+    ),
+    (
+        id: "and-the-raw-import-carried-the-document",
+        group: "docs-spec",
+        what: "the article is the specification, not a path to it",
+        // The first section of the document proper. If `?raw` had degraded to
+        // a URL the page would still have a heading, a sidebar shell and a
+        // footer; it would not have this.
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:1. Abstract",
+        expect: Present,
+    ),
+    (
+        id: "and-the-document-is-rendered-to-its-end",
+        group: "docs-spec",
+        what: "the last section of the specification is on the page",
+        // Sixteen sections and about sixteen thousand pixels of document. A
+        // truncated or lazily-mounted article keeps its opening and loses
+        // this.
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:16. Open questions queue",
+        expect: Present,
+    ),
+    (
+        id: "and-the-sections-are-in-order",
+        group: "docs-spec",
+        what: "the document reads top to bottom rather than being reflowed by the layout",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:1. Abstract",
+        expect: Above,
+        compare: Some("heading:16. Open questions queue"),
+    ),
+    // Every normative section, one check each.
+    //
+    // `covers` is not an assertion -- the harness uses it to credit a repeated
+    // family in `inventory`, and a list of thirteen section names hidden under
+    // one subject would report thirteen sections proven while asking about
+    // one. The specification is judged section by section, so it is checked
+    // that way. A conversion that drops a section in the middle keeps the
+    // opening and the ending, which is exactly what a first-and-last pair
+    // cannot see.
+    (
+        id: "section-2-terminology-rendered",
+        group: "docs-spec",
+        what: "the terminology section is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:2. Terminology",
+        expect: Present,
+    ),
+    (
+        id: "section-3-design-principles-rendered",
+        group: "docs-spec",
+        what: "the design principles section is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:3. Design principles",
+        expect: Present,
+    ),
+    (
+        id: "section-4-layered-architecture-rendered",
+        group: "docs-spec",
+        what: "the layered architecture section is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:4. Layered architecture",
+        expect: Present,
+    ),
+    (
+        id: "section-5-directive-scopes-rendered",
+        group: "docs-spec",
+        what: "the directive scopes section is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:5. Directive scopes",
+        expect: Present,
+    ),
+    (
+        id: "section-6-entity-references-rendered",
+        group: "docs-spec",
+        what: "the entity reference and resolution section is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:6. Entity references and resolution",
+        expect: Present,
+    ),
+    (
+        id: "section-7-capabilities-rendered",
+        group: "docs-spec",
+        what: "the capabilities and parameters section is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:7. Capabilities and parameters",
+        expect: Present,
+    ),
+    (
+        id: "section-8-fulfillment-rendered",
+        group: "docs-spec",
+        what: "the fulfillment section is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:8. Fulfillment",
+        expect: Present,
+    ),
+    (
+        id: "section-9-budgets-rendered",
+        group: "docs-spec",
+        what: "the budgets and fallback chains section is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:9. Budgets and fallback chains",
+        expect: Present,
+    ),
+    (
+        id: "section-10-authority-rendered",
+        group: "docs-spec",
+        what: "the authority and precedence section is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:10. Authority and precedence",
+        expect: Present,
+    ),
+    (
+        id: "section-11-canonical-form-rendered",
+        group: "docs-spec",
+        what: "the canonical form section is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:11. Canonical form and the strict document",
+        expect: Present,
+    ),
+    (
+        id: "section-12-prompt-trace-rendered",
+        group: "docs-spec",
+        what: "the Prompt Trace section is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:12. The Prompt Trace",
+        expect: Present,
+    ),
+    (
+        id: "section-13-content-safety-rendered",
+        group: "docs-spec",
+        what: "the content safety and input marking section is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:13. Content safety and input marking",
+        expect: Present,
+    ),
+    (
+        id: "section-14-determinism-rendered",
+        group: "docs-spec",
+        what: "the determinism taxonomy section is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:14. Determinism taxonomy",
+        expect: Present,
+    ),
+    (
+        id: "section-15-out-of-scope-rendered",
+        group: "docs-spec",
+        what: "the delegated out-of-scope section is on the page",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:15. Out of scope",
+        expect: Present,
+    ),
+    // The second level. Pandoc emits `h3` for these, and the conversion is
+    // what decides whether they survive as headings or flatten into prose.
+    (
+        id: "the-span-tag-subsection-rendered",
+        group: "docs-spec",
+        what: "5.1 is a heading of its own rather than a paragraph in 5",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:5.1 Span tag forms",
+        expect: Present,
+    ),
+    (
+        id: "the-reference-syntax-subsection-rendered",
+        group: "docs-spec",
+        what: "6.1 is a heading of its own",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:6.1 Reference syntax",
+        expect: Present,
+    ),
+    (
+        id: "the-fulfillment-policies-subsection-rendered",
+        group: "docs-spec",
+        what: "8.1 is a heading of its own",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:8.1 Policies",
+        expect: Present,
+    ),
+    (
+        id: "the-normative-rule-subsection-rendered",
+        group: "docs-spec",
+        what: "10.3 is a heading of its own",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:10.3 Normative rule",
+        expect: Present,
+    ),
+    (
+        id: "the-trace-structure-subsection-rendered",
+        group: "docs-spec",
+        what: "12.1 is a heading of its own",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:12.1 Structure",
+        expect: Present,
+    ),
+    (
+        id: "the-internationalization-subsection-rendered",
+        group: "docs-spec",
+        what: "13.1 is a heading of its own",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:13.1 Internationalization",
+        expect: Present,
+    ),
+    (
+        id: "and-the-tables-rendered",
+        group: "docs-spec",
+        what: "the normative tables are tables rather than a run of loose text",
+        // Five of them carry the specification's normative content -- the
+        // terminology, the layers, the scopes, the fulfillment policies and
+        // the determinism taxonomy.
+        open: None,
+        hover: None,
+        click: None,
+        subject: "table:",
+        expect: Paints,
+    ),
+    // The sidebar, which is generated from the rendered article rather than
+    // authored.
+    (
+        id: "the-sidebar-is-a-navigation-landmark",
+        group: "docs-spec",
+        what: "the table of contents is a navigation region, not a column of loose links",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "navigation:",
+        expect: Paints,
+    ),
+    (
+        id: "and-the-sidebar-offers-the-pdf",
+        group: "docs-spec",
+        what: "the sidebar leads with the downloadable copy of the document",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:Download PDF",
+        expect: Paints,
+    ),
+    (
+        id: "and-the-sidebar-was-built-from-the-document",
+        group: "docs-spec",
+        what: "the effect that walks the rendered headings ran and produced entries",
+        // A link, not a heading: the same text exists as both, and only the
+        // link is the sidebar's.
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:1. Abstract",
+        expect: PaintsNamed,
+    ),
+    (
+        id: "and-the-walk-covered-the-whole-document",
+        group: "docs-spec",
+        what: "the last section has an entry too, so the walk did not stop early",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:16. Open questions queue",
+        expect: PaintsNamed,
+    ),
+    (
+        id: "and-the-walk-picked-up-the-second-level",
+        group: "docs-spec",
+        what: "subsections are in the sidebar, so the query was not h2 alone",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:10.3 Normative rule",
+        expect: PaintsNamed,
+    ),
+    (
+        id: "and-a-middle-section-has-an-entry",
+        group: "docs-spec",
+        what: "the sidebar is the whole document rather than its first and last sections",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:8. Fulfillment",
+        expect: PaintsNamed,
+    ),
+    (
+        id: "and-the-sidebar-entries-are-in-document-order",
+        group: "docs-spec",
+        what: "the entries follow the document rather than the order the DOM query returned",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:1. Abstract",
+        expect: Above,
+        compare: Some("link:16. Open questions queue"),
+    ),
+    (
+        id: "and-the-sidebar-sits-beside-the-document",
+        group: "docs-spec",
+        what: "the two-column layout held rather than collapsing into a stack",
+        // `lg:grid-cols-[260px_minmax(0,1fr)]`, and the headless window is
+        // 1344 wide. Both columns draw either way, so presence cannot tell a
+        // held layout from a collapsed one.
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:1. Abstract",
+        expect: RightOf,
+        compare: Some("link:1. Abstract"),
+    ),
+    // Pressing the entries.
+    //
+    // What a press does is scroll, and scroll position is the one observable
+    // this harness has no expectation for. What a press must *not* do is throw:
+    // the handler calls `preventDefault`, measures the target's box, scrolls
+    // the window and rewrites the fragment with `history.replaceState`, and an
+    // error escaping any of that takes the whole application down with it.
+    // Solid 2 halts its reactive system permanently when an error escapes
+    // every boundary, and a halted page still paints -- it renders once and
+    // then answers nothing, which no assertion about this page's content can
+    // see, because the content is static.
+    //
+    // So the entries are pressed, and then the one control on the page whose
+    // label is derived from state is pressed after them. If the sidebar
+    // handler halted the application, the theme toggle stops renaming itself
+    // and this fails.
+    (
+        id: "a-sidebar-entry-can-be-pressed",
+        group: "docs-spec",
+        what: "pressing a table-of-contents entry leaves the document standing",
+        open: None,
+        hover: None,
+        click: Some("1. Abstract"),
+        subject: "heading:1. Abstract",
+        expect: Present,
+        outcome_timeout_ms: 3000,
+    ),
+    (
+        id: "and-so-can-a-second-level-entry",
+        group: "docs-spec",
+        what: "a subsection entry takes the same path, indented rather than different",
+        open: None,
+        hover: None,
+        click: Some("10.3 Normative rule"),
+        subject: "heading:10.3 Normative rule",
+        expect: Present,
+        outcome_timeout_ms: 3000,
+    ),
+    (
+        id: "and-so-can-the-last-entry",
+        group: "docs-spec",
+        what: "the entry furthest from the top is pressable too",
+        open: None,
+        hover: None,
+        click: Some("16. Open questions queue"),
+        subject: "heading:16. Open questions queue",
+        expect: Present,
+        outcome_timeout_ms: 3000,
+    ),
+    (
+        id: "and-the-application-is-still-alive-after-them",
+        group: "docs-spec",
+        what: "state still moves, so no sidebar press halted the reactive system",
+        // The only control on this page whose own label is derived from state.
+        // Pressing it and reading the label back asks whether the application
+        // still reacts, with no knowledge of what the page is for.
+        open: None,
+        hover: None,
+        click: Some("Switch to light mode"),
+        subject: "button:Switch to dark mode",
+        expect: Paints,
+        outcome_timeout_ms: 8000,
+    ),
+    (
+        id: "and-the-theme-is-put-back",
+        group: "docs-spec",
+        what: "the group leaves the theme it found",
+        open: None,
+        hover: None,
+        click: Some("Switch to dark mode"),
+        subject: "button:Switch to light mode",
+        expect: Paints,
+        outcome_timeout_ms: 8000,
+    ),
+    // The page is still the site: the shell is drawn around the document
+    // rather than replacing it.
+    (
+        id: "the-header-is-drawn-over-the-document",
+        group: "docs-spec",
+        what: "the document page keeps the site header",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:PromptSyntax",
+        expect: Present,
+    ),
+    (
+        id: "and-the-footer-is-drawn-under-it",
+        group: "docs-spec",
+        what: "the document page keeps the site footer",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:Contact",
+        expect: Present,
+    ),
+    (
+        id: "and-the-theme-toggle-is-drawn-on-it",
+        group: "docs-spec",
+        what: "the theme control is available from the document, not only from home",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Switch to light mode",
+        expect: Measures,
+        // An icon-only control: everything about it except the box comes from
+        // its accessible name, so a floor on the box is the only thing that
+        // separates a pressable control from a collapsed one. A minimum
+        // rather than an exact size, since the library owns the token.
+        expect_size: Some("24x24"),
+    ),
+]
