@@ -52,13 +52,14 @@ jobs:
         run: |
           # One invocation per group, so a failure names the area rather than
           # the suite: chrome is the shell every page is drawn inside, home and
-          # lenses are the landing page, and navigation is the routes between
-          # the pages.
+          # lenses are the landing page, the two document groups are the
+          # specification and the syntax reference, and navigation is the
+          # routes between them.
           #
           # Each invocation gets its own host and starts on the landing page,
           # so the order here is for reading. Within one run the order is not:
           # see tests/ps-qa/ps-qa.ron.
-          for GROUP in chrome home lenses navigation; do
+          for GROUP in chrome docs-spec docs-syntax home lenses navigation; do
             echo "::group::$GROUP"
             ps-qa --app tests/ps-qa/ps-qa.ron \
               qa-hosted "$GROUP" \
