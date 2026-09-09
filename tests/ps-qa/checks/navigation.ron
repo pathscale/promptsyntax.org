@@ -1,0 +1,152 @@
+// Every route a visitor can reach, and the way they reach it.
+//
+// This is its own group, and it sorts last on purpose. The runner buckets
+// checks by the surface their `open` names and walks the buckets in profile
+// order, so within the home bucket the files run in name order: chrome, home,
+// lenses, then this one. The header logo is the only control that returns to
+// the landing page and it is a `<span>` of text, so on the fontless host CI
+// builds it has no box and cannot be pressed. Home is reachable only where the
+// application already is. Every other group therefore stays on the landing
+// page, and this one -- running after all of them -- is the group allowed to
+// leave.
+//
+// The theme is also carried across a route change here, because a route change
+// on this site is a whole document load rather than a client-side transition.
+// That makes it the honest end-to-end test of the storage the startup defect
+// was about: a site that cannot write the preference and a site that never
+// reads it look identical until the theme has to survive a navigation.
+[
+    // Home, and the two ways off it.
+    (
+        id: "the-landing-page-is-where-the-site-opens",
+        group: "navigation",
+        what: "the application starts on the landing page",
+        open: Some("PromptSyntax"),
+        hover: None,
+        click: None,
+        subject: "tablist:Choose your lens",
+        expect: Paints,
+    ),
+    (
+        id: "the-theme-is-changed-before-leaving",
+        group: "navigation",
+        what: "a preference is set, so the next page has something to remember",
+        open: None,
+        hover: None,
+        click: Some("Switch to light mode"),
+        subject: "button:Switch to dark mode",
+        expect: Paints,
+        outcome_timeout_ms: 8000,
+    ),
+    (
+        id: "the-hero-call-to-action-reaches-the-specification",
+        group: "navigation",
+        what: "the landing page's own button goes where its label says",
+        // The control a visitor is most likely to press, and a Button rather
+        // than the header's router link.
+        open: None,
+        hover: None,
+        click: Some("Read the specification"),
+        subject: "link:Download PDF",
+        expect: PaintsNamed,
+        outcome_timeout_ms: 8000,
+    ),
+    (
+        id: "and-the-specification-is-what-arrived",
+        group: "navigation",
+        what: "the destination is the specification and not the other document",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:Specification Draft",
+        expect: Present,
+    ),
+    (
+        id: "and-the-landing-page-is-gone",
+        group: "navigation",
+        what: "the route replaced the page rather than appending to it",
+        // The positive halves of this pair are the two checks above: without
+        // them, a page that rendered nothing would satisfy the absence.
+        open: None,
+        hover: None,
+        click: None,
+        subject: "tablist:Choose your lens",
+        expect: Absent,
+    ),
+    (
+        id: "and-the-chosen-theme-survived-the-navigation",
+        group: "navigation",
+        what: "the new document read the stored preference rather than starting dark again",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Switch to dark mode",
+        expect: Paints,
+    ),
+    (
+        id: "and-the-theme-goes-back-to-dark-after-the-navigation",
+        group: "navigation",
+        what: "the preference is put back for the groups that follow",
+        open: None,
+        hover: None,
+        click: Some("Switch to dark mode"),
+        subject: "button:Switch to light mode",
+        expect: Paints,
+        outcome_timeout_ms: 8000,
+    ),
+    // From one document to the other, and back, using the header. These
+    // declare `open` so a single check can be re-run by id against a fresh
+    // host; in a whole-group run they are already where they need to be.
+    (
+        id: "the-header-reaches-the-syntax-reference-from-the-specification",
+        group: "navigation",
+        what: "the header works from a document page, not only from home",
+        open: Some("Syntax reference"),
+        hover: None,
+        click: None,
+        subject: "heading:Syntax Reference",
+        expect: Present,
+        outcome_timeout_ms: 8000,
+    ),
+    (
+        id: "and-the-specification-is-gone-from-it",
+        group: "navigation",
+        what: "one document page replaced the other rather than stacking on it",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:Specification Draft",
+        expect: Absent,
+    ),
+    (
+        id: "and-the-sidebar-was-rebuilt-for-the-new-document",
+        group: "navigation",
+        what: "the generated table of contents is this document's, not the last one's",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:1. Abstract",
+        expect: Absent,
+    ),
+    (
+        id: "the-header-reaches-the-specification-from-the-syntax-reference",
+        group: "navigation",
+        what: "the return leg works too, so neither direction is one-way",
+        open: None,
+        hover: None,
+        click: Some("Specification"),
+        subject: "link:1. Abstract",
+        expect: PaintsNamed,
+        outcome_timeout_ms: 8000,
+    ),
+    (
+        id: "and-the-syntax-reference-is-gone-again",
+        group: "navigation",
+        what: "the round trip closes",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "heading:Syntax Reference",
+        expect: Absent,
+    ),
+]

@@ -1,0 +1,195 @@
+// The shell every page is drawn inside: header, footer and theme.
+//
+// This group runs first, so it also carries the assertion the whole suite
+// stands on -- that the built bundle reached the page at all. The defect it
+// guards is a real one: a `localStorage` read outside a try killed the site
+// where storage is unavailable, in a private window, in a browser with site
+// data blocked, in an embedded webview. The symptom was a blank page, because
+// the read happened during startup and threw before anything rendered. A test
+// that mounts a component cannot ask that question; this one loads the built
+// `dist` through the engine a tab uses.
+//
+// # Present, Paints, and why the difference matters here
+//
+// The host CI builds has no font stack. On it a heading is laid out with a
+// height of zero and an inline anchor is not laid out at all, while anything
+// whose box comes from padding measures exactly what it measures locally. So
+// `Paints` is used only on controls -- the header's buttons, the theme toggle
+// -- and everything text-shaped is asserted with `Present`, which asks whether
+// the node the document was supposed to produce appeared with the name it was
+// supposed to have. Both are falsifiable; only one of them is falsifiable for
+// the right reason.
+//
+// This group stays on the landing page and leaves it in the dark theme it
+// found. `navigation.ron` is the group that walks between routes.
+[
+    (
+        id: "the-shell-reaches-the-page",
+        group: "chrome",
+        what: "the built bundle mounts and the header's own name is drawn",
+        // The logo is a `<span>` of text, so it has a name and, on a host with
+        // no fonts, no box. It still has to carry that name: it is the only
+        // link back to the landing page, and without one it is unreachable to
+        // anyone not pointing at it.
+        open: Some("PromptSyntax"),
+        hover: None,
+        click: None,
+        subject: "link:PromptSyntax",
+        expect: Present,
+    ),
+    (
+        id: "the-header-offers-the-specification",
+        group: "chrome",
+        what: "the specification is one press away from anywhere",
+        // `PaintsNamed` rather than `Paints`: the footer carries a link of the
+        // same name, and `Paints` requires every match to have a box, so it
+        // fails on the fontless host for the footer's copy while the header's
+        // is perfectly pressable.
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:Specification",
+        expect: PaintsNamed,
+    ),
+    (
+        id: "the-header-offers-the-syntax-reference",
+        group: "chrome",
+        what: "the syntax reference is one press away from anywhere",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:Syntax reference",
+        expect: PaintsNamed,
+    ),
+    (
+        id: "the-header-offers-the-repository",
+        group: "chrome",
+        what: "the repository link is drawn, though this suite never follows it",
+        // Declared manual in the profile: following it would make a run depend
+        // on github.com being up and unchanged rather than on this site.
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:GitHub",
+        expect: PaintsNamed,
+    ),
+    (
+        id: "the-header-navigation-is-a-landmark",
+        group: "chrome",
+        what: "the two document links sit in a navigation region rather than loose in the header",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "navigation:",
+        expect: Paints,
+    ),
+    (
+        id: "the-footer-is-drawn",
+        group: "chrome",
+        what: "the page ends in a footer, and its contact address is in it",
+        // Contact is the only footer link whose name is not also a header
+        // link's: Spec, Syntax reference and GitHub each match something in
+        // the header first, and names here are matched as substrings.
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:Contact",
+        expect: Present,
+    ),
+    // The footer's position is not asserted, and cannot be from here: every
+    // link in it is bare text, so on the fontless host none of them is laid
+    // out with a box, and `Above` needs a painted comparison node. The footer
+    // holds no control that is not text.
+    //
+    // Readability, asked of the colours the renderer actually resolved with
+    // whatever is stacked beneath them rather than of the values in the
+    // stylesheet. `Contrast` selects on a bare name or a bare role rather than
+    // on `role:name`, so this audits the whole family.
+    //
+    // Dark only, and that is a finding rather than a preference: in the light
+    // theme six named nodes fall under the floor today -- the four footer
+    // links and the inline TOON link at `text-base-content/55` and `/60`
+    // (3.65:1 and 4.26:1), and the receipt's own heading in `text-warning`
+    // over `bg-warning/5` (3.39:1). Those are token decisions, not typos, so
+    // they are reported rather than patched here. Move this check below the
+    // light toggle once the palette is settled.
+    (
+        id: "every-link-is-readable",
+        group: "chrome",
+        what: "no link on the landing page falls under the 4.5:1 text floor",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link",
+        expect: Contrast,
+    ),
+    // The theme. Nothing above this line presses anything, and a page that
+    // only paints cannot tell you whether the application is alive: Solid 2
+    // halts the reactive system permanently when an error escapes every
+    // boundary, and a halted page still paints. It renders once, then answers
+    // nothing. Two sites in this fleet shipped in exactly that state and every
+    // render-only check passed over them.
+    //
+    // The theme control is the cheapest detector there is. Its own label is
+    // derived from state, so pressing it and reading the label back asks
+    // whether state still moves, with no knowledge of what the page is for.
+    (
+        id: "the-theme-toggle-offers-the-other-theme",
+        group: "chrome",
+        what: "the site starts dark and the control names what it would do",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Switch to light mode",
+        expect: Paints,
+    ),
+    (
+        id: "and-the-theme-toggle-is-big-enough-to-press",
+        group: "chrome",
+        what: "the icon-only control has a box rather than collapsing to its glyph",
+        // Everything about this control except its box comes from its
+        // accessible name, and its icon is a CSS mask that the engine does not
+        // rasterize at all -- `capture` reports zero ink inside it. A floor on
+        // the box is the only thing separating a pressable control from
+        // nothing. A minimum rather than an exact size, since the component
+        // library owns the token.
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Switch to light mode",
+        expect: Measures,
+        expect_size: Some("24x24"),
+    ),
+    (
+        id: "pressing-the-theme-toggle-changes-the-theme",
+        group: "chrome",
+        what: "the control offers the opposite theme once it has been used",
+        open: None,
+        hover: None,
+        click: Some("Switch to light mode"),
+        subject: "button:Switch to dark mode",
+        expect: Paints,
+        outcome_timeout_ms: 8000,
+    ),
+    (
+        id: "and-the-old-label-is-gone",
+        group: "chrome",
+        what: "the toggle re-rendered rather than gaining a second label",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "button:Switch to light mode",
+        expect: Absent,
+    ),
+    (
+        id: "and-the-theme-goes-back-to-dark",
+        group: "chrome",
+        what: "the toggle is a toggle, and the rest of the suite gets the theme it expects",
+        open: None,
+        hover: None,
+        click: Some("Switch to dark mode"),
+        subject: "button:Switch to light mode",
+        expect: Paints,
+        outcome_timeout_ms: 8000,
+    ),
+]
