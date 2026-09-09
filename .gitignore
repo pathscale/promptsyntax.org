@@ -38,3 +38,6 @@ conformance/runner/target
 
 # Finder (MacOS) folder config
 .DS_Store
+
+bun.lock
+Cargo.lock
