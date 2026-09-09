@@ -4,28 +4,72 @@
 // page whose controls are never counted. Home is named for that reason even
 // though it is where the site opens.
 //
-// A marker has to be absent from the page being left, not merely present on
-// the page being reached: "Specification" is in the navigation of every page,
-// so it proves nothing about having arrived at the specification.
+// # Markers have to be painted, and the CI host has no fonts
+//
+// A marker answers "are we already here". `on_surface` requires a node whose
+// name contains the marker *and* which is visible with a non-zero box, and the
+// composite action that supplies the host builds it with
+// `--no-default-features`, which drops `system-fonts` along with the window.
+// On that host a heading is laid out with a height of zero and an inline link
+// is not laid out at all, so "PromptSyntax Edge" and "Specification Draft" --
+// both headings -- name nothing that satisfies `on_surface`. The navigation
+// step then never decides it has arrived, and the check fails on a control
+// that was already on screen.
+//
+// So every marker below is a node whose box comes from padding rather than
+// from shaped glyphs:
+//
+//   home    the lens tab strip, which exists on no other page
+//   spec    the first entry in that document's generated sidebar
+//   syntax  the same, and the two documents' first sections differ
+//
+// Sidebar entries are anchors with `padding: 3px 0`, so they measure 243x6
+// with no font at all. Markers are matched case-sensitively and as substrings.
+//
+// # Surface order is run order, and home is reachable only at the start
+//
+// The runner buckets every check by the surface its `open` names and walks the
+// buckets in the order this list gives them, so a group whose checks jump
+// between surfaces does not run in the order its file reads.
+//
+// The one control that returns to the landing page is the header logo, and it
+// is a `<span>` of text: on the fontless host it has no box and cannot be
+// pressed. Home is therefore reachable only where the application already is
+// -- at the start of a run -- and the check files are written for that. Every
+// home-surface check leaves the site on the landing page, and `navigation.ron`
+// sorts last among them so the one group that leaves does so at the end.
+//
+// # The two routes no check can reach
+//
+// `/vignette` and `/study` are routed and are linked from nowhere -- by
+// design. The study is recruited by invite link and the vignette is built to
+// be embedded in an iframe, which is why it posts its result to
+// `window.parent`. Both are legitimately reached by typing a URL, and ps-qa
+// has no way to do that: `qa-hosted --page` names a directory, the host serves
+// it and opens `index.html`, and every later step is a press on something the
+// page already draws. Adding a link to satisfy the harness would change the
+// product to suit the test, so they are left uncovered and said so here.
+// Closing the gap needs a starting route on `qa-hosted`, not a change to this
+// site.
 AppProfile(
     surfaces: [
-        (name: "home", opener: "PromptSyntax", marker: Some("PromptSyntax Edge")),
-        (
-            name: "spec",
-            opener: "Specification",
-            marker: Some("Specification Draft"),
-        ),
-        (
-            name: "syntax",
-            opener: "Syntax reference",
-            marker: Some("Syntax Reference"),
-        ),
+        (name: "home", opener: "PromptSyntax", marker: Some("Choose your lens")),
+        (name: "spec", opener: "Specification", marker: Some("1. Abstract")),
+        (name: "syntax", opener: "Syntax reference", marker: Some("1. At a glance")),
     ],
     navigation_controls: ["PromptSyntax", "Specification", "Syntax reference"],
+    // Used only to recover a sweep that has walked somewhere it cannot get
+    // back from, and on the fontless host it cannot: see above. Named anyway,
+    // because it is the control, and a sweep with a real font stack can use it.
     home_opener: Some("PromptSyntax"),
-    // The repository. A headless browser will follow an ordinary anchor, and
-    // following these would make a run depend on github.com being up and
-    // unchanged rather than on this site.
+    // Controls that leave the site. A headless browser will follow an ordinary
+    // anchor, and following these would make a run depend on github.com being
+    // up and unchanged, on a mail client existing, or on the engine's PDF
+    // handling -- rather than on this site.
+    //
+    // Matched by prefix against the control's accessible name, which is why
+    // the three GitHub buttons are listed separately: only one of them is
+    // named "GitHub".
     manual_controls: [
         (label: "GitHub", command: "github.com/pathscale/promptsyntax.org"),
         (label: "View on GitHub", command: "github.com/pathscale/promptsyntax.org"),
@@ -34,6 +78,8 @@ AppProfile(
         (label: "Contact", command: "mailto: hello@promptsyntax.org"),
         (label: "Read the transport profile", command: "github.com, the TOON profile"),
         (label: "Decision record", command: "github.com, the decision record"),
-        (label: "Read the full specification", command: "SPEC.pdf"),
+        // Both document pages draw this, with the same label and different
+        // targets: SPEC.pdf and SYNTAX-REFERENCE.pdf.
+        (label: "Download PDF", command: "the document's PDF"),
     ],
 )
