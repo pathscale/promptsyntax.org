@@ -1,0 +1,207 @@
+// The audience switcher on the landing page.
+//
+// Six tabs, six panels, and the same argument told six ways. It is the only
+// stateful control the public site has, and it carries most of the page's
+// prose: a switcher that draws its tabs and never changes its panel loses five
+// sixths of the section while looking completely healthy.
+//
+// # What is asserted, and what cannot be
+//
+// Each switch is proved twice. `SelectionChanges` follows the exact node that
+// was pressed and asks whether its selected state moved, which catches a strip
+// that draws six tabs and records nothing. The panels are then asked about as
+// a family: six mounted, exactly one painted, and the painted one under the
+// strip.
+//
+// What is *not* asserted is which panel is showing, and that is a limitation
+// of this page rather than a choice. Everything inside a panel is either
+// anonymous -- the list and its items carry no accessible name -- or is the
+// panel's heading, which on the host CI builds has no font stack and so is
+// laid out with a height of zero. The harness selects on names and boxes, and
+// the panel offers neither. A `data-slot` or an `id` on each panel would close
+// this in one line, and ps-qa already selects on both (`@slot`, `#id`); the
+// tab strip is addressed that way below precisely because the component
+// library supplies `data-slot="tabs-tab"` and `data-slot="tabs-panel"` while
+// this site supplies no identifiers of its own.
+[
+    (
+        id: "the-impact-section-is-drawn",
+        group: "lenses",
+        what: "the landing page carries the audience section at all",
+        open: Some("PromptSyntax"),
+        hover: None,
+        click: None,
+        subject: "heading:PromptSyntax Impact",
+        expect: Present,
+    ),
+    (
+        id: "the-lenses-are-a-tablist",
+        group: "lenses",
+        what: "the switcher is a labelled tablist rather than six loose buttons",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "tablist:Choose your lens",
+        expect: Paints,
+    ),
+    (
+        id: "every-lens-has-a-tab",
+        group: "lenses",
+        what: "all six audiences are offered, not five",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "@tabs-tab",
+        expect: Count,
+        expect_count: Some(6),
+    ),
+    (
+        id: "and-the-tabs-are-laid-out-side-by-side",
+        group: "lenses",
+        what: "the strip is a strip, not six controls stacked on one coordinate",
+        // A repeated family can expose correct names, correct state and
+        // non-zero boxes while every member sits at the same position.
+        open: None,
+        hover: None,
+        click: None,
+        subject: "@tabs-tab",
+        expect: DistinctPositions,
+    ),
+    (
+        id: "and-no-tab-escapes-the-strip",
+        group: "lenses",
+        what: "the sixth tab is inside the control rather than spilling past its end",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "@tabs-tab",
+        expect: ContainedBy,
+        compare: Some("tablist:Choose your lens"),
+    ),
+    (
+        id: "every-lens-has-a-panel",
+        group: "lenses",
+        what: "six panels are mounted, so the switch is instant rather than a fetch",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "@tabs-panel",
+        expect: Count,
+        expect_count: Some(6),
+    ),
+    (
+        id: "and-exactly-one-panel-is-on-screen",
+        group: "lenses",
+        what: "the section arrives with a panel showing, and with only one",
+        // `Paints` requires every match to have a box, so this fails both ways
+        // it can be wrong: no panel showing, and more than one showing.
+        open: None,
+        hover: None,
+        click: None,
+        subject: "@tabs-panel",
+        expect: PaintsNamed,
+    ),
+    (
+        id: "and-the-panel-is-under-the-strip",
+        group: "lenses",
+        what: "the panel is below the tabs that select it rather than beside or above them",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "tablist:Choose your lens",
+        expect: Above,
+        compare: Some("@tabs-panel"),
+    ),
+    // The switches. Each one presses a tab that is not currently selected, so
+    // `SelectionChanges` has something to observe; pressing the tab that is
+    // already open would pass by changing nothing.
+    (
+        id: "the-power-user-tab-takes-selection",
+        group: "lenses",
+        what: "pressing a tab moves the selection to it",
+        open: None,
+        hover: None,
+        click: Some("Power User"),
+        subject: "tab:Power User",
+        expect: SelectionChanges,
+        outcome_timeout_ms: 3000,
+    ),
+    (
+        id: "and-the-first-tab-gave-it-up",
+        group: "lenses",
+        what: "selection moved rather than being held by two tabs at once",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "@tabs-panel",
+        expect: PaintsNamed,
+    ),
+    (
+        id: "the-enterprise-tab-takes-selection",
+        group: "lenses",
+        what: "the strip keeps working after the first switch",
+        open: None,
+        hover: None,
+        click: Some("Enterprise"),
+        subject: "tab:Enterprise",
+        expect: SelectionChanges,
+        outcome_timeout_ms: 3000,
+    ),
+    (
+        id: "the-auditor-tab-takes-selection",
+        group: "lenses",
+        what: "the third switch lands too",
+        open: None,
+        hover: None,
+        click: Some("Auditor"),
+        subject: "tab:Auditor",
+        expect: SelectionChanges,
+        outcome_timeout_ms: 3000,
+    ),
+    (
+        id: "the-regulator-tab-takes-selection",
+        group: "lenses",
+        what: "the fourth switch lands too",
+        open: None,
+        hover: None,
+        click: Some("Regulator"),
+        subject: "tab:Regulator",
+        expect: SelectionChanges,
+        outcome_timeout_ms: 3000,
+    ),
+    (
+        id: "the-vendor-tab-takes-selection",
+        group: "lenses",
+        what: "the last tab in the strip is reachable, not clipped off the end",
+        open: None,
+        hover: None,
+        click: Some("Vendor"),
+        subject: "tab:Vendor",
+        expect: SelectionChanges,
+        outcome_timeout_ms: 3000,
+    ),
+    (
+        id: "and-still-exactly-one-panel-is-on-screen",
+        group: "lenses",
+        what: "five switches later the section shows one panel, not five stacked",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "@tabs-panel",
+        expect: PaintsNamed,
+    ),
+    (
+        id: "the-strip-goes-back-to-the-first-lens",
+        group: "lenses",
+        what: "the switcher is not one-way, and the section is left as it was found",
+        // "User" is a substring of "Power User", and the harness matches names
+        // as substrings; the first tab in the strip is also the first match in
+        // document order, which is the one that gets pressed.
+        open: None,
+        hover: None,
+        click: Some("User"),
+        subject: "tab:User",
+        expect: SelectionChanges,
+        outcome_timeout_ms: 3000,
+    ),
+]
