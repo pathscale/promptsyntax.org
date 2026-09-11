@@ -47,9 +47,9 @@ if (mainCssFiles.length > 0) {
 // --- 3. Remove async chunk folder ---
 try {
   rmSync(path.join(dist, "static/js/async"), { recursive: true, force: true });
-  console.info("Removed async chunks directory after build");
+  process.stdout.write("Removed async chunks directory after build\n");
 } catch {
-  console.warn("No async folder found, skipping async cleanup");
+  process.stderr.write("No async folder found, skipping async cleanup\n");
 }
 
 // --- 4. Update HTML references with version ---
@@ -77,4 +77,4 @@ if (existsSync(htmlPath)) {
   writeFileSync(htmlPath, html);
 }
 
-console.info(`Cleanup completed. Version: ${version}`);
+process.stdout.write(`Cleanup completed. Version: ${version}\n`);

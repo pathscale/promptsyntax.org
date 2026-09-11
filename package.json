@@ -19,7 +19,7 @@
   },
   "license": "CC-BY-4.0",
   "dependencies": {
-    "@pathscale/ui": "^3.1.0",
+    "@pathscale/ui": "^3.2.0",
     "@solidjs/router": "2.0.0-next.16",
     "@solidjs/web": "2.0.0-rc.4",
     "@standard-schema/spec": "^1.0.0",
@@ -33,6 +33,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
+    "@iconify-json/lucide": "^1.2.131",
+    "@iconify-json/mdi": "^1.2.3",
     "@iconify/tailwind4": "^1.0.6",
     "@rsbuild/core": "^1.3.20",
     "@rsbuild/plugin-babel": "^1.0.5",

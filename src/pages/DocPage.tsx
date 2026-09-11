@@ -76,12 +76,7 @@ const DocPage: Component<DocPageProps> = (props) => {
           </For>
         </nav>
       </aside>
-      <article
-        ref={contentRef}
-        class="doc-prose max-w-[780px]"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: static, repo-authored spec content
-        innerHTML={props.html}
-      />
+      <article ref={contentRef} class="doc-prose max-w-[780px]" innerHTML={props.html} />
     </div>
   );
 };
