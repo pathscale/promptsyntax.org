@@ -120,7 +120,7 @@
         open: None,
         hover: None,
         click: None,
-        subject: "link",
+        subject: "link:*",
         expect: Contrast,
     ),
     // The theme. Nothing above this line presses anything, and a page that

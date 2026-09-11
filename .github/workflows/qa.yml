@@ -1,16 +1,4 @@
-# What the site does, checked against a real browser engine.
-#
-# The defect this started as a guard against: a `localStorage` read outside a
-# try killed the whole page where storage is unavailable -- a private window, a
-# browser with site data blocked, an embedded webview. The symptom was a blank
-# page. `chrome` still carries that assertion, and the rest of the suite is the
-# shape of the site around it: the shell and its navigation, both published
-# documents section by section, the landing page's six sections, and the
-# audience switcher.
-#
-# It is not jsdom. `chuzz-headless` loads the built site through the same
-# loader, the same web-API shim and the same engine a tab uses, and `ps-qa`
-# drives it over a socket without linking any of it.
+# Run every declared group, including newly added functionality.
 name: QA
 
 on:
@@ -50,21 +38,7 @@ jobs:
           # only; every declared transition is still required.
           QA_TIMEOUT_SCALE: 2
         run: |
-          # One invocation per group, so a failure names the area rather than
-          # the suite: chrome is the shell every page is drawn inside, home and
-          # lenses are the landing page, the two document groups are the
-          # specification and the syntax reference, and navigation is the
-          # routes between them.
-          #
-          # Each invocation gets its own host and starts on the landing page,
-          # so the order here is for reading. Within one run the order is not:
-          # see tests/ps-qa/ps-qa.ron.
-          for GROUP in chrome docs-spec docs-syntax home lenses navigation; do
-            echo "::group::$GROUP"
-            ps-qa --app tests/ps-qa/ps-qa.ron \
-              qa-hosted "$GROUP" \
-              --host "${{ steps.qa.outputs.host }}" \
-              --page dist \
-              --checks tests/ps-qa/checks
-            echo "::endgroup::"
-          done
+          ps-qa --app tests/ps-qa/ps-qa.ron \
+            qa-hosted \
+            --host "${{ steps.qa.outputs.host }}" \
+            --page dist --checks tests/ps-qa/checks

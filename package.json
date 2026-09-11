@@ -28,7 +28,7 @@
     "popmotion": "^11.0.5",
     "promptsyntax": "^0.1.0",
     "solid-js": "2.0.0-rc.4",
-    "solid-layouts": "^0.2.1",
+    "solid-layouts": "^0.2.4",
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
