@@ -11,6 +11,7 @@ export const ThemeToggle: Component = () => {
 
   return (
     <Button
+      id="site-theme-toggle"
       type="button"
       variant="ghost"
       size="sm"

@@ -11,7 +11,12 @@ import SyntaxPage from "~/pages/SyntaxPage";
 import VignettePage from "~/pages/VignettePage";
 
 const Shell: ParentComponent = (props) => (
-  <div class="flex min-h-screen flex-col">
+  <div
+    id="promptsyntax-surface-root"
+    role="region"
+    aria-label="PromptSyntax"
+    class="flex min-h-screen flex-col"
+  >
     <SiteNavbar />
     <main class="flex-1">{props.children}</main>
     <Footer />
@@ -20,7 +25,12 @@ const Shell: ParentComponent = (props) => (
 
 /** Bare shell for the unlisted study: no navigation, no footer, no outbound links. */
 const BareShell: ParentComponent = (props) => (
-  <div class="flex min-h-screen flex-col">
+  <div
+    id="promptsyntax-surface-root"
+    role="region"
+    aria-label="PromptSyntax"
+    class="flex min-h-screen flex-col"
+  >
     <main class="flex-1">{props.children}</main>
   </div>
 );
