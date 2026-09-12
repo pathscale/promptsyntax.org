@@ -39,12 +39,6 @@ jobs:
           mkdir -p bunnycdn_errors
           cp index.html bunnycdn_errors/404.html
 
-      - name: Sync BunnyCDN Content Security Policy
-        env:
-          ZONE_API_KEY: ${{ secrets.BUNNYCDN_ZONE_API_KEY }}
-          ZONE_ID: ${{ secrets.BUNNYCDN_ZONE_ID }}
-        run: bun run csp:sync
-
       - name: Remove stale assets from BunnyCDN
         env:
           STORAGE_API_KEY: ${{ secrets.BUNNYCDN_STORAGE_API_KEY }}
@@ -122,5 +116,3 @@ jobs:
           else
             echo "Skipping purge: BUNNYCDN_ZONE_API_KEY or BUNNYCDN_ZONE_ID not set"
           fi
-      - name: Verify live Content Security Policy
-        run: bun run csp:verify

@@ -15,9 +15,7 @@
     "preview": "rsbuild preview",
     "cleanup": "bun run src/scripts/cleanup.js",
     "lint": "biome check .",
-    "format": "biome format . --write",
-    "csp:sync": "bun run src/scripts/updateBunnyCsp.js",
-    "csp:verify": "bun run src/scripts/verifyCsp.js"
+    "format": "biome format . --write"
   },
   "license": "CC-BY-4.0",
   "dependencies": {
