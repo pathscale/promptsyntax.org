@@ -422,6 +422,7 @@
         open: None,
         hover: None,
         click: Some("1. Abstract"),
+        covers: ["@document-toc-link", "@document-content-link"],
         subject: "heading:1. Abstract",
         expect: Present,
         outcome_timeout_ms: 3000,

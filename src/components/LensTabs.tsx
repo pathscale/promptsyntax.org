@@ -95,7 +95,7 @@ const LensTabs: Component = () => (
   <section class="border-base-300 border-b">
     <div class="py-16 content-container">
       <h2 class="mb-7 font-bold text-[clamp(23px,3vw,30px)] tracking-tight">PromptSyntax Impact</h2>
-      <Tabs defaultSelectedKey="user" variant="primary">
+      <Tabs id="impact-lenses" defaultSelectedKey="user" variant="primary">
         <Tabs.List aria-label="Choose your lens">
           <For each={LENSES}>{(lens) => <Tabs.Tab id={lens.id}>{lens.label}</Tabs.Tab>}</For>
         </Tabs.List>
