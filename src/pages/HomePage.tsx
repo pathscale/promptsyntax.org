@@ -19,16 +19,12 @@ const HomePage: Component = () => (
           PromptSyntax is a vendor-neutral proposal to fix that, at the layer where you type.
         </p>
         <div class="flex flex-wrap gap-3">
-          <a href={ROUTES.SPEC}>
-            <Button variant="solid" flavor="primary" type="button">
-              Read the specification
-            </Button>
-          </a>
-          <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" type="button">
-              View on GitHub
-            </Button>
-          </a>
+          <Button href={ROUTES.SPEC} variant="solid" flavor="primary">
+            Read the specification
+          </Button>
+          <Button href={GITHUB_URL} target="_blank" rel="noopener noreferrer" variant="outline">
+            View on GitHub
+          </Button>
         </div>
       </div>
     </div>
@@ -173,11 +169,9 @@ const HomePage: Component = () => (
           </li>
         </ul>
         <p class="mt-7">
-          <a href={ROUTES.SPEC}>
-            <Button variant="solid" flavor="primary" type="button">
-              Read the full specification →
-            </Button>
-          </a>
+          <Button href={ROUTES.SPEC} variant="solid" flavor="primary">
+            Read the full specification →
+          </Button>
         </p>
       </div>
     </section>
@@ -258,24 +252,23 @@ const HomePage: Component = () => (
           </li>
         </ul>
         <div class="mt-7 flex flex-wrap gap-3">
-          <a
+          <Button
             href={`${GITHUB_URL}/blob/master/profiles/transport/toon.md`}
             target="_blank"
             rel="noopener noreferrer"
+            variant="solid"
+            flavor="primary"
           >
-            <Button variant="solid" flavor="primary" type="button">
-              Read the transport profile
-            </Button>
-          </a>
-          <a
+            Read the transport profile
+          </Button>
+          <Button
             href={`${GITHUB_URL}/blob/master/decisions/2026-08-23-toon-transport-profile-proposal.md`}
             target="_blank"
             rel="noopener noreferrer"
+            variant="outline"
           >
-            <Button variant="outline" type="button">
-              Decision record
-            </Button>
-          </a>
+            Decision record
+          </Button>
         </div>
       </div>
     </section>
@@ -297,11 +290,9 @@ const HomePage: Component = () => (
           interface legible. Nothing more, and nothing less.
         </p>
         <p class="mt-6">
-          <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" type="button">
-              Contribute on GitHub
-            </Button>
-          </a>
+          <Button href={GITHUB_URL} target="_blank" rel="noopener noreferrer" variant="outline">
+            Contribute on GitHub
+          </Button>
         </p>
       </div>
     </section>

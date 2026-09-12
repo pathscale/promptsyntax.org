@@ -3,12 +3,10 @@
 // This is its own group, and it sorts last on purpose. The runner buckets
 // checks by the surface their `open` names and walks the buckets in profile
 // order, so within the home bucket the files run in name order: chrome, home,
-// lenses, then this one. The header logo is the only control that returns to
-// the landing page and it is a `<span>` of text, so on the fontless host CI
-// builds it has no box and cannot be pressed. Home is reachable only where the
-// application already is. Every other group therefore stays on the landing
-// page, and this one -- running after all of them -- is the group allowed to
-// leave.
+// lenses, then this one. Every other home group stays on the landing page, and
+// this one -- running after all of them -- is the group allowed to leave. The
+// home link has a minimum box of its own, so the final check can exercise the
+// route home even on the fontless host.
 //
 // The theme is also carried across a route change here, because a route change
 // on this site is a whole document load rather than a client-side transition.
@@ -41,14 +39,18 @@
     (
         id: "the-hero-call-to-action-reaches-the-specification",
         group: "navigation",
-        what: "the landing page's own button goes where its label says",
-        // The control a visitor is most likely to press, and a Button rather
-        // than the header's router link.
+        what: "the landing page's own action goes where its label says",
+        // The control a visitor is most likely to press, and the prominent
+        // action rather than the header's router link.
         open: None,
         hover: None,
         click: Some("Read the specification"),
         subject: "link:Download PDF",
         expect: PaintsNamed,
+        // The lower call to action and footer use the same route. This driven
+        // outcome covers those copies without pretending that painting them
+        // proves navigation.
+        covers: ["link:Read the full specification", "link:Spec"],
         outcome_timeout_ms: 8000,
     ),
     (
@@ -96,16 +98,19 @@
     ),
     // From one document to the other, and back, using the header. These
     // declare `open` so a single check can be re-run by id against a fresh
-    // host; in a whole-group run they are already where they need to be.
+    // host.
     (
         id: "the-header-reaches-the-syntax-reference-from-the-specification",
         group: "navigation",
         what: "the header works from a document page, not only from home",
-        open: Some("Syntax reference"),
+        open: Some("Specification"),
         hover: None,
-        click: None,
+        click: Some("Syntax reference"),
         subject: "heading:Syntax Reference",
         expect: Present,
+        // The footer copy is the same route and label; the header copy is the
+        // painted representative that this check actually presses.
+        covers: ["#footer-syntax-reference"],
         outcome_timeout_ms: 8000,
     ),
     (
@@ -148,5 +153,16 @@
         click: None,
         subject: "heading:Syntax Reference",
         expect: Absent,
+    ),
+    (
+        id: "the-site-name-returns-home-from-a-document",
+        group: "navigation",
+        what: "the persistent site name returns a document reader to the landing page",
+        open: Some("Specification"),
+        hover: None,
+        click: Some("#site-home"),
+        subject: "tablist:Choose your lens",
+        expect: Paints,
+        outcome_timeout_ms: 8000,
     ),
 ]
