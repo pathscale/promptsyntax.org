@@ -27,10 +27,8 @@
         id: "the-shell-reaches-the-page",
         group: "chrome",
         what: "the built bundle mounts and the header's own name is drawn",
-        // The logo is a `<span>` of text, so it has a name and, on a host with
-        // no fonts, no box. It still has to carry that name: it is the only
-        // link back to the landing page, and without one it is unreachable to
-        // anyone not pointing at it.
+        // The logo text sits inside a UI Link with its own minimum box, so the
+        // route home stays reachable even when the host has no fonts.
         open: Some("PromptSyntax"),
         hover: None,
         click: None,
@@ -72,6 +70,7 @@
         click: None,
         subject: "link:GitHub",
         expect: PaintsNamed,
+        covers: ["link:GitHub"],
     ),
     (
         id: "the-header-navigation-is-a-landmark",
@@ -95,6 +94,7 @@
         click: None,
         subject: "link:Contact",
         expect: Present,
+        covers: ["link:Contact"],
     ),
     // The footer's position is not asserted, and cannot be from here: every
     // link in it is bare text, so on the fontless host none of them is laid

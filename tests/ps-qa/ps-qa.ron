@@ -26,18 +26,16 @@
 // Sidebar entries are anchors with `padding: 3px 0`, so they measure 243x6
 // with no font at all. Markers are matched case-sensitively and as substrings.
 //
-// # Surface order is run order, and home is reachable only at the start
+// # Surface order is run order
 //
 // The runner buckets every check by the surface its `open` names and walks the
 // buckets in the order this list gives them, so a group whose checks jump
 // between surfaces does not run in the order its file reads.
 //
-// The one control that returns to the landing page is the header logo, and it
-// is a `<span>` of text: on the fontless host it has no box and cannot be
-// pressed. Home is therefore reachable only where the application already is
-// -- at the start of a run -- and the check files are written for that. Every
-// home-surface check leaves the site on the landing page, and `navigation.ron`
-// sorts last among them so the one group that leaves does so at the end.
+// Every home-surface check leaves the site on the landing page, and
+// `navigation.ron` sorts last among them so the one group that leaves does so
+// at the end. Its final check presses the padded home link and proves a reader
+// can return from a document even on the fontless host.
 //
 // # The two routes no check can reach
 //
@@ -58,9 +56,7 @@ AppProfile(
         (name: "syntax", opener: "Syntax reference", marker: Some("1. At a glance")),
     ],
     navigation_controls: ["PromptSyntax", "Specification", "Syntax reference"],
-    // Used only to recover a sweep that has walked somewhere it cannot get
-    // back from, and on the fontless host it cannot: see above. Named anyway,
-    // because it is the control, and a sweep with a real font stack can use it.
+    // Used to recover a sweep that has walked away from the landing page.
     home_opener: Some("PromptSyntax"),
     // Controls that leave the site. A headless browser will follow an ordinary
     // anchor, and following these would make a run depend on github.com being
@@ -68,7 +64,7 @@ AppProfile(
     // handling -- rather than on this site.
     //
     // Matched by prefix against the control's accessible name, which is why
-    // the three GitHub buttons are listed separately: only one of them is
+    // the three GitHub links are listed separately: only one of them is
     // named "GitHub".
     manual_controls: [
         (label: "GitHub", command: "github.com/pathscale/promptsyntax.org"),

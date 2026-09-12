@@ -36,7 +36,7 @@
         open: None,
         hover: None,
         click: None,
-        subject: "button:Read the specification",
+        subject: "link:Read the specification",
         expect: PaintsNamed,
     ),
     (
@@ -46,9 +46,10 @@
         open: None,
         hover: None,
         click: None,
-        subject: "button:View on GitHub",
+        subject: "link:View on GitHub",
         expect: RightOf,
-        compare: Some("button:Read the specification"),
+        compare: Some("link:Read the specification"),
+        covers: ["link:View on GitHub"],
     ),
     // The worked example: an annotated prompt, then the receipt that says what
     // it did. This is the whole argument of the site in one section.
@@ -122,7 +123,7 @@
         open: None,
         hover: None,
         click: None,
-        subject: "button:Read the full specification",
+        subject: "link:Read the full specification",
         expect: PaintsNamed,
     ),
     // The TOON transport proposal. The newest section, and the one whose two
@@ -139,14 +140,26 @@
         expect: Present,
     ),
     (
+        id: "and-it-links-the-transport-format",
+        group: "home",
+        what: "the format named by the proposal has its source linked inline",
+        open: None,
+        hover: None,
+        click: None,
+        subject: "link:TOON",
+        expect: Present,
+        covers: ["link:TOON"],
+    ),
+    (
         id: "and-it-links-the-transport-profile",
         group: "home",
         what: "the profile the section describes can be reached from it",
         open: None,
         hover: None,
         click: None,
-        subject: "button:Read the transport profile",
+        subject: "link:Read the transport profile",
         expect: PaintsNamed,
+        covers: ["link:Read the transport profile"],
     ),
     (
         id: "and-it-links-the-decision-record",
@@ -155,9 +168,10 @@
         open: None,
         hover: None,
         click: None,
-        subject: "button:Decision record",
+        subject: "link:Decision record",
         expect: RightOf,
-        compare: Some("button:Read the transport profile"),
+        compare: Some("link:Read the transport profile"),
+        covers: ["link:Decision record"],
     ),
     // Scope. The section that says what the proposal does not claim, which is
     // the one a reader checks before taking any of the rest seriously.
@@ -174,12 +188,13 @@
     (
         id: "and-it-invites-contribution",
         group: "home",
-        what: "the page ends on the action it wants, and the button is pressable",
+        what: "the page ends on the action it wants, and the link is pressable",
         open: None,
         hover: None,
         click: None,
-        subject: "button:Contribute on GitHub",
+        subject: "link:Contribute on GitHub",
         expect: PaintsNamed,
+        covers: ["link:Contribute on GitHub"],
     ),
     // The authored order of the page, read off the boxes the renderer produced
     // rather than off the source. Each pair names the control its section ends
@@ -192,9 +207,9 @@
         open: None,
         hover: None,
         click: None,
-        subject: "button:Read the specification",
+        subject: "link:Read the specification",
         expect: Above,
-        compare: Some("button:Read the full specification"),
+        compare: Some("link:Read the full specification"),
     ),
     (
         id: "and-the-mechanism-comes-before-the-transport-proposal",
@@ -203,9 +218,9 @@
         open: None,
         hover: None,
         click: None,
-        subject: "button:Read the full specification",
+        subject: "link:Read the full specification",
         expect: Above,
-        compare: Some("button:Read the transport profile"),
+        compare: Some("link:Read the transport profile"),
     ),
     (
         id: "and-scope-is-the-last-section",
@@ -214,8 +229,8 @@
         open: None,
         hover: None,
         click: None,
-        subject: "button:Read the transport profile",
+        subject: "link:Read the transport profile",
         expect: Above,
-        compare: Some("button:Contribute on GitHub"),
+        compare: Some("link:Contribute on GitHub"),
     ),
 ]

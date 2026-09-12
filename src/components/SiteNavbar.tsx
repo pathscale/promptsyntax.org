@@ -1,4 +1,4 @@
-import { Button, Navbar } from "@pathscale/ui";
+import { Button, Link, Navbar } from "@pathscale/ui";
 import { useLocation } from "@solidjs/router";
 import type { Component } from "solid-js";
 import Logo from "~/components/Logo";
@@ -16,9 +16,14 @@ const SiteNavbar: Component = () => {
       <Navbar.Row bordered class="site-nav" padded={false}>
         <div class="page-container flex min-h-14 items-center justify-between gap-4">
           <Navbar.Start>
-            <a href={ROUTES.HOME} class="mr-4 no-underline">
+            <Link
+              id="site-home"
+              href={ROUTES.HOME}
+              class="mr-4 inline-flex min-h-8 items-center"
+              underline="none"
+            >
               <Logo class="text-base" />
-            </a>
+            </Link>
             <nav class="hidden items-center gap-1 sm:flex">
               <Button
                 href={ROUTES.SPEC}
