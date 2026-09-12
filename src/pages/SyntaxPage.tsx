@@ -4,7 +4,7 @@ import syntaxHtml from "~/content/syntax.html?raw";
 import DocPage from "~/pages/DocPage";
 
 const SyntaxPage: Component = () => (
-  <DocPage html={syntaxHtml} pdfHref={SYNTAX_PDF} pdfLabel="Download PDF" />
+  <DocPage documentId="syntax" html={syntaxHtml} pdfHref={SYNTAX_PDF} pdfLabel="Download PDF" />
 );
 
 export default SyntaxPage;

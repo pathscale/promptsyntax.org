@@ -3,6 +3,7 @@ import { type Component, createEffect, createSignal, For } from "solid-js";
 type TocItem = { id: string; text: string; level: number };
 
 type DocPageProps = {
+  documentId: string;
   html: string;
   pdfHref: string;
   pdfLabel: string;
@@ -18,6 +19,27 @@ const DocPage: Component<DocPageProps> = (props) => {
     () => props.html,
     () => {
       if (!contentRef) return;
+      const hrefCounts = new Map<string, number>();
+      for (const anchor of contentRef.querySelectorAll("a[href]")) {
+        const href = anchor.getAttribute("href") ?? "link";
+        // Pandoc emits empty, aria-hidden self-links for source-code line
+        // anchors. They are position markers rather than controls. Leaving an
+        // href on them exposes dozens of anonymous links to the semantic tree.
+        if (
+          anchor.getAttribute("aria-hidden") === "true" &&
+          anchor.getAttribute("tabindex") === "-1" &&
+          !anchor.textContent?.trim() &&
+          href.startsWith("#")
+        ) {
+          anchor.removeAttribute("href");
+          continue;
+        }
+        const key = href.replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "") || "link";
+        const occurrence = (hrefCounts.get(key) ?? 0) + 1;
+        hrefCounts.set(key, occurrence);
+        anchor.id = `doc-${props.documentId}-link-${key}-${occurrence}`;
+        if (href.startsWith("#")) anchor.setAttribute("data-slot", "document-content-link");
+      }
       const items: TocItem[] = [];
       for (const heading of contentRef.querySelectorAll("h2[id], h3[id]")) {
         items.push({
@@ -56,6 +78,7 @@ const DocPage: Component<DocPageProps> = (props) => {
       <aside class="hidden lg:block">
         <nav class="doc-toc sticky top-20 max-h-[calc(100vh-6rem)] overflow-auto border-base-300 border-r pr-4">
           <a
+            id={`doc-${props.documentId}-pdf`}
             href={props.pdfHref}
             target="_blank"
             rel="noopener noreferrer"
@@ -66,6 +89,8 @@ const DocPage: Component<DocPageProps> = (props) => {
           <For each={toc()}>
             {(item) => (
               <a
+                id={`doc-${props.documentId}-toc-${item.id}`}
+                data-slot="document-toc-link"
                 href={`#${item.id}`}
                 class={item.level === 3 ? "toc-h3" : undefined}
                 onClick={(event) => scrollTo(event, item.id)}

@@ -26,6 +26,7 @@ const SiteNavbar: Component = () => {
             </Link>
             <nav class="hidden items-center gap-1 sm:flex">
               <Button
+                id="nav-specification"
                 href={ROUTES.SPEC}
                 size="sm"
                 variant={isActive(ROUTES.SPEC) ? "soft" : "ghost"}
@@ -33,6 +34,7 @@ const SiteNavbar: Component = () => {
                 Specification
               </Button>
               <Button
+                id="nav-syntax-reference"
                 href={ROUTES.SYNTAX}
                 size="sm"
                 variant={isActive(ROUTES.SYNTAX) ? "soft" : "ghost"}
@@ -44,6 +46,7 @@ const SiteNavbar: Component = () => {
           <Navbar.End>
             <div class="flex items-center gap-1">
               <Button
+                id="nav-github"
                 href={GITHUB_URL}
                 target="_blank"
                 rel="noopener noreferrer"

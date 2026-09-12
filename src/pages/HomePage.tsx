@@ -19,10 +19,16 @@ const HomePage: Component = () => (
           PromptSyntax is a vendor-neutral proposal to fix that, at the layer where you type.
         </p>
         <div class="flex flex-wrap gap-3">
-          <Button href={ROUTES.SPEC} variant="solid" flavor="primary">
+          <Button id="hero-read-specification" href={ROUTES.SPEC} variant="solid" flavor="primary">
             Read the specification
           </Button>
-          <Button href={GITHUB_URL} target="_blank" rel="noopener noreferrer" variant="outline">
+          <Button
+            id="hero-view-github"
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="outline"
+          >
             View on GitHub
           </Button>
         </div>
@@ -169,7 +175,7 @@ const HomePage: Component = () => (
           </li>
         </ul>
         <p class="mt-7">
-          <Button href={ROUTES.SPEC} variant="solid" flavor="primary">
+          <Button id="body-read-specification" href={ROUTES.SPEC} variant="solid" flavor="primary">
             Read the full specification →
           </Button>
         </p>
