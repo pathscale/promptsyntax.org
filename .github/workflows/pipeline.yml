@@ -104,15 +104,9 @@ jobs:
             exit 1
           fi
 
-      - name: Purge BunnyCDN edge cache
+      - name: Purge Bunny CDN
         env:
           ZONE_API_KEY: ${{ secrets.BUNNYCDN_ZONE_API_KEY }}
-          ZONE_ID: ${{ secrets.BUNNYCDN_ZONE_ID }}
+          ZONE_ID: ${{ secrets.BUNNYCDN_ZONE_ID || secrets.BUNNYCDN_DEV_ZONE_ID }}
         run: |
-          if [ -n "$ZONE_API_KEY" ] || [ -n "$ZONE_ID" ]; then
-            curl -sf -X POST -H "AccessKey: $ZONE_API_KEY" \
-              "https://bunnycdn.com/api/pullzone/$ZONE_ID/purgeCache" || true
-            echo "Edge cache purged"
-          else
-            echo "Skipping purge: BUNNYCDN_ZONE_API_KEY or BUNNYCDN_ZONE_ID not set"
-          fi
+          curl -sS -X POST -H "AccessKey: $ZONE_API_KEY" "https://api.bunny.net/pullzone/$ZONE_ID/purgeCache"
