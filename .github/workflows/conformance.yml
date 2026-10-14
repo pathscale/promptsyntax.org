@@ -35,6 +35,8 @@ jobs:
     steps:
       - name: Checkout standard and corpus
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Install stable Rust
         uses: dtolnay/rust-toolchain@stable
@@ -68,11 +70,13 @@ jobs:
       - name: Checkout standard and canonical cases
         uses: actions/checkout@v4
         with:
+          persist-credentials: false
           path: standard
 
       - name: Checkout pinned Rust implementation
         uses: actions/checkout@v4
         with:
+          persist-credentials: false
           repository: pathscale/PromptSyntax-rs
           ref: 2789fac8acb810279ece887f46c025ef987ce0bf
           path: implementations/promptsyntax-rs
@@ -80,6 +84,7 @@ jobs:
       - name: Checkout pinned TypeScript implementation
         uses: actions/checkout@v4
         with:
+          persist-credentials: false
           repository: pathscale/PromptSyntax-ts
           ref: 3c2c505d6f8fa836aa42abe12c0b466bcc3ba254
           path: implementations/promptsyntax-ts
