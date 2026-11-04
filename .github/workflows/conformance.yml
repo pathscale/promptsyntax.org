@@ -1,24 +1,6 @@
 name: Conformance
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/conformance.yml"
-      - "conformance/**"
-      - "decisions/**"
-      - "examples/**"
-      - "schemas/**"
-      - "spec/**"
-  push:
-    branches:
-      - master
-    paths:
-      - ".github/workflows/conformance.yml"
-      - "conformance/**"
-      - "decisions/**"
-      - "examples/**"
-      - "schemas/**"
-      - "spec/**"
   workflow_dispatch:
 
 permissions:
